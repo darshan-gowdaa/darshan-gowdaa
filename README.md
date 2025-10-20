@@ -1,4 +1,4 @@
-<h2 align="center">Portfolio Website- <br>https://Darshan-Gowdaa.github.io/Darshan-Gowdaa</h2>
+<h2 align="center">Portfolio Website - <br> https://darshan-gowdaa.github.io/darshan-gowdaa/ </h2>
 
 
 ###
