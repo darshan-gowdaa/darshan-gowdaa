@@ -1,3 +1,6 @@
+
+
+
 <h2 align="center">Portfolio Website - <br> https://darshan-gowdaa.github.io/darshan-gowdaa/ </h2>
 
 
@@ -33,13 +36,13 @@
   
 </div>
 
-###
 
 <div align="center">
-  <img src="https://count.getloli.com/@:Darshan-Gowdaa?theme=minecraft&padding=5&scale=0.8&align=center&pixelated=1&darkmode=auto"  />
-</div>
 
-###
+| **Profile Visits:** | <img src="https://count.getloli.com/@:Darshan-Gowdaa?theme=minecraft&padding=5&scale=0.8&align=center&pixelated=1&darkmode=auto" /> |
+|---|---|
+
+</div>
 
 <div align="center">
   <img src="https://github-readme-stats.vercel.app/api?username=Darshan-Gowdaa&hide_title=false&hide_rank=true&show_icons=true&include_all_commits=true&count_private=true&disable_animations=false&theme=merko&locale=en&hide_border=false&order=1" height="150" alt="stats graph"  />
