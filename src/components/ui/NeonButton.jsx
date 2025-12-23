@@ -44,4 +44,4 @@ const NeonButton = React.forwardRef(
 
 NeonButton.displayName = 'NeonButton';
 
-export { NeonButton, buttonVariants };
+export { NeonButton };

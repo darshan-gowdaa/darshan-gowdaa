@@ -36,3 +36,7 @@ coverage
 
 # Build files
 build/
+
+# Temporary files
+*.txt
+!README.txt

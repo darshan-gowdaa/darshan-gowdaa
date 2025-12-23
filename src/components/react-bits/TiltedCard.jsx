@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 const springValues = {
@@ -17,12 +17,13 @@ export default function TiltedCard({
     imageWidth = '300px',
     scaleOnHover = 1.1,
     rotateAmplitude = 14,
-    showMobileWarning = true,
+    showMobileWarning = false,
     showTooltip = true,
     overlayContent = null,
     displayOverlayContent = false
 }) {
     const ref = useRef(null);
+    const resetTimeoutRef = useRef(null);
     const x = useMotionValue(0);
     const y = useMotionValue(0);
     const rotateX = useSpring(useMotionValue(0), springValues);
@@ -38,12 +39,12 @@ export default function TiltedCard({
     const [lastY, setLastY] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
 
-    function handleMouse(e) {
+    const handleInteraction = useCallback((clientX, clientY) => {
         if (!ref.current) return;
 
         const rect = ref.current.getBoundingClientRect();
-        const offsetX = e.clientX - rect.left - rect.width / 2;
-        const offsetY = e.clientY - rect.top - rect.height / 2;
+        const offsetX = clientX - rect.left - rect.width / 2;
+        const offsetY = clientY - rect.top - rect.height / 2;
 
         const rotationX = (offsetY / (rect.height / 2)) * -rotateAmplitude;
         const rotationY = (offsetX / (rect.width / 2)) * rotateAmplitude;
@@ -51,15 +52,23 @@ export default function TiltedCard({
         rotateX.set(rotationX);
         rotateY.set(rotationY);
 
-        x.set(e.clientX - rect.left);
-        y.set(e.clientY - rect.top);
+        x.set(clientX - rect.left);
+        y.set(clientY - rect.top);
 
         const velocityY = offsetY - lastY;
         rotateFigcaption.set(-velocityY * 0.6);
         setLastY(offsetY);
+    }, [lastY, rotateAmplitude, rotateX, rotateY, x, y, rotateFigcaption]);
+
+    function handleMouse(e) {
+        handleInteraction(e.clientX, e.clientY);
     }
 
     function handleMouseEnter() {
+        if (resetTimeoutRef.current) {
+            clearTimeout(resetTimeoutRef.current);
+            resetTimeoutRef.current = null;
+        }
         scale.set(scaleOnHover);
         opacity.set(1);
         setIsHovered(true);
@@ -74,21 +83,59 @@ export default function TiltedCard({
         setIsHovered(false);
     }
 
+    // Touch handlers with effect persistence
+    function handleTouchStart(e) {
+        if (resetTimeoutRef.current) {
+            clearTimeout(resetTimeoutRef.current);
+            resetTimeoutRef.current = null;
+        }
+        scale.set(scaleOnHover);
+        setIsHovered(true);
+
+        if (e.touches.length > 0) {
+            const touch = e.touches[0];
+            handleInteraction(touch.clientX, touch.clientY);
+        }
+    }
+
+    function handleTouchMove(e) {
+        if (e.touches.length > 0) {
+            const touch = e.touches[0];
+            handleInteraction(touch.clientX, touch.clientY);
+        }
+    }
+
+    function handleTouchEnd() {
+        // Keep the effect visible for 2 seconds after touch ends
+        resetTimeoutRef.current = setTimeout(() => {
+            scale.set(1);
+            rotateX.set(0);
+            rotateY.set(0);
+            rotateFigcaption.set(0);
+            setIsHovered(false);
+            resetTimeoutRef.current = null;
+        }, 2000);
+    }
+
     return (
         <figure
             ref={ref}
-            className="relative w-full h-full [perspective:800px] flex flex-col items-center justify-center"
+            className="relative w-full h-full [perspective:800px] flex flex-col items-center justify-center select-none"
             style={{
                 height: containerHeight,
-                width: containerWidth
+                width: containerWidth,
+                touchAction: 'none' // Prevent scrolling while interacting
             }}
             onMouseMove={handleMouse}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
         >
             {showMobileWarning && (
-                <div className="absolute top-4 text-center text-sm block sm:hidden">
-                    This effect is not optimized for mobile. Check on desktop.
+                <div className="absolute top-4 text-center text-sm block sm:hidden text-gray-500">
+                    Tap and drag to interact
                 </div>
             )}
 
@@ -119,6 +166,7 @@ export default function TiltedCard({
                         width: imageWidth,
                         height: imageHeight
                     }}
+                    draggable={false}
                 />
 
                 {displayOverlayContent && overlayContent && (
