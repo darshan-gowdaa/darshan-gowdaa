@@ -13,7 +13,7 @@ const CertificationCard = ({ title, issuer, description, link, icon, delay }) =>
       transition={{ duration: 0.5, delay: delay * 0.001 }} // delay is in ms in the data
       className="group relative h-full"
     >
-      <div className="h-full p-6 md:p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] flex flex-col">
+      <div className="h-full p-6 md:p-8 rounded-3xl bg-white/5 border border-white/15 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] flex flex-col">
 
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-6">
