@@ -2,13 +2,14 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
+import LazyImage from './ui/LazyImage';
 
-import petrolBunkThumbnail from '../assets/petrol-bunk-management-thumbnail.png';
-import eduWorldThumbnail from '../assets/eduworld-thumbnail.png';
-import headlinesHubThumbnail from '../assets/headlines-hub-thumbnail.png';
-import loginDashboardThumbnail from '../assets/login-dashboard-thumbnail.png';
-import zapierCloneThumbnail from '../assets/zapier-clone-thumbnail.png';
-import expenseTrackerThumbnail from '../assets/expense-tracker-thumbnail.png';
+import petrolBunkThumbnail from '../assets/petrol-bunk-management-thumbnail.avif';
+import eduWorldThumbnail from '../assets/eduworld-thumbnail.avif';
+import headlinesHubThumbnail from '../assets/headlines-hub-thumbnail.avif';
+import loginDashboardThumbnail from '../assets/login-dashboard-thumbnail.avif';
+import zapierCloneThumbnail from '../assets/zapier-clone-thumbnail.avif';
+import expenseTrackerThumbnail from '../assets/expense-tracker-thumbnail.avif';
 
 const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, index, isVignette }) => {
   return (
@@ -25,10 +26,14 @@ const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, in
         <div className="relative aspect-video overflow-hidden">
           <div className={`absolute inset-0 z-10 pointer-events-none transition-all duration-500 ${isVignette ? 'shadow-[inset_0_0_60px_rgba(0,0,0,0.9)]' : ''}`} />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
-          <motion.img
+          <LazyImage
             src={image}
             alt={title}
             className="w-full h-full object-cover transition-transform duration-700"
+            wrapperClassName="w-full h-full"
+            placeholderColor="rgba(20, 20, 20, 0.8)"
+            threshold={0.1}
+            rootMargin="100px"
           />
 
           {/* Overlay Actions */}
