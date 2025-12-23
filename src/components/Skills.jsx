@@ -34,13 +34,13 @@ const Skills = () => {
 
   // Custom renderer for LogoLoop to ensure monochrome styling
   const renderSkillItem = (item, key) => (
-    <div key={key} className="flex flex-col items-center justify-center gap-4 group cursor-pointer p-4">
-      <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-colors duration-300 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:border-white/40 group-hover:bg-white/10">
-        <div className="text-5xl md:text-6xl text-gray-400 transition-colors duration-300 group-hover:text-white drop-shadow-lg">
+    <div key={key} className="flex flex-col items-center justify-center gap-4 group/skill p-4">
+      <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-colors duration-300 group-hover/skill:shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover/skill:border-white/40 group-hover/skill:bg-white/10">
+        <div className="text-5xl md:text-6xl text-gray-400 transition-colors duration-300 group-hover/skill:text-white drop-shadow-lg">
           {item.node}
         </div>
       </div>
-      <span className="text-sm md:text-base font-medium text-gray-500 uppercase tracking-widest group-hover:text-white transition-colors duration-300">
+      <span className="text-sm md:text-base font-medium text-gray-500 uppercase tracking-widest group-hover/skill:text-white transition-colors duration-300">
         {item.title}
       </span>
     </div>
@@ -73,7 +73,7 @@ const Skills = () => {
 
         <LogoLoop
           logos={allSkills}
-          speed={30}
+          speed={50}
           direction="left"
           logoHeight={140}
           gap={40}

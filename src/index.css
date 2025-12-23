@@ -72,6 +72,27 @@ input[type="button"],
   cursor: pointer;
 }
 
+/* Draggable/Scrollable Elements */
+.cursor-grab,
+[style*="cursor: grab"] {
+  cursor: grab !important;
+}
+
+.cursor-grab *,
+[style*="cursor: grab"] * {
+  cursor: inherit !important;
+}
+
+.cursor-grabbing,
+[style*="cursor: grabbing"] {
+  cursor: grabbing !important;
+}
+
+.cursor-grabbing *,
+[style*="cursor: grabbing"] * {
+  cursor: inherit !important;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -111,7 +132,7 @@ html {
     inset 0 -1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-radius: 9999px;
+  border-radius: 2rem;
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);

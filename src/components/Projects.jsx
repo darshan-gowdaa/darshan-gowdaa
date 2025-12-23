@@ -36,8 +36,8 @@ const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, in
             rootMargin="100px"
           />
 
-          {/* Overlay Actions */}
-          <div className="absolute inset-0 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4 bg-black/60 backdrop-blur-[2px]">
+          {/* Overlay Actions - Desktop only */}
+          <div className="absolute inset-0 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex items-center justify-center gap-4 bg-black/60 backdrop-blur-[2px]">
             {githubLink && (
               <motion.a
                 whileHover={{ backgroundColor: "rgba(255, 255, 255, 1)", color: "#000" }}
@@ -65,6 +65,34 @@ const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, in
               </motion.a>
             )}
           </div>
+
+          {/* Mobile Action Buttons - Always visible */}
+          {(githubLink || liveLink) && (
+            <div className="absolute bottom-0 left-0 right-0 z-20 md:hidden flex items-center justify-center gap-3 p-3 bg-gradient-to-t from-black/90 via-black/70 to-transparent backdrop-blur-sm">
+              {githubLink && (
+                <a
+                  href={githubLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white text-sm font-medium border border-white/20 backdrop-blur-md transition-all active:scale-95 active:bg-white/20"
+                >
+                  <FaGithub size={16} />
+                  <span>Code</span>
+                </a>
+              )}
+              {liveLink && (
+                <a
+                  href={liveLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 text-black text-sm font-medium border border-white/20 transition-all active:scale-95 active:bg-white"
+                >
+                  <FaExternalLinkAlt size={14} />
+                  <span>Live Demo</span>
+                </a>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Content */}
