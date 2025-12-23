@@ -92,7 +92,7 @@ const Navbar = () => {
     <>
       {/* Desktop Floating Centered Pill Navbar */}
       <nav
-        className="hidden md:block fixed top-6 left-1/2 -translate-x-1/2 z-50 rounded-full px-3 py-2.5 transition-all duration-300 border border-white/5 shadow-[0_0_20px_rgba(255,255,255,0.1)] backdrop-blur-[3px] bg-black/5 group overflow-hidden"
+        className="hidden md:block fixed top-6 left-1/2 -translate-x-1/2 z-50 rounded-full px-3 py-1.5 transition-all duration-300 border border-white/5 shadow-[0_0_20px_rgba(255,255,255,0.1)] backdrop-blur-[3px] bg-black/5 group overflow-hidden"
         style={{ width: 'fit-content' }}
       >
         {/* Neon Glow Borders (Top & Bottom) */}
@@ -111,7 +111,7 @@ const Navbar = () => {
               <button
                 key={link}
                 onClick={() => scrollToSection(link)}
-                className={`relative px-5 py-2.5 rounded-full text-base font-medium uppercase tracking-wider transition-colors duration-300 group select-none ${isActive ? 'text-white' : 'text-gray-300 hover:text-white'
+                className={`relative px-5 py-2 rounded-full text-base font-medium uppercase tracking-wider transition-colors duration-300 group select-none ${isActive ? 'text-white' : 'text-gray-300 hover:text-white'
                   }`}
                 style={{ outline: 'none' }}
               >

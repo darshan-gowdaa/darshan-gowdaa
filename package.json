@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
+    "deploy": "gh-pages -d dist -m \"Deploy to GitHub pages [skip ci]\"",
     "deploy:vercel": "vercel --prod"
   },
   "dependencies": {
