@@ -40,3 +40,6 @@ build/
 # Temporary files
 *.txt
 !README.txt
+
+.vercel
+.env*.local
