@@ -1,276 +1,161 @@
 // src/components/Projects.jsx
-import React, { memo, useMemo, useCallback } from 'react';
-import { useState, useRef } from 'react';
-import { useSpring, animated } from '@react-spring/web';
-import { useInView } from 'framer-motion';
+import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
 
 import petrolBunkThumbnail from '../assets/petrolbunkmanagementsystem-thumnail.png';
 import eduWorldThumbnail from '../assets/eduworld-thumbnail.png';
 import headlinesHubThumbnail from '../assets/headlinesHub-thumnail.png';
+import loginDashboardThumbnail from '../assets/login-dashboard.png';
+import zapierCloneThumbnail from '../assets/zapier_clone-thumnail.png';
 
-const ProjectCard = memo(({ 
-  title, 
-  description, 
-  tags, 
-  image, 
-  liveLink, 
-  githubLink, 
-  isInView, 
-  delay, 
-  duration 
-}) => {
-  const [hovered, setHovered] = useState(false);
-  const [tapped, setTapped] = useState(false);
-
-  const cardAnimation = useSpring({
-    opacity: isInView ? 1 : 0,
-    transform: isInView ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,20px,0) scale(0.98)',
-    config: { tension: 280, friction: 25 },
-    delay
-  });
-
-  // Show overlay on mobile tap or desktop hover
-  const showOverlay = hovered || tapped;
-
-  const contentAnimation = useSpring({
-    opacity: showOverlay ? 1 : 0,
-    transform: showOverlay ? 'translate3d(0,0,0)' : 'translate3d(0,12px,0)',
-    config: { tension: 280, friction: 22 }
-  });
-
-  const buttonAnimation = useSpring({
-    opacity: showOverlay ? 1 : 0,
-    transform: showOverlay ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,6px,0) scale(0.95)',
-    config: { tension: 280, friction: 22 },
-    delay: 60
-  });
-
-  const imageAnimation = useSpring({
-    filter: showOverlay ? 'brightness(0.65) blur(2px)' : 'brightness(1) blur(0px)',
-    transform: showOverlay ? 'translate3d(0,0,0) scale(1.05)' : 'translate3d(0,0,0) scale(1)',
-    config: { tension: 280, friction: 22 }
-  });
-
-  const renderDescription = useCallback(() => {
-    const parts = description.split(title);
-    if (parts.length > 1) {
-      return (
-        <>
-          {parts[0]}
-          <span className="text-purple-100 font-bold [text-shadow:_0_0_8px_rgb(168_85_247_/_0.7),_0_0_16px_rgb(168_85_247_/_0.4)]">
-            {title}
-          </span>
-          {parts[1]}
-        </>
-      );
-    }
-    return description;
-  }, [description, title]);
-
-  const handleMouseEnter = useCallback(() => setHovered(true), []);
-  const handleMouseLeave = useCallback(() => setHovered(false), []);
-  
-  // Toggle tap state on mobile
-  const handleTap = useCallback(() => {
-    setTapped(prev => !prev);
-  }, []);
-  
-  const handleStopPropagation = useCallback((e) => e.stopPropagation(), []);
-
+const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, index }) => {
   return (
-    <animated.div
-      style={cardAnimation}
-      className="liquid-glass-primary rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 flex flex-col h-full"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleTap}
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      className="group relative h-full flex flex-col"
     >
-      <div className="relative overflow-hidden aspect-video">
-        <animated.img
-          style={imageAnimation}
-          src={image}
-          alt={title}
-          loading="lazy"
-          className="w-full h-full object-cover"
-        />
+      <div className="relative h-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:border-white/30">
 
-        {/* Desktop hover overlay */}
-        <animated.div
-          style={contentAnimation}
-          className="hidden md:flex absolute inset-0 p-3 sm:p-4 md:p-5 flex-col justify-end backdrop-blur-sm bg-gradient-to-t from-black/60 to-transparent"
-        >
-          <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2 text-white drop-shadow-2xl">
-            {title}
-          </h3>
+        {/* Image Container */}
+        <div className="relative aspect-video overflow-hidden">
+          <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
+          <motion.img
+            src={image}
+            alt={title}
+            className="w-full h-full object-cover transition-transform duration-700"
+          />
 
-          <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-2 sm:mb-3">
-            {tags.map((tag, index) => (
-              <span
-                key={index}
-                className="liquid-glass-badge text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-md font-medium"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          <animated.div style={buttonAnimation} className="flex gap-2 sm:gap-3">
+          {/* Overlay Actions */}
+          <div className="absolute inset-0 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4 bg-black/60 backdrop-blur-[2px]">
             {githubLink && (
-              <a
+              <motion.a
+                whileHover={{ backgroundColor: "rgba(255, 255, 255, 1)", color: "#000" }}
+                whileTap={{ scale: 0.95 }}
                 href={githubLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-gray-900/80 backdrop-blur-lg p-2 sm:p-2.5 rounded-full text-gray-200 hover:text-white hover:scale-105 active:scale-95 transition-all touch-manipulation"
-                onClick={handleStopPropagation}
-                aria-label={`View ${title} on GitHub`}
+                className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-colors"
+                title="View Source Code"
               >
-                <FaGithub className="text-sm sm:text-base" />
-              </a>
+                <FaGithub size={20} />
+              </motion.a>
             )}
             {liveLink && (
-              <a
+              <motion.a
+                whileHover={{ backgroundColor: "rgba(255, 255, 255, 1)", color: "#000" }}
+                whileTap={{ scale: 0.95 }}
                 href={liveLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-gray-900/80 backdrop-blur-lg p-2 sm:p-2.5 rounded-full text-gray-200 hover:text-white hover:scale-105 active:scale-95 transition-all touch-manipulation"
-                onClick={handleStopPropagation}
-                aria-label={`View ${title} live demo`}
+                className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-colors"
+                title="View Live Demo"
               >
-                <FaExternalLinkAlt className="text-sm sm:text-base" />
-              </a>
-            )}
-          </animated.div>
-        </animated.div>
-
-        {/* Mobile always-visible overlay */}
-        <div className="md:hidden absolute inset-0 p-3 flex flex-col justify-end bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-          <h3 className="text-base font-bold mb-2 text-white drop-shadow-2xl">
-            {title}
-          </h3>
-
-          <div className="flex flex-wrap gap-1 mb-2">
-            {tags.slice(0, 3).map((tag, index) => (
-              <span
-                key={index}
-                className="liquid-glass-badge text-[9px] px-1.5 py-0.5 rounded-md font-medium"
-              >
-                {tag}
-              </span>
-            ))}
-            {tags.length > 3 && (
-              <span className="liquid-glass-badge text-[9px] px-1.5 py-0.5 rounded-md font-medium">
-                +{tags.length - 3}
-              </span>
-            )}
-          </div>
-
-          <div className="flex gap-2 mt-1">
-            {githubLink && (
-              <a
-                href={githubLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-gray-900/90 backdrop-blur-lg p-2 rounded-full text-gray-200 active:scale-95 transition-all touch-manipulation"
-                onClick={handleStopPropagation}
-                aria-label={`View ${title} on GitHub`}
-              >
-                <FaGithub className="text-sm" />
-              </a>
-            )}
-            {liveLink && (
-              <a
-                href={liveLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-gray-900/90 backdrop-blur-lg p-2 rounded-full text-gray-200 active:scale-95 transition-all touch-manipulation"
-                onClick={handleStopPropagation}
-                aria-label={`View ${title} live demo`}
-              >
-                <FaExternalLinkAlt className="text-sm" />
-              </a>
+                <FaExternalLinkAlt size={20} />
+              </motion.a>
             )}
           </div>
         </div>
-      </div>
 
-      <div className="p-4 sm:p-5 bg-gray-800/20 backdrop-blur-md border-t border-gray-700/20 flex-grow">
-        {duration && (
-          <p className="text-xs sm:text-sm text-white-100 font-semibold mb-1.5 sm:mb-2">
-            {duration}
+        {/* Content */}
+        <div className="p-6 md:p-8 flex flex-col flex-grow">
+          <div className="flex flex-wrap gap-2 mb-4">
+            {tags.map((tag, i) => (
+              <span
+                key={i}
+                className="liquid-glass-tag"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <h3 className="text-2xl font-bold text-white mb-3 font-heading leading-tight group-hover:text-gray-200 transition-colors">
+            {title}
+          </h3>
+
+          <p className="text-gray-400 text-sm leading-relaxed flex-grow">
+            {description}
           </p>
-        )}
-        <p className="text-gray-200 text-xs sm:text-sm leading-relaxed">
-          {renderDescription()}
-        </p>
-      </div>
-    </animated.div>
-  );
-});
+        </div>
 
-ProjectCard.displayName = 'ProjectCard';
+        {/* Decorative Bottom Line */}
+        <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      </div>
+    </motion.div>
+  );
+};
 
 const Projects = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.05 });
-
-  const titleAnimation = useSpring({
-    opacity: isInView ? 1 : 0,
-    transform: isInView ? 'translate3d(0,0,0)' : 'translate3d(0,20px,0)',
-    config: { tension: 280, friction: 25 },
-  });
-
   const projects = useMemo(() => [
     {
       title: "Petrol Bunk Management System",
-      description: "Petrol Bunk Management System is a MERN-Stack web application (Full-Stack) designed to streamline petrol bunk operations with modern technology. It provides a comprehensive solution for managing inventory, sales, employees, and generate Visual Reports, ensuring efficient and transparent business processes.",
-      tags: ["MERN Stack", "JWT", "Software Documentation", "Responsive Web Design", "Data Visualisation"],
+      description: "A comprehensive MERN-Stack solution for managing petrol bunk operations. Streamlines inventory tracking, sales reporting, and employee management with real-time data visualization.",
+      tags: ["MERN Stack", "Dashboard", "Analytics"],
       image: petrolBunkThumbnail,
       githubLink: "https://github.com/darshan-gowdaa/petrol-bunk-management-system",
-      delay: 150,
     },
     {
       title: "EduWorld-FullStack",
-      description: "EduWorld-FullStack offers a comprehensive suite of features for admissions, course management, enquiries, and more. It has a chatbot feature for user interaction and a responsive design for easy use. It also has a dashboard for the admin to manage the website.",
-      tags: ["MERN Stack", "Tailwind CSS", "JWT", "Chatbot", "Responsive"],
+      description: "Complete education management ecosystem featuring admission portals, course administration, and an integrated AI chatbot for student enquiries.",
+      tags: ["MERN Stack", "AI Chatbot", "Management"],
       image: eduWorldThumbnail,
       githubLink: "https://github.com/darshan-gowdaa/eduworld-fullstack",
-      delay: 250,
     },
     {
       title: "headlinesHub-React",
-      description: "headlinesHub-React is a modern, responsive news aggregator app built with React and Vite. Fetches latest news articles from various categories using the NewsAPI and displays them in a clean, intuitive interface. The app allows users to search for news articles, view them in a list format, and click on an article to read the full content.",
-      tags: ["React.js", "API", "Bootstrap", "Infinite Scroll", "Caching"],
+      description: "Modern news aggregator leveraging NewsAPI. Features infinite scrolling, category filtering, and a responsive reading experience built with React and Vite.",
+      tags: ["React", "API Integration", "News"],
       image: headlinesHubThumbnail,
       liveLink: "#",
       githubLink: "https://github.com/darshan-gowdaa/headlinesHub-React",
-      delay: 350,
+    },
+    {
+      title: "Login & Dashboard Panel",
+      description: "A pixel-perfect admin dashboard featuring interactive charts, user management tables, and comprehensive authentication flows. Built for scalability and responsiveness.",
+      tags: ["React", "Vite", "Tailwind CSS", "Recharts"],
+      image: loginDashboardThumbnail,
+      liveLink: "https://darshan-gowdaa.github.io/Login-and-Dashboard-Vite/",
+      githubLink: "https://github.com/darshan-gowdaa/Login-and-Dashboard-Vite",
+    },
+    {
+      title: "Zapier Interface Clone",
+      description: "A meticulous recreation of the Zapier Interface tab, demonstrating advanced search logic, dynamic filtering, and complex state management with TypeScript.",
+      tags: ["React", "TypeScript", "Tailwind CSS"],
+      image: zapierCloneThumbnail,
+      liveLink: "https://darshan-gowdaa.github.io/Zapier-Clone-React/",
+      githubLink: "https://github.com/darshan-gowdaa/Zapier-Clone-React",
     },
   ], []);
 
   return (
-    <section 
-      id="projects" 
-      className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-gray-900/50 backdrop-blur-sm" 
-      ref={ref}
-    >
-      <div className="max-w-7xl mx-auto">
-        <animated.div style={titleAnimation} className="text-center mb-10 sm:mb-12 md:mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-            Featured Projects
-          </h2>
-          <div className="w-16 sm:w-20 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full"></div>
-          <p className="text-gray-300 mt-4 sm:mt-5 max-w-2xl mx-auto text-sm sm:text-base px-4">
-            My recent projects that showcase my technical skills and problem-solving abilities.
-          </p>
-        </animated.div>
+    <section id="projects" className="py-24 relative overflow-hidden">
+      {/* Background Gradients */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-8">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+
+          <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">
+            Projects
+          </h2>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
           {projects.map((project, index) => (
             <ProjectCard
-              key={`${project.title}-${index}`}
+              key={index}
+              index={index}
               {...project}
-              isInView={isInView}
             />
           ))}
         </div>
@@ -279,4 +164,4 @@ const Projects = () => {
   );
 };
 
-export default memo(Projects);
+export default Projects;

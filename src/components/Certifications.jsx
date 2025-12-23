@@ -1,136 +1,104 @@
 // src/components/Certifications.jsx
-import React, { memo, useMemo, useCallback, useRef } from 'react';
-import { useSpring, animated } from '@react-spring/web';
-import { useInView } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { SiAmazonwebservices, SiInfosys } from 'react-icons/si';
+import { NeonButton } from './ui/NeonButton';
 
-// Memoized CertificationCard component
-const CertificationCard = memo(({ title, issuer, description, link, icon, delay }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.15 });
-
-  // GPU-accelerated animation with translate3d
-  const cardAnimation = useSpring({
-    opacity: isInView ? 1 : 0,
-    transform: isInView ? 'translate3d(0,0,0)' : 'translate3d(0,20px,0)',
-    config: { tension: 280, friction: 25 },
-    delay: 50 + delay,
-  });
-
-  // Memoized click handler
-  const handleClick = useCallback(() => {
-    if (link) {
-      window.open(link, '_blank', 'noopener,noreferrer');
-    }
-  }, [link]);
-
+const CertificationCard = ({ title, issuer, description, link, icon, delay }) => {
   return (
-    <animated.div
-      ref={ref}
-      style={cardAnimation}
-      className="liquid-glass-card-enhanced p-4 sm:p-5 md:p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, delay: delay * 0.001 }} // delay is in ms in the data
+      className="group relative h-full"
     >
-      <div className="flex items-start gap-3 sm:gap-4">
-        {/* Icon container */}
-        <div className="flex-shrink-0 text-xl sm:text-2xl mt-1" aria-hidden="true">
-          {icon}
-        </div>
+      <div className="h-full p-6 md:p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] flex flex-col">
 
-        {/* Content container */}
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-base sm:text-lg md:text-xl mb-1.5 sm:mb-2 text-white break-words">
-            {title}
-          </h3>
-          <p className="text-gray-300 text-sm sm:text-base mb-2 font-medium">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 text-2xl text-gray-300 group-hover:text-white group-hover:bg-white/10 transition-colors">
+            {icon}
+          </div>
+          <span className="text-xs font-bold tracking-widest text-gray-500 uppercase border border-white/10 px-3 py-1 rounded-full bg-black/20">
             {issuer}
-          </p>
-          <p className="text-gray-300 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4">
-            {description}
-          </p>
-          
-          {link && (
-            <button
-              onClick={handleClick}
-              className="liquid-glass-shine px-3 sm:px-4 py-2 rounded-full text-purple-100 hover:text-white text-xs sm:text-sm transition-all cursor-pointer inline-block touch-manipulation hover:scale-105 active:scale-95"
-              aria-label={`View ${title} certificate`}
-            >
-              <span className="relative z-10 whitespace-nowrap">
-                View Certificate →
-              </span>
-            </button>
-          )}
+          </span>
         </div>
-      </div>
-    </animated.div>
-  );
-});
 
-CertificationCard.displayName = 'CertificationCard';
+        {/* Content */}
+        <h3 className="text-xl font-bold text-white mb-3 font-heading group-hover:text-gray-200 transition-colors">
+          {title}
+        </h3>
+
+        <p className="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
+          {description}
+        </p>
+
+        {/* Action */}
+        {link && (
+          <NeonButton
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="default"
+            className="w-full"
+          >
+            View Certificate
+          </NeonButton>
+        )}
+      </div>
+    </motion.div>
+  );
+};
 
 const Certifications = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.05 });
-
-  // GPU-accelerated title animation
-  const titleAnimation = useSpring({
-    opacity: isInView ? 1 : 0,
-    transform: isInView ? 'translate3d(0,0,0)' : 'translate3d(0,20px,0)',
-    config: { tension: 280, friction: 25 }
-  });
-
-  // Memoized certifications data
-  const certifications = useMemo(() => [
+  const certifications = [
     {
       title: "AWS Academy Graduate",
       issuer: "AWS Academy",
-      description: "Introduction to Cloud & Cloud Foundations with hands-on experience with AWS services",
+      description: "Cloud Foundations & Architecture. Gained hands-on experience with core AWS services and distributed systems.",
       link: "https://drive.google.com/drive/folders/1VSngU3XZfkpLdXzRRIWZLZrRpWLmHTQ6?usp=sharing",
-      icon: <SiAmazonwebservices className="text-orange-500" />,
+      icon: <SiAmazonwebservices />,
       delay: 0
     },
     {
-      title: "Cybersecurity & Security Foundation",
+      title: "Cybersecurity Foundation",
       issuer: "Infosys Springboard",
-      description: "Certification in cybersecurity awareness, security foundation concepts, security risks and key security concepts",
+      description: "Comprehensive training in security protocols, risk management, and network defense strategies.",
       link: "https://drive.google.com/drive/folders/1i2oZ1cNJpIdKR3BSpGi85pGLvRn5DR2l?usp=drive_link",
-      icon: <SiInfosys className="text-blue-500" />,
+      icon: <SiInfosys />,
       delay: 100
     }
-  ], []);
+  ];
 
   return (
-    <section 
-      id="certifications" 
-      className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-gray-900/30" 
-      ref={ref}
-    >
-      <div className="max-w-6xl mx-auto">
-        {/* Title section */}
-        <animated.div 
-          style={titleAnimation} 
-          className="text-center mb-10 sm:mb-12 md:mb-16"
+    <section id="certifications" className="py-24 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-20"
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+
+          <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">
             Certifications
           </h2>
-          <div className="w-16 sm:w-20 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full"></div>
-          <p className="text-gray-300 mt-4 sm:mt-6 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed px-4">
-            Professional certifications that validate my expertise in cloud computing, cybersecurity, and data analytics.
-          </p>
-        </animated.div>
+        </motion.div>
 
-        {/* Responsive grid - optimized for all screen sizes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
           {certifications.map((cert, index) => (
-            <CertificationCard 
-              key={`cert-${index}-${cert.title.replace(/\s+/g, '-').toLowerCase()}`} 
-              {...cert} 
+            <CertificationCard
+              key={index}
+              {...cert}
             />
           ))}
         </div>
+
       </div>
     </section>
   );
 };
 
-export default memo(Certifications);
+export default Certifications;

@@ -1,10 +1,10 @@
-// src/components/Hero.jsx
 import React, { memo, useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { FaGithub, FaLinkedin, FaEnvelope, FaArrowUp, FaArrowRight } from 'react-icons/fa';
 import { useSpring, animated } from '@react-spring/web';
 import { useInView } from 'framer-motion';
-
-
+import LiquidEther from './react-bits/LiquidEther';
+import TextPressure from './react-bits/TextPressure';
+import { NeonButton } from './ui/NeonButton';
 
 const Hero = () => {
   const ref = useRef(null);
@@ -12,20 +12,16 @@ const Hero = () => {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [displayedText, setDisplayedText] = useState('');
   const [showExclamation, setShowExclamation] = useState(false);
-  
+
   const fullText = useMemo(() => "Hey, I'm Darshan Gowda", []);
-
-
 
   // Handle scroll button visibility
   useEffect(() => {
     const handleScroll = () => setShowScrollButton(window.scrollY > 300);
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll, { passive: true });
   }, []);
-
-
 
   // Typewriter effect
   useEffect(() => {
@@ -43,8 +39,6 @@ const Hero = () => {
     return () => clearInterval(typingInterval);
   }, [isInView, fullText]);
 
-
-
   // Consolidated spring animations with GPU acceleration
   const createAnimation = useCallback((delay = 0, translateY = 30) => ({
     from: { opacity: 0, transform: `translate3d(0,${translateY}px,0)` },
@@ -56,23 +50,10 @@ const Hero = () => {
     delay,
   }), [isInView]);
 
-
-
   const titleAnimation = useSpring(createAnimation(0, 50));
   const subtitleAnimation = useSpring(createAnimation(150, 30));
   const buttonAnimation = useSpring(createAnimation(300, 20));
   const socialAnimation = useSpring(createAnimation(450, 20));
-
-
-
-  // Memoized blob data
-  const blobs = useMemo(() => [
-    { top: '10%', left: '5%', bg: 'bg-purple-600', delay: 0, size: 'w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64' },
-    { top: '15%', right: '5%', bg: 'bg-blue-600', delay: 2000, size: 'w-40 h-40 sm:w-56 sm:h-56 md:w-64 md:h-64' },
-    { bottom: '10%', left: '10%', bg: 'bg-pink-600', delay: 4000, size: 'w-36 h-36 sm:w-52 sm:h-52 md:w-64 md:h-64' }
-  ], []);
-
-
 
   // Memoized social links
   const socialLinks = useMemo(() => [
@@ -81,23 +62,21 @@ const Hero = () => {
     { href: "mailto:darshangowdaa223@gmail.com", Icon: FaEnvelope, external: false }
   ], []);
 
-
-
   // Split text with animated gradient - faster animation
   const renderTypedText = useCallback(() => {
     const prefix = "Hey, I'm ";
-    
+
     if (displayedText.length <= prefix.length) {
       return <span>{displayedText}</span>;
     }
-    
+
     const coloredPart = displayedText.slice(prefix.length);
     return (
       <>
         <span>{prefix}</span>
-        <span 
-          className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400"
-          style={{ 
+        <span
+          className="bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-white"
+          style={{
             backgroundSize: '200% auto',
             animation: 'gradient 2s linear infinite'
           }}
@@ -108,13 +87,9 @@ const Hero = () => {
     );
   }, [displayedText]);
 
-
-
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
-
-
 
   return (
     <>
@@ -130,113 +105,111 @@ const Hero = () => {
         </button>
       )}
 
-
-      <div 
-        id="home" 
-        className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20 sm:pt-24 md:pt-28 pb-12 sm:pb-16 md:pb-20" 
+      <div
+        id="home"
+        className="h-screen w-full relative z-20 overflow-hidden flex items-center justify-center"
         ref={ref}
       >
-        {/* Animated Background Blobs - Responsive */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {blobs.map((blob, i) => (
+        {/* Liquid Ether Background */}
+        <div className="absolute inset-0 z-0">
+          <LiquidEther
+            colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+            mouseForce={20}
+            cursorSize={100}
+            isViscous={false}
+            viscous={30}
+            iterationsViscous={32}
+            iterationsPoisson={32}
+            resolution={0.5}
+            isBounce={false}
+            autoDemo={true}
+            autoSpeed={0.5}
+            autoIntensity={2.2}
+            takeoverDuration={0.25}
+            autoResumeDelay={1500}
+            autoRampDuration={0.6}
+          />
+        </div>
+
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full pt-44 sm:pt-52 md:pt-60 pb-12 sm:pb-16 md:pb-20">
+          {/* Content */}
+          <div className="w-full max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl text-center px-4 sm:px-6 md:px-8 flex flex-col items-center">
+            <animated.div style={titleAnimation} className="mb-6 sm:mb-8 md:mb-10">
+              <span className="liquid-glass-badge inline-block bg-clip-text text-gray-200 bg-gradient-to-r from-white to-gray-300 font-medium px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm tracking-widest uppercase">
+                Full-Stack Developer
+              </span>
+            </animated.div>
+
+            <div className="relative h-[100px] sm:h-[120px] md:h-[150px] w-full mb-10 sm:mb-14 max-w-5xl mx-auto">
+              <TextPressure
+                text="Darshan Gowda"
+                flex={true}
+                alpha={false}
+                stroke={false}
+                width={true}
+                weight={true}
+                italic={true}
+                textColor="#ffffff"
+                strokeColor="#ff0000"
+                minFontSize={36}
+              />
+            </div>
+
+            <animated.p
+              style={subtitleAnimation}
+              className="text-sm sm:text-base md:text-lg text-gray-400 mb-10 sm:mb-14 max-w-3xl md:max-w-4xl mx-auto px-4 leading-relaxed font-light tracking-wide"
+            >
+              I am a software developer and data analytics student with strong skills in the MERN stack, building full-stack web apps that solve real problems. My experience includes developing scalable systems and interactive platforms. I also have foundational knowledge in DevOps and cloud computing, helping deploy and manage applications efficiently. I enjoy working in teams and continuously learning to keep up with evolving technologies.
+            </animated.p>
+
             <animated.div
-              key={i}
-              className={`absolute rounded-full ${blob.bg} ${blob.size} filter blur-2xl sm:blur-3xl animate-blob opacity-70`}
-              style={{
-                top: blob.top,
-                left: blob.left,
-                right: blob.right,
-                bottom: blob.bottom,
-                animationDelay: `${blob.delay}ms`,
-                transform: isInView ? 'scale(1)' : 'scale(0.8)',
-                transition: 'transform 0.5s ease-out',
-              }}
-            />
-          ))}
-        </div>
-
-
-
-        {/* Content */}
-        <div className="z-10 w-full max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl text-center px-4 sm:px-6 md:px-8">
-          <animated.div style={titleAnimation} className="mb-3 sm:mb-4">
-            <span className="liquid-glass-badge inline-block bg-clip-text text-purple-200 bg-gradient-to-r from-purple-400 to-pink-400 font-medium px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm">
-              Full-Stack Developer
-            </span>
-          </animated.div>
-
-
-
-          <animated.h1 
-            style={titleAnimation} 
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 mt-4 sm:mt-6 md:mt-8 text-white leading-tight px-2"
-          >
-            {renderTypedText()}
-            {showExclamation && (
-              <span 
-                className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400"
-                style={{ 
-                  backgroundSize: '200% auto',
-                  animation: 'gradient 2s linear infinite'
-                }}
-              >!</span>
-            )}
-          </animated.h1>
-
-
-
-          <animated.p 
-            style={subtitleAnimation} 
-            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mb-6 sm:mb-8 md:mb-10 max-w-full sm:max-w-xl md:max-w-2xl mx-auto px-2 sm:px-4 leading-relaxed"
-          >
-            I am a software developer and data analytics student with strong skills in the MERN stack, building full-stack web apps that solve real problems. My experience includes developing scalable systems and interactive platforms. I also have foundational knowledge in DevOps and cloud computing, helping deploy and manage applications efficiently. I enjoy working in teams and continuously learning to keep up with evolving technologies.
-          </animated.p>
-
-
-
-          <animated.div 
-            style={buttonAnimation} 
-            className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 mb-8 sm:mb-10 md:mb-12 px-2 sm:px-4"
-          >
-            <a
-              href="#projects"
-              className="liquid-glass-primary group relative overflow-hidden px-6 py-2.5 sm:px-8 sm:py-3 md:px-10 md:py-3.5 rounded-full text-white text-sm sm:text-base font-medium transform transition-all duration-300 hover:scale-105 hover:-translate-y-1 flex items-center gap-2 justify-center w-full sm:w-auto select-none"
+              style={buttonAnimation}
+              className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 mb-8 sm:mb-10 md:mb-12 px-2 sm:px-4"
             >
-              <span className="relative z-10">View My Work</span>
-              <FaArrowRight className="relative z-10 transform group-hover:translate-x-1 transition-transform duration-300" size={14} />
-            </a>
-            <a
-              href="#contact"
-              className="liquid-glass-secondary px-6 py-2.5 sm:px-8 sm:py-3 md:px-10 md:py-3.5 rounded-full text-white text-sm sm:text-base font-medium transform transition-all duration-300 hover:scale-105 hover:-translate-y-1 w-full sm:w-auto select-none"
-            >
-              Contact Me
-            </a>
-          </animated.div>
-
-
-
-          <animated.div 
-            style={socialAnimation} 
-            className="flex justify-center items-center space-x-3 sm:space-x-4 md:space-x-6 mb-8 sm:mb-10 md:mb-12 px-2"
-          >
-            {socialLinks.map(({ href, Icon, external }, i) => (
-              <a
-                key={i}
-                href={href}
-                target={external ? "_blank" : undefined}
-                rel={external ? "noopener noreferrer" : undefined}
-                className="liquid-glass-icon text-gray-300 hover:text-white transition-all p-2 sm:p-2.5 md:p-3 rounded-full transform hover:scale-110 duration-300 select-none"
+              <NeonButton
+                href="#projects"
+                variant="solid"
+                size="lg"
+                className="w-full sm:w-auto"
               >
-                <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8" />
-              </a>
-            ))}
-          </animated.div>
+                <span className="relative z-10 flex items-center gap-2">
+                  View My Work
+                  <FaArrowRight className="transform group-hover:translate-x-1 transition-transform duration-300" size={14} />
+                </span>
+              </NeonButton>
+              <NeonButton
+                href="#contact"
+                variant="default"
+                size="lg"
+                className="w-full sm:w-auto"
+              >
+                Contact Me
+              </NeonButton>
+            </animated.div>
+
+            <animated.div
+              style={socialAnimation}
+              className="flex justify-center items-center space-x-3 sm:space-x-4 md:space-x-6 mb-8 sm:mb-10 md:mb-12 px-2"
+            >
+              {socialLinks.map(({ href, Icon, external }, i) => (
+                <a
+                  key={i}
+                  href={href}
+                  target={external ? "_blank" : undefined}
+                  rel={external ? "noopener noreferrer" : undefined}
+                  className="liquid-glass-icon text-gray-300 hover:text-white transition-all p-2 sm:p-2.5 md:p-3 rounded-full transform hover:scale-110 duration-300 select-none"
+                >
+                  <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8" />
+                </a>
+              ))}
+            </animated.div>
+          </div>
         </div>
+
+
       </div>
     </>
   );
 };
-
-
 
 export default memo(Hero);
