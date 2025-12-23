@@ -149,12 +149,32 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile: Current Section Indicator (top) */}
-      <div className="md:hidden fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-black/50 backdrop-blur-md border border-white/10">
-        <span className="text-white text-sm font-medium tracking-wider uppercase">{activeSection}</span>
+      {/* Mobile: Current Section Indicator (top) - Liquid Glass Style */}
+      <div
+        className="md:hidden fixed top-4 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-full overflow-hidden"
+        style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: `
+            0 0 20px rgba(255, 255, 255, 0.1),
+            inset 0 0 15px rgba(255, 255, 255, 0.03)
+          `
+        }}
+      >
+        {/* Neon Glow Border - Top */}
+        <span className="absolute h-px opacity-100 inset-x-0 top-0 bg-gradient-to-r w-3/4 mx-auto from-transparent via-white/40 to-transparent pointer-events-none" />
+        {/* Neon Glow Border - Bottom */}
+        <span className="absolute h-px opacity-100 inset-x-0 bottom-0 bg-gradient-to-r w-3/4 mx-auto from-transparent via-white/40 to-transparent pointer-events-none" />
+        {/* Liquid Glass Shine */}
+        <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-30" />
+        </div>
+        <span className="relative z-10 text-white text-sm font-medium tracking-wider uppercase">{activeSection}</span>
       </div>
 
-      {/* Mobile: Fixed FAB (Bottom Right) - Thumb Friendly */}
+      {/* Mobile: Fixed FAB (Bottom Left) - Thumb Friendly with Liquid Glass Neon */}
       <AnimatePresence>
         {!mobileMenuOpen && (
           <motion.button
@@ -163,11 +183,31 @@ const Navbar = () => {
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             onClick={toggleMobileMenu}
-            className="md:hidden fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-white text-black flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] active:scale-95 transition-transform duration-150 select-none"
-            style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+            className="md:hidden fixed bottom-10 sm:bottom-12 left-6 sm:left-8 z-50 w-14 h-14 rounded-full flex items-center justify-center active:scale-95 transition-all duration-300 select-none group overflow-hidden"
+            style={{
+              touchAction: 'manipulation',
+              WebkitTapHighlightColor: 'transparent',
+              background: 'rgba(255, 255, 255, 0.05)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: `
+                0 0 25px rgba(255, 255, 255, 0.15),
+                0 0 50px rgba(255, 255, 255, 0.08),
+                inset 0 0 20px rgba(255, 255, 255, 0.05)
+              `
+            }}
             aria-label="Open menu"
           >
-            <FaBars size={20} />
+            {/* Neon Glow Border - Top */}
+            <span className="absolute h-px opacity-100 inset-x-0 top-0 bg-gradient-to-r w-3/4 mx-auto from-transparent via-white/50 to-transparent pointer-events-none" />
+            {/* Neon Glow Border - Bottom */}
+            <span className="absolute h-px opacity-100 inset-x-0 bottom-0 bg-gradient-to-r w-3/4 mx-auto from-transparent via-white/50 to-transparent pointer-events-none" />
+            {/* Liquid Glass Shine */}
+            <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-50" />
+            </div>
+            <FaBars size={20} className="relative z-10 text-white group-hover:text-white/90 transition-colors" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -197,10 +237,22 @@ const Navbar = () => {
               transition={{ type: "spring", stiffness: 400, damping: 35 }}
               className="relative w-full max-w-xs"
             >
-              {/* Glass Container */}
-              <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-black shadow-[0_0_80px_rgba(255,255,255,0.05)]">
-                {/* Top Glow */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+              {/* Glass Container - Liquid Glass Theme */}
+              <div
+                className="relative rounded-3xl overflow-hidden"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  boxShadow: `
+                    0 0 60px rgba(255, 255, 255, 0.08),
+                    inset 0 0 30px rgba(255, 255, 255, 0.02)
+                  `
+                }}
+              >
+                {/* Top Neon Glow */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
 
                 {/* Menu Items */}
                 <div className="p-4 space-y-1">
@@ -213,12 +265,15 @@ const Navbar = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.03 }}
                         onClick={() => scrollToSection(link)}
-                        className={`w-full text-left py-3.5 px-5 rounded-xl text-base font-medium transition-all duration-150 select-none
-                          ${isActive
-                            ? 'bg-white text-black'
-                            : 'text-gray-400 active:bg-white/10 active:text-white'
-                          }`}
-                        style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+                        className="w-full text-left py-3.5 px-5 rounded-xl text-base font-medium transition-all duration-200 select-none"
+                        style={{
+                          touchAction: 'manipulation',
+                          WebkitTapHighlightColor: 'transparent',
+                          background: isActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                          color: isActive ? '#ffffff' : 'rgba(156, 163, 175, 1)',
+                          border: isActive ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid transparent',
+                          boxShadow: isActive ? '0 0 20px rgba(255, 255, 255, 0.1), inset 0 0 15px rgba(255, 255, 255, 0.05)' : 'none'
+                        }}
                       >
                         {link}
                       </motion.button>
@@ -226,21 +281,31 @@ const Navbar = () => {
                   })}
                 </div>
 
-                {/* Bottom Glow */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                {/* Bottom Neon Glow */}
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
               </div>
 
-              {/* Close Button - Large for easy tap */}
+              {/* Close Button - Liquid Glass Style */}
               <motion.button
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
                 onClick={closeMobileMenu}
-                className="w-full mt-4 py-4 rounded-2xl bg-white text-black font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform duration-150 select-none shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-                style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+                className="w-full mt-4 py-4 rounded-2xl font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 select-none text-white overflow-hidden relative"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  boxShadow: '0 0 25px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.03)'
+                }}
               >
-                <FaTimes size={16} />
-                Close
+                {/* Neon Glow Border - Top */}
+                <span className="absolute h-px opacity-100 inset-x-0 top-0 bg-gradient-to-r w-3/4 mx-auto from-transparent via-white/40 to-transparent pointer-events-none" />
+                {/* Neon Glow Border - Bottom */}
+                <span className="absolute h-px opacity-100 inset-x-0 bottom-0 bg-gradient-to-r w-3/4 mx-auto from-transparent via-white/40 to-transparent pointer-events-none" />
+                <FaTimes size={16} className="relative z-10" />
+                <span className="relative z-10">Close</span>
               </motion.button>
             </motion.div>
           </motion.div>
