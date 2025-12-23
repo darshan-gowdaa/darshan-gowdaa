@@ -8,8 +8,9 @@ import eduWorldThumbnail from '../assets/eduworld-thumbnail.png';
 import headlinesHubThumbnail from '../assets/headlinesHub-thumnail.png';
 import loginDashboardThumbnail from '../assets/login-dashboard.png';
 import zapierCloneThumbnail from '../assets/zapier_clone-thumnail.png';
+import expenseTrackerThumbnail from '../assets/expense-tracker-thumbnail.png';
 
-const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, index }) => {
+const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, index, isVignette }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -22,6 +23,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, in
 
         {/* Image Container */}
         <div className="relative aspect-video overflow-hidden">
+          <div className={`absolute inset-0 z-10 pointer-events-none transition-all duration-500 ${isVignette ? 'shadow-[inset_0_0_60px_rgba(0,0,0,0.9)]' : ''}`} />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
           <motion.img
             src={image}
@@ -99,13 +101,6 @@ const Projects = () => {
       githubLink: "https://github.com/darshan-gowdaa/petrol-bunk-management-system",
     },
     {
-      title: "EduWorld-FullStack",
-      description: "Complete education management ecosystem featuring admission portals, course administration, and an integrated AI chatbot for student enquiries.",
-      tags: ["MERN Stack", "AI Chatbot", "Management"],
-      image: eduWorldThumbnail,
-      githubLink: "https://github.com/darshan-gowdaa/eduworld-fullstack",
-    },
-    {
       title: "Headlines Hub",
       description: "Modern news aggregator leveraging NewsAPI. Features infinite scrolling, category filtering, and a responsive reading experience built with React and Vite.",
       tags: ["React", "API Integration", "News"],
@@ -114,20 +109,36 @@ const Projects = () => {
       githubLink: "https://github.com/darshan-gowdaa/headlinesHub-React",
     },
     {
-      title: "Login & Dashboard Panel",
-      description: "A pixel-perfect admin dashboard featuring interactive charts, user management tables, and comprehensive authentication flows. Built for scalability and responsiveness.",
-      tags: [ "Vite + JSX", "Tailwind CSS", "Recharts"],
-      image: loginDashboardThumbnail,
-      liveLink: "https://darshan-gowdaa.github.io/Login-and-Dashboard-Vite/",
-      githubLink: "https://github.com/darshan-gowdaa/Login-and-Dashboard-Vite",
-    },
-    {
       title: "Zapier Interface Clone",
       description: "A meticulous recreation of the Zapier Interface tab, demonstrating advanced search logic, dynamic filtering, and complex state management with TypeScript.",
       tags: ["React", "TypeScript", "Tailwind CSS"],
       image: zapierCloneThumbnail,
       liveLink: "https://darshan-gowdaa.github.io/Zapier-Clone-React/",
       githubLink: "https://github.com/darshan-gowdaa/Zapier-Clone-React",
+    },
+    {
+      title: "Login & Dashboard Panel",
+      description: "A pixel-perfect admin dashboard featuring interactive charts, user management tables, and comprehensive authentication flows. Built for scalability and responsiveness.",
+      tags: ["Vite + JSX", "Tailwind CSS", "Recharts"],
+      image: loginDashboardThumbnail,
+      liveLink: "https://darshan-gowdaa.github.io/Login-and-Dashboard-Vite/",
+      githubLink: "https://github.com/darshan-gowdaa/Login-and-Dashboard-Vite",
+    },
+    {
+      title: "EduWorld-FullStack",
+      description: "Complete education management ecosystem featuring admission portals, course administration, and an integrated AI chatbot for student enquiries.",
+      tags: ["MERN Stack", "AI Chatbot", "Management"],
+      image: eduWorldThumbnail,
+      githubLink: "https://github.com/darshan-gowdaa/eduworld-fullstack",
+    },
+    {
+      title: "Expense Tracker",
+      description: "A full-stack web application to manage finances. Users can track income/expenses with CRUD capabilities. Built with a responsive LAMP stack architecture.",
+      tags: ["PHP", "MySQL", "JavaScript", "Bootstrap"],
+      image: expenseTrackerThumbnail,
+      githubLink: "https://github.com/darshan-gowdaa/expense-tracker",
+      liveLink: "https://drive.google.com/file/d/1zOWsi7jQCVbzGqryi4eOY65X6LACZpXT/view?usp=drivesdk",
+      isVignette: true,
     },
   ], []);
 
