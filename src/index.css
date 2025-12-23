@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Raleway:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+@import "tailwindcss";
 
 @theme {
   --font-heading: 'Outfit', sans-serif;
@@ -16,6 +16,25 @@ body {
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mobile Touch Optimization */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Enable hover effects on touch via :active */
+@media (hover: none) and (pointer: coarse) {
+  .touch-hover:active {
+    transform: scale(0.98);
+  }
+
+  /* Cards and interactive elements get hover effect on tap */
+  .liquid-glass-icon:active,
+  .liquid-glass-badge:active {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+  }
 }
 
 h1,

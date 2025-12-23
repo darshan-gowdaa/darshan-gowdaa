@@ -47,7 +47,6 @@ function App() {
         <Contact />
       </main>
 
-      {/* Footer Removed */}
     </div>
   );
 }

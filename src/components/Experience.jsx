@@ -21,7 +21,7 @@ const TimelineMarker = ({ icon, isLast }) => {
   );
 };
 
-const TimelineContent = ({ title, organization, period, description, certificateLink, isLeft }) => {
+const TimelineContent = ({ title, organization, period, description, certificateLink }) => {
   return (
     <div
       className={`glass-panel relative p-6 md:p-8 rounded-3xl overflow-hidden group`}
@@ -30,7 +30,7 @@ const TimelineContent = ({ title, organization, period, description, certificate
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-100 group-hover:from-white/10 group-hover:to-white/5 transition-all duration-500 pointer-events-none" />
 
       {/* Decorative Top Line */}
-      < div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700" />
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700" />
 
       <div className="flex flex-col gap-4 relative z-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
@@ -57,86 +57,33 @@ const TimelineContent = ({ title, organization, period, description, certificate
   );
 };
 
-const TimelineItem = ({ data, index, isLast }) => {
+const TimelineItem = ({ item, index }) => {
   const isEven = index % 2 === 0;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className={`flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-0 ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} mb-16 md:mb-24 relative`}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      className={`relative flex flex-col md:flex-row gap-8 md:gap-0 ${isEven ? 'md:flex-row-reverse' : ''}`}
     >
-      {/* Left Content Side */}
-      <div className={`flex-1 w-full ${isEven ? 'md:pr-12 md:text-right' : 'md:pl-12 md:text-left'}`}>
-        {isEven && (
-          <TimelineContent {...data} isLeft={true} />
-        )}
+      {/* Spacer for Desktop Alignment */}
+      <div className="hidden md:block md:w-1/2" />
+
+      {/* Marker Area */}
+      <div className="absolute left-0 md:left-1/2 md:-translate-x-1/2 flex justify-center w-12 md:w-auto">
+        <div className="w-3 h-3 md:w-4 md:h-4 bg-black border-2 border-white rounded-full z-20 shadow-[0_0_10px_white]" />
       </div>
 
-      {/* Center Marker */}
-      <div className="absolute left-4 md:left-1/2 -translate-x-1/2 top-0 md:relative md:translate-x-0 z-20 flex-shrink-0">
-        <TimelineMarker icon={data.icon} isLast={isLast} />
+      {/* Content Area */}
+      <div className={`pl-16 md:pl-0 w-full md:w-1/2 ${isEven ? 'md:pr-16 md:text-right' : 'md:pl-16 md:text-left'}`}>
+        <TimelineContent {...item} />
       </div>
-
-      {/* Right Content Side (for odd items) */}
-      <div className={`flex-1 w-full ${!isEven ? 'md:pr-12 md:text-right' : 'md:pl-12 md:text-left'} pl-16 md:pl-0`}>
-        {!isEven && (
-          <TimelineContent {...data} isLeft={false} />
-        )}
-        {/* Mobile View for Even Items (Content was rendered on left for desktop, needs to be here for mobile structure if we want strictly vertical on mobile) */}
-        {/* Actually, my structure above handles desktop well. For mobile, both content blocks need to be adaptable. 
-            The current structure: flex-col. Marker is absolute left on mobile.
-            So 'Left Content Side' (desktop left) becomes top block. 'Right Content Side' becomes bottom block?
-            No, for a timeline item, there is only ONE content card. 
-            So I should conditionally render the content based on screen size? 
-            Better approach: Always render content in one div that shifts grid placement.
-            Let's keep it simple: Just one content block per item.
-        */}
-        {isEven && <div className="md:hidden"><TimelineContent {...data} isLeft={true} /></div>}
-      </div>
-      {/* Fix for the double render on mobile for Even items: The first half renders it for desktop left side.
-           On mobile flex-col, that first div is visible.
-           So:
-           Desktop: Even -> Content on Left. Marker Center. Right Empty.
-           Mobile: Even -> Marker Left. Content Right.
-           
-           Let's refactor TimelineItem for cleaner responsive logic.
-       */}
     </motion.div>
   );
 };
 
-const TimelineItemRefined = ({ data, index, isLast }) => {
-  const isEven = index % 2 === 0;
-
-  return (
-    <div className={`relative flex md:justify-center items-stretch md:items-center w-full mb-12 md:mb-24`}>
-      {/* Desktop: Left Side */}
-      <div className={`hidden md:flex w-1/2 justify-end pr-12 ${!isEven ? 'invisible' : ''}`}>
-        <TimelineContent {...data} />
-      </div>
-
-      {/* Spine & Marker */}
-      <div className="relative flex flex-col items-center">
-        {/* Marker */}
-        <TimelineMarker icon={data.icon} isLast={isLast} />
-      </div>
-
-      {/* Desktop: Right Side */}
-      <div className={`w-full md:w-1/2 pl-12 md:pl-12 ${isEven ? 'hidden md:flex md:invisible' : ''}`}>
-        <TimelineContent {...data} />
-      </div>
-
-      {/* Mobile Content Placement - Always on the right of the marker (which is absolute left) or just stacked?
-                My Marker is relative in the flex col.
-             */}
-    </div>
-  );
-}
-
-// Final robust implementation
 const Experience = () => {
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -200,28 +147,7 @@ const Experience = () => {
 
         <div className="space-y-12">
           {timelineItems.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`relative flex flex-col md:flex-row gap-8 md:gap-0 ${index % 2 === 0 ? 'md:flex-row-reverse' : ''}`}
-            >
-              {/* Spacer for Desktop Alignment */}
-              <div className="hidden md:block md:w-1/2" />
-
-              {/* Marker Area */}
-              <div className="absolute left-0 md:left-1/2 md:-translate-x-1/2 flex justify-center w-12 md:w-auto">
-                <div className="w-3 h-3 md:w-4 md:h-4 bg-black border-2 border-white rounded-full z-20 shadow-[0_0_10px_white]" />
-              </div>
-
-              {/* Content Area */}
-              <div className={`pl-16 md:pl-0 w-full md:w-1/2 ${index % 2 === 0 ? 'md:pr-16 md:text-right' : 'md:pl-16 md:text-left'}`}>
-                <TimelineContent {...item} />
-              </div>
-
-            </motion.div>
+            <TimelineItem key={index} item={item} index={index} />
           ))}
         </div>
 
