@@ -166,6 +166,7 @@ const TextPressure = ({
           font-family: '${fontFamily}';
           src: url('${fontUrl}');
           font-style: normal;
+          font-display: swap;
         }
         .stroke span {
           position: relative;
