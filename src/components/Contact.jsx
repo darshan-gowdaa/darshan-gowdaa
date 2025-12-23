@@ -137,7 +137,7 @@ const Contact = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-10 backdrop-blur-md"
+            className="bg-white/5 border border-white/15 rounded-3xl p-8 md:p-10 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.06)]"
           >
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-6">

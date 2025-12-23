@@ -1,7 +1,7 @@
 // src/components/About.jsx
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import profileImage from '../assets/DGpfp.png';
+import profileImage from '../assets/profile-picture.png';
 import TiltedCard from './react-bits/TiltedCard';
 
 const About = () => {
@@ -92,7 +92,7 @@ const About = () => {
           >
 
             {/* Premium Glass Card */}
-            <div className="relative backdrop-blur-2xl bg-white/5 border border-white/10 shadow-2xl rounded-[2rem] p-8 sm:p-10 overflow-hidden group hover:border-white/20 transition-colors duration-500">
+            <div className="relative backdrop-blur-2xl bg-white/5 border border-white/15 shadow-[0_0_20px_rgba(255,255,255,0.06),0_25px_50px_-12px_rgba(0,0,0,0.25)] rounded-[2rem] p-8 sm:p-10 overflow-hidden group hover:border-white/20 transition-colors duration-500">
 
               {/* Internal Shine Effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-30 pointer-events-none" />

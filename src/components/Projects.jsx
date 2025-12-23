@@ -3,11 +3,11 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
 
-import petrolBunkThumbnail from '../assets/petrolbunkmanagementsystem-thumnail.png';
+import petrolBunkThumbnail from '../assets/petrol-bunk-management-thumbnail.png';
 import eduWorldThumbnail from '../assets/eduworld-thumbnail.png';
-import headlinesHubThumbnail from '../assets/headlinesHub-thumnail.png';
-import loginDashboardThumbnail from '../assets/login-dashboard.png';
-import zapierCloneThumbnail from '../assets/zapier_clone-thumnail.png';
+import headlinesHubThumbnail from '../assets/headlines-hub-thumbnail.png';
+import loginDashboardThumbnail from '../assets/login-dashboard-thumbnail.png';
+import zapierCloneThumbnail from '../assets/zapier-clone-thumbnail.png';
 import expenseTrackerThumbnail from '../assets/expense-tracker-thumbnail.png';
 
 const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, index, isVignette }) => {
@@ -19,7 +19,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, in
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className="group relative h-full flex flex-col"
     >
-      <div className="relative h-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:border-white/30">
+      <div className="relative h-full bg-white/5 backdrop-blur-sm border border-white/15 rounded-3xl overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:border-white/30">
 
         {/* Image Container */}
         <div className="relative aspect-video overflow-hidden">
@@ -40,7 +40,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, in
                 href={githubLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-colors"
+                className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-colors cursor-pointer"
                 title="View Source Code"
               >
                 <FaGithub size={20} />
@@ -53,7 +53,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, in
                 href={liveLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-colors"
+                className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-colors cursor-pointer"
                 title="View Live Demo"
               >
                 <FaExternalLinkAlt size={20} />

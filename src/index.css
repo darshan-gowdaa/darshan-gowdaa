@@ -18,9 +18,24 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Mobile Touch Optimization */
+/* Mobile Touch Optimization & Cursor Control */
 * {
   -webkit-tap-highlight-color: transparent;
+  cursor: default;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection in form inputs */
+input,
+textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  cursor: text;
 }
 
 /* Enable hover effects on touch via :active */
@@ -44,6 +59,17 @@ h4,
 h5,
 h6 {
   font-family: var(--font-heading);
+}
+
+/* Global Cursor Styles for Interactive Elements */
+a,
+button,
+[role="button"],
+[onclick],
+input[type="submit"],
+input[type="button"],
+.cursor-pointer {
+  cursor: pointer;
 }
 
 /* Custom Scrollbar */
@@ -72,27 +98,32 @@ html {
 /* Premium Glass Heading Pill */
 .glass-heading {
   display: inline-block;
-  padding: 0.75rem 2rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.875rem 2.5rem;
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow:
-    0 0 25px rgba(255, 255, 255, 0.2),
-    0 0 50px rgba(255, 255, 255, 0.1),
-    inset 0 0 20px rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+    0 0 30px rgba(255, 255, 255, 0.12),
+    0 0 60px rgba(255, 255, 255, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 9999px;
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .glass-heading:hover {
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.4);
   box-shadow:
-    0 0 20px rgba(255, 255, 255, 0.5),
-    0 0 35px rgba(255, 255, 255, 0.25),
-    inset 0 0 15px rgba(255, 255, 255, 0.15);
+    0 0 40px rgba(255, 255, 255, 0.2),
+    0 0 80px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .glass-heading::before {
@@ -100,19 +131,19 @@ html {
   position: absolute;
   top: 0;
   left: -100%;
-  width: 50%;
+  width: 60%;
   height: 100%;
-  background: linear-gradient(to right,
+  background: linear-gradient(90deg,
       transparent,
-      rgba(255, 255, 255, 0.2),
+      rgba(255, 255, 255, 0.15),
       transparent);
-  transform: skewX(-25deg);
-  transition: 0.5s;
+  transform: skewX(-20deg);
+  transition: 0.6s;
 }
 
 .glass-heading:hover::before {
-  left: 150%;
-  transition: 0.7s;
+  left: 160%;
+  transition: 0.8s;
 }
 
 /* Liquid Glass Cards (Shared) */
@@ -120,8 +151,10 @@ html {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 8px 32px 0 rgba(0, 0, 0, 0.37),
+    0 0 20px rgba(255, 255, 255, 0.06);
 }
 
 .liquid-glass-shine {
@@ -164,6 +197,7 @@ html {
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .liquid-glass-icon:hover {
@@ -176,6 +210,7 @@ html {
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(5px);
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.08);
+  cursor: pointer;
 }
 
 .liquid-glass-badge:hover {
@@ -254,6 +289,7 @@ html {
     0 0 10px rgba(255, 255, 255, 0.1),
     inset 0 0 10px rgba(255, 255, 255, 0.05);
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .glass-btn:hover {
