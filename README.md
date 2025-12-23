@@ -59,7 +59,8 @@
 ![about_section](https://github.com/user-attachments/assets/2f155c1c-0781-4116-a979-8d1dbafff12a)
 ![skills_section](https://github.com/user-attachments/assets/67c038b2-5330-4dd0-a908-546f54f8ef9b)
 ![projects_section](https://github.com/user-attachments/assets/8f6c6871-8fcc-4d20-a8fe-9007fb519ed8)
-<img width="1339" height="876" alt="image" src="https://github.com/user-attachments/assets/d88805f9-3195-44be-8e28-7a3c0f994981" />
-<img width="1529" height="958" alt="image" src="https://github.com/user-attachments/assets/1501e09c-d3a0-4d81-b98e-0f3bafeb0423" />
+![certifications_section](https://github.com/user-attachments/assets/eaeb59fb-feef-4562-9c7e-db10ddeece99)
+![contact_section](https://github.com/user-attachments/assets/d369ec72-1324-4a23-aecc-2966c60e87d6)
+
 
 
