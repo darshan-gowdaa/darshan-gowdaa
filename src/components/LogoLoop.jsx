@@ -68,13 +68,20 @@ const useImageLoader = (seqRef, onLoad, dependencies) => {
     }, [onLoad, seqRef, dependencies]);
 };
 
-const useAnimationLoop = (trackRef, targetVelocity, seqWidth, seqHeight, isHovered, hoverSpeed, isVertical) => {
+const useAnimationLoop = (trackRef, targetVelocity, seqWidth, seqHeight, isHovered, hoverSpeed, isVertical, isDragging, dragVelocity) => {
     const rafRef = useRef(null);
     const lastTimestampRef = useRef(null);
     const offsetRef = useRef(0);
     // Init with target to avoid ramp-up if starting from 0
     const velocityRef = useRef(targetVelocity);
     const initializedRef = useRef(false);
+
+    // Expose offsetRef for drag manipulation
+    useEffect(() => {
+        if (trackRef.current) {
+            trackRef.current._offsetRef = offsetRef;
+        }
+    }, [trackRef]);
 
     useEffect(() => {
         const track = trackRef.current;
@@ -119,12 +126,23 @@ const useAnimationLoop = (trackRef, targetVelocity, seqWidth, seqHeight, isHover
             const deltaTime = Math.min(0.1, Math.max(0, timestamp - lastTimestampRef.current) / 1000);
             lastTimestampRef.current = timestamp;
 
-            const target = isHovered && hoverSpeed !== undefined ? hoverSpeed : targetVelocity;
+            // During drag, use drag velocity; otherwise use normal target
+            let target;
+            if (isDragging) {
+                target = 0; // Stop auto-scroll during drag
+            } else if (dragVelocity !== 0) {
+                // Apply momentum after drag release
+                target = dragVelocity;
+            } else if (isHovered && hoverSpeed !== undefined) {
+                target = hoverSpeed;
+            } else {
+                target = targetVelocity;
+            }
 
             const easingFactor = 1 - Math.exp(-deltaTime / ANIMATION_CONFIG.SMOOTH_TAU);
             velocityRef.current += (target - velocityRef.current) * easingFactor;
 
-            if (seqSize > 0) {
+            if (seqSize > 0 && !isDragging) {
                 let nextOffset = offsetRef.current + velocityRef.current * deltaTime;
                 nextOffset = ((nextOffset % seqSize) + seqSize) % seqSize;
                 offsetRef.current = nextOffset;
@@ -147,7 +165,7 @@ const useAnimationLoop = (trackRef, targetVelocity, seqWidth, seqHeight, isHover
             }
             lastTimestampRef.current = null;
         };
-    }, [targetVelocity, seqWidth, seqHeight, isHovered, hoverSpeed, isVertical, trackRef]);
+    }, [targetVelocity, seqWidth, seqHeight, isHovered, hoverSpeed, isVertical, trackRef, isDragging, dragVelocity]);
 };
 
 export const LogoLoop = memo(
@@ -176,6 +194,14 @@ export const LogoLoop = memo(
         const [seqHeight, setSeqHeight] = useState(0);
         const [copyCount, setCopyCount] = useState(ANIMATION_CONFIG.MIN_COPIES);
         const [isHovered, setIsHovered] = useState(false);
+        const [isDragging, setIsDragging] = useState(false);
+        const [dragVelocity, setDragVelocity] = useState(0);
+
+        // Drag tracking refs
+        const dragStartRef = useRef({ x: 0, y: 0 });
+        const lastDragPosRef = useRef({ x: 0, y: 0 });
+        const lastDragTimeRef = useRef(0);
+        const dragVelocityRef = useRef(0);
 
         const effectiveHoverSpeed = useMemo(() => {
             if (hoverSpeed !== undefined) return hoverSpeed;
@@ -227,7 +253,104 @@ export const LogoLoop = memo(
 
         useImageLoader(seqRef, updateDimensions, [logos, gap, logoHeight, isVertical]);
 
-        useAnimationLoop(trackRef, targetVelocity, seqWidth, seqHeight, isHovered, effectiveHoverSpeed, isVertical);
+        useAnimationLoop(trackRef, targetVelocity, seqWidth, seqHeight, isHovered, effectiveHoverSpeed, isVertical, isDragging, dragVelocity);
+
+        // Drag handlers
+        const handleDragStart = useCallback((clientX, clientY) => {
+            setIsDragging(true);
+            setDragVelocity(0);
+            dragStartRef.current = { x: clientX, y: clientY };
+            lastDragPosRef.current = { x: clientX, y: clientY };
+            lastDragTimeRef.current = Date.now();
+            dragVelocityRef.current = 0;
+        }, []);
+
+        const handleDragMove = useCallback((clientX, clientY) => {
+            if (!isDragging) return;
+
+            const track = trackRef.current;
+            if (!track || !track._offsetRef) return;
+
+            const currentTime = Date.now();
+            const deltaTime = Math.max(1, currentTime - lastDragTimeRef.current) / 1000;
+
+            const delta = isVertical
+                ? clientY - lastDragPosRef.current.y
+                : clientX - lastDragPosRef.current.x;
+
+            // Update velocity for momentum
+            dragVelocityRef.current = -delta / deltaTime;
+
+            // Update offset directly
+            const seqSize = isVertical ? seqHeight : seqWidth;
+            if (seqSize > 0) {
+                let newOffset = track._offsetRef.current - delta;
+                newOffset = ((newOffset % seqSize) + seqSize) % seqSize;
+                track._offsetRef.current = newOffset;
+
+                const transformValue = isVertical
+                    ? `translate3d(0, ${-newOffset}px, 0)`
+                    : `translate3d(${-newOffset}px, 0, 0)`;
+                track.style.transform = transformValue;
+            }
+
+            lastDragPosRef.current = { x: clientX, y: clientY };
+            lastDragTimeRef.current = currentTime;
+        }, [isDragging, isVertical, seqWidth, seqHeight, trackRef]);
+
+        const handleDragEnd = useCallback(() => {
+            if (!isDragging) return;
+            setIsDragging(false);
+
+            // Apply momentum - clamp velocity to reasonable range
+            const momentumVelocity = Math.max(-500, Math.min(500, dragVelocityRef.current));
+            setDragVelocity(momentumVelocity);
+
+            // Gradually return to normal auto-scroll
+            setTimeout(() => setDragVelocity(0), 1000);
+        }, [isDragging]);
+
+        // Mouse event handlers
+        const handleMouseDown = useCallback((e) => {
+            e.preventDefault();
+            handleDragStart(e.clientX, e.clientY);
+        }, [handleDragStart]);
+
+        useEffect(() => {
+            if (!isDragging) return;
+
+            const handleMouseMove = (e) => {
+                handleDragMove(e.clientX, e.clientY);
+            };
+
+            const handleMouseUp = () => {
+                handleDragEnd();
+            };
+
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+
+            return () => {
+                window.removeEventListener('mousemove', handleMouseMove);
+                window.removeEventListener('mouseup', handleMouseUp);
+            };
+        }, [isDragging, handleDragMove, handleDragEnd]);
+
+        // Touch event handlers
+        const handleTouchStart = useCallback((e) => {
+            const touch = e.touches[0];
+            handleDragStart(touch.clientX, touch.clientY);
+        }, [handleDragStart]);
+
+        const handleTouchMove = useCallback((e) => {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            handleDragMove(touch.clientX, touch.clientY);
+        }, [isDragging, handleDragMove]);
+
+        const handleTouchEnd = useCallback(() => {
+            handleDragEnd();
+        }, [handleDragEnd]);
 
         const cssVariables = useMemo(
             () => ({
@@ -248,9 +371,11 @@ export const LogoLoop = memo(
                     '[--logoloop-fadeColorAuto:#ffffff]',
                     'dark:[--logoloop-fadeColorAuto:#0b0b0b]',
                     scaleOnHover && 'py-[calc(var(--logoloop-logoHeight)*0.1)]',
+                    isDragging ? 'cursor-grabbing' : 'cursor-grab',
+                    'select-none touch-none',
                     className
                 ),
-            [isVertical, scaleOnHover, className]
+            [isVertical, scaleOnHover, isDragging, className]
         );
 
         const handleMouseEnter = useCallback(() => {
@@ -376,10 +501,11 @@ export const LogoLoop = memo(
                         ? undefined
                         : toCssLength(width)
                     : (toCssLength(width) ?? '100%'),
+                cursor: isDragging ? 'grabbing' : 'grab',
                 ...cssVariables,
                 ...style
             }),
-            [width, cssVariables, style, isVertical]
+            [width, cssVariables, style, isVertical, isDragging]
         );
 
         return (
@@ -391,6 +517,10 @@ export const LogoLoop = memo(
                 aria-label={ariaLabel}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
+                onMouseDown={handleMouseDown}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
             >
                 {fadeOut && (
                     <>
