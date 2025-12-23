@@ -166,6 +166,10 @@ export default function TiltedCard({
                         width: imageWidth,
                         height: imageHeight
                     }}
+                    width={350}
+                    height={350}
+                    loading="lazy"
+                    decoding="async"
                     draggable={false}
                 />
 
