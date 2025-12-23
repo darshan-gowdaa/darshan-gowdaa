@@ -1,8 +1,4 @@
-
-
-
-<h2 align="center">Portfolio Website - <br> https://darshan-gowdaa.github.io/darshan-gowdaa/ </h2>
-
+<h2 align="center">Portfolio Website - <br> https://darshan-gowdaa.vercel.app/ </h2>
 
 ###
 
@@ -59,31 +55,11 @@
 
 ###
 
-<div align="center">
-  <a href="https://www.linkedin.com/in/darshan-gowda-g-s/" target="_blank">
-    <img src="https://raw.githubusercontent.com/maurodesouza/profile-readme-generator/master/src/assets/icons/social/linkedin/default.svg" width="37" height="25" alt="linkedin logo"  />
-  </a>
-  <a href="https://www.instagram.com/_darshangowdaa/" target="_blank">
-    <img src="https://raw.githubusercontent.com/maurodesouza/profile-readme-generator/master/src/assets/icons/social/instagram/default.svg" width="37" height="25" alt="instagram logo"  />
-  </a>
-  <a href="mailto:darshangowdaa223@gmail.com?subject=I%20Just%20Viewed%20your%20Github%20Profile" target="_blank">
-    <img src="https://raw.githubusercontent.com/maurodesouza/profile-readme-generator/master/src/assets/icons/social/gmail/default.svg" width="37" height="25" alt="gmail logo"  />
-  </a>
-</div>
-
-###
-###
-
-<img width="1919" height="941" alt="image" src="https://github.com/user-attachments/assets/d8d26f73-fad3-4b97-becc-4023f3be391a" />
-
-https://github.com/user-attachments/assets/35eb25c7-8bd2-46a5-88cc-cd0f3230468c
-
-<img width="1861" height="946" alt="image" src="https://github.com/user-attachments/assets/cac8a69f-828e-4e2a-b3e7-30259ff15d1d" />
-<img width="1835" height="922" alt="image" src="https://github.com/user-attachments/assets/6db4bbf1-2394-45ca-89d5-788ccf95ee39" />
-<img width="1579" height="944" alt="image" src="https://github.com/user-attachments/assets/24af3f8b-7ad2-49e0-b312-7bf7a39de3bc" />
-
-
-
-
+![hero_section](https://github.com/user-attachments/assets/70ed7398-385d-424b-8d81-58c8e0c21424)
+![about_section](https://github.com/user-attachments/assets/2f155c1c-0781-4116-a979-8d1dbafff12a)
+![skills_section](https://github.com/user-attachments/assets/67c038b2-5330-4dd0-a908-546f54f8ef9b)
+![projects_section](https://github.com/user-attachments/assets/8f6c6871-8fcc-4d20-a8fe-9007fb519ed8)
+<img width="1339" height="876" alt="image" src="https://github.com/user-attachments/assets/d88805f9-3195-44be-8e28-7a3c0f994981" />
+<img width="1529" height="958" alt="image" src="https://github.com/user-attachments/assets/1501e09c-d3a0-4d81-b98e-0f3bafeb0423" />
 
 
