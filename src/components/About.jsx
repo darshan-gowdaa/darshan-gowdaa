@@ -1,7 +1,7 @@
 // src/components/About.jsx
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import profileImage from '../assets/profile-picture.png';
+import profileImage from '../assets/profile-picture.avif';
 import TiltedCard from './react-bits/TiltedCard';
 
 const About = () => {
