@@ -170,7 +170,7 @@ const Projects = () => {
       tags: ["MERN Stack", "AI Chatbot", "Management"],
       image: eduWorldThumbnail,
       githubLink: "https://github.com/darshan-gowdaa/eduworld-fullstack",
-      demoVideo: "https://drive.google.com/file/d/17Pq3vrNtKKkriepqy_uWykRUAPAh64ey/",
+      demoVideo: "https://drive.google.com/drive/folders/1hGJpzq83Luf3ZU3eaJoWdDkaDJ_uAF5h?usp=sharing",
     },
     {
       title: "Expense Tracker",
