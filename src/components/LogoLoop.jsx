@@ -1,5 +1,25 @@
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 
+// Mobile detection hook for performance optimizations
+const useIsMobile = () => {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(
+                window.matchMedia('(hover: none) and (pointer: coarse)').matches
+            );
+        };
+        checkMobile();
+        window.matchMedia('(hover: none) and (pointer: coarse)').addEventListener('change', checkMobile);
+        return () => {
+            window.matchMedia('(hover: none) and (pointer: coarse)').removeEventListener('change', checkMobile);
+        };
+    }, []);
+
+    return isMobile;
+};
+
 const ANIMATION_CONFIG = {
     SMOOTH_TAU: 0.1, // Reduced for snappier response
     MIN_COPIES: 2,
@@ -197,11 +217,15 @@ export const LogoLoop = memo(
         const [isDragging, setIsDragging] = useState(false);
         const [dragVelocity, setDragVelocity] = useState(0);
 
+        // Mobile detection for performance optimizations
+        const isMobile = useIsMobile();
+
         // Drag tracking refs
         const dragStartRef = useRef({ x: 0, y: 0 });
         const lastDragPosRef = useRef({ x: 0, y: 0 });
         const lastDragTimeRef = useRef(0);
         const dragVelocityRef = useRef(0);
+        const lastMoveTimeRef = useRef(0); // Throttle ref for mobile
 
         const effectiveHoverSpeed = useMemo(() => {
             if (hoverSpeed !== undefined) return hoverSpeed;
@@ -311,10 +335,12 @@ export const LogoLoop = memo(
         }, [isDragging]);
 
         // Mouse event handlers
+        // Disable drag on mobile to reduce forced reflows (touch is still enabled)
         const handleMouseDown = useCallback((e) => {
+            if (isMobile) return;
             e.preventDefault();
             handleDragStart(e.clientX, e.clientY);
-        }, [handleDragStart]);
+        }, [handleDragStart, isMobile]);
 
         useEffect(() => {
             if (!isDragging) return;
@@ -336,17 +362,25 @@ export const LogoLoop = memo(
             };
         }, [isDragging, handleDragMove, handleDragEnd]);
 
-        // Touch event handlers
+        // Touch event handlers - enabled on mobile with throttling for performance
         const handleTouchStart = useCallback((e) => {
             const touch = e.touches[0];
             handleDragStart(touch.clientX, touch.clientY);
+            lastMoveTimeRef.current = Date.now();
         }, [handleDragStart]);
 
+        // Throttled touch move for mobile performance (60fps = 16ms)
         const handleTouchMove = useCallback((e) => {
             if (!isDragging) return;
+
+            // Throttle updates on mobile to ~60fps to reduce reflows
+            const now = Date.now();
+            if (isMobile && now - lastMoveTimeRef.current < 16) return;
+            lastMoveTimeRef.current = now;
+
             const touch = e.touches[0];
             handleDragMove(touch.clientX, touch.clientY);
-        }, [isDragging, handleDragMove]);
+        }, [isDragging, handleDragMove, isMobile]);
 
         const handleTouchEnd = useCallback(() => {
             handleDragEnd();

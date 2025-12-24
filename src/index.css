@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Raleway:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+/* Fonts loaded asynchronously in index.html to avoid render blocking */
 @import "tailwindcss";
 
 @theme {
@@ -318,4 +318,56 @@ html {
     0 0 20px rgba(255, 255, 255, 0.3),
     inset 0 0 15px rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ===========================================
+   MOBILE PERFORMANCE OPTIMIZATIONS
+   Reduces paint cost, reflows, and main-thread work
+   =========================================== */
+@media (hover: none) and (pointer: coarse) {
+
+  /* Reduce backdrop-filter blur intensity on mobile (major paint cost) */
+  .liquid-glass-card-enhanced,
+  .glass-heading,
+  .liquid-glass-badge {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  /* Simplify box-shadows on mobile to reduce paint complexity */
+  .glass-heading {
+    box-shadow:
+      0 0 15px rgba(255, 255, 255, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-panel {
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.4),
+      0 10px 15px -3px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Disable hover animations on touch devices */
+  .glass-heading:hover::before {
+    left: -100%;
+    transition: none;
+  }
+
+  /* Reduce animation complexity */
+  .animate-spin-slow {
+    animation-duration: 15s;
+  }
+}
+
+/* Content visibility optimization for below-the-fold sections */
+@media (max-width: 768px) {
+
+  #skills,
+  #experience,
+  #projects,
+  #certifications,
+  #contact {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
+  }
 }
