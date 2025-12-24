@@ -1,10 +1,35 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
+// Mobile detection for performance optimization
+const useIsMobile = () => {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+        };
+        checkMobile();
+        window.matchMedia('(hover: none) and (pointer: coarse)').addEventListener('change', checkMobile);
+        return () => {
+            window.matchMedia('(hover: none) and (pointer: coarse)').removeEventListener('change', checkMobile);
+        };
+    }, []);
+
+    return isMobile;
+};
+
+// Spring values - desktop uses full config, mobile uses simplified for performance
 const springValues = {
     damping: 30,
     stiffness: 100,
     mass: 2
+};
+
+const mobileSpringValues = {
+    damping: 40,
+    stiffness: 60,
+    mass: 1
 };
 
 export default function TiltedCard({

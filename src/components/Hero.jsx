@@ -9,6 +9,18 @@ const Hero = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.1 });
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Mobile detection for performance optimization
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+    };
+    checkMobile();
+    const mq = window.matchMedia('(hover: none) and (pointer: coarse)');
+    mq.addEventListener('change', checkMobile);
+    return () => mq.removeEventListener('change', checkMobile);
+  }, []);
 
   // Handle scroll button visibility
   useEffect(() => {
@@ -69,21 +81,21 @@ const Hero = () => {
         className="h-screen w-full relative z-20 overflow-hidden flex items-center justify-center"
         ref={ref}
       >
-        {/* Liquid Ether Background */}
+        {/* Liquid Ether Background - optimized for mobile */}
         <div className="absolute inset-0 z-0">
           <LiquidEther
             colors={['#5227FF', '#FF9FFC', '#B19EEF']}
-            mouseForce={20}
-            cursorSize={100}
+            mouseForce={isMobile ? 12 : 20}
+            cursorSize={isMobile ? 60 : 100}
             isViscous={false}
-            viscous={30}
-            iterationsViscous={32}
-            iterationsPoisson={32}
-            resolution={0.5}
+            viscous={isMobile ? 20 : 30}
+            iterationsViscous={isMobile ? 16 : 32}
+            iterationsPoisson={isMobile ? 16 : 32}
+            resolution={isMobile ? 0.25 : 0.5}
             isBounce={false}
             autoDemo={true}
-            autoSpeed={0.5}
-            autoIntensity={2.2}
+            autoSpeed={isMobile ? 0.3 : 0.5}
+            autoIntensity={isMobile ? 1.5 : 2.2}
             takeoverDuration={0.25}
             autoResumeDelay={1500}
             autoRampDuration={0.6}

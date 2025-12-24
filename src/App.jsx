@@ -1,7 +1,24 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import LiquidEther from './components/react-bits/LiquidEther';
+
+// Mobile detection hook for performance optimization
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+    };
+    checkMobile();
+    const mq = window.matchMedia('(hover: none) and (pointer: coarse)');
+    mq.addEventListener('change', checkMobile);
+    return () => mq.removeEventListener('change', checkMobile);
+  }, []);
+
+  return isMobile;
+};
 
 // Lazy load below-the-fold components for better initial load performance
 const About = lazy(() => import('./components/About'));
@@ -22,21 +39,23 @@ const SectionLoader = () => (
 );
 
 function App() {
+  const isMobile = useIsMobile();
+
   return (
     <div className="bg-gradient-to-br from-[#050505] via-[#050505] to-[#050505] text-white min-h-screen overflow-x-hidden relative">
 
-      {/* Side Liquid Effect (Civil/Silver) */}
+      {/* Side Liquid Effect - optimized for mobile */}
       <div className="fixed inset-0 h-screen w-full opacity-30 pointer-events-none z-[1] mix-blend-screen">
         <div className="absolute inset-0">
           <LiquidEther
-            colors={['#FFFFFF', '#C0C0C0', '#808080']} // Brighter Silver: White, Silver, Gray
-            mouseForce={30}
-            cursorSize={120}
+            colors={['#FFFFFF', '#C0C0C0', '#808080']}
+            mouseForce={isMobile ? 15 : 30}
+            cursorSize={isMobile ? 80 : 120}
             isViscous={false}
             viscous={10}
-            iterationsViscous={20}
-            iterationsPoisson={20}
-            resolution={0.5}
+            iterationsViscous={isMobile ? 10 : 20}
+            iterationsPoisson={isMobile ? 10 : 20}
+            resolution={isMobile ? 0.25 : 0.5}
             isBounce={false}
             autoDemo={false}
             autoSpeed={0}

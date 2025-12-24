@@ -1,5 +1,5 @@
 // src/components/Skills.jsx
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   FaHtml5, FaReact, FaNodeJs, FaDatabase,
@@ -11,9 +11,27 @@ import {
 } from 'react-icons/si';
 import LogoLoop from './LogoLoop';
 
+// Mobile detection for performance optimization
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+    };
+    checkMobile();
+    window.matchMedia('(hover: none) and (pointer: coarse)').addEventListener('change', checkMobile);
+    return () => {
+      window.matchMedia('(hover: none) and (pointer: coarse)').removeEventListener('change', checkMobile);
+    };
+  }, []);
+
+  return isMobile;
+};
+
 const Skills = () => {
   const containerRef = useRef(null);
-
+  const isMobile = useIsMobile();
   const allSkills = [
     { node: <FaReact />, title: 'React', href: "https://react.dev" },
     { node: <SiJavascript />, title: 'JavaScript', href: "https://developer.mozilla.org/en-US/docs/Web/JavaScript" },
@@ -67,16 +85,16 @@ const Skills = () => {
       </div>
 
       <div className="w-full relative">
-        {/* Gradient Fade Masks */}
-        <div className="absolute left-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+        {/* Gradient Fade Masks - matches page background */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
 
         <LogoLoop
           logos={allSkills}
-          speed={100}
+          speed={isMobile ? 40 : 100}
           direction="left"
-          logoHeight={140}
-          gap={40}
+          logoHeight={isMobile ? 100 : 140}
+          gap={isMobile ? 24 : 40}
           pauseOnHover={false}
           renderItem={renderSkillItem}
           scaleOnHover={false}

@@ -1,7 +1,7 @@
 // src/components/Projects.jsx
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaGithub, FaExternalLinkAlt, FaPlay } from 'react-icons/fa';
 import LazyImage from './ui/LazyImage';
 
 import petrolBunkThumbnail from '../assets/petrol-bunk-management-thumbnail.avif';
@@ -11,7 +11,13 @@ import loginDashboardThumbnail from '../assets/login-dashboard-thumbnail.avif';
 import zapierCloneThumbnail from '../assets/zapier-clone-thumbnail.avif';
 import expenseTrackerThumbnail from '../assets/expense-tracker-thumbnail.avif';
 
-const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, index, isVignette }) => {
+const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, githubLink, index, isVignette }) => {
+  // Prefer liveLink over demoVideo
+  const actionLink = liveLink || demoVideo;
+  const isLiveLink = !!liveLink;
+  const actionLabel = isLiveLink ? 'Live Demo' : 'Demo Video';
+  const ActionIcon = isLiveLink ? FaExternalLinkAlt : FaPlay;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -51,24 +57,24 @@ const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, in
                 <FaGithub size={20} />
               </motion.a>
             )}
-            {liveLink && (
+            {actionLink && (
               <motion.a
                 whileHover={{ backgroundColor: "rgba(255, 255, 255, 1)", color: "#000" }}
                 whileTap={{ scale: 0.95 }}
-                href={liveLink}
+                href={actionLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-colors cursor-pointer"
-                title="View Live Demo"
+                title={actionLabel}
               >
-                <FaExternalLinkAlt size={20} />
+                <ActionIcon size={isLiveLink ? 20 : 18} />
               </motion.a>
             )}
           </div>
 
           {/* Mobile Action Buttons - Always visible */}
-          {(githubLink || liveLink) && (
-            <div className="absolute bottom-0 left-0 right-0 z-20 md:hidden flex items-center justify-center gap-3 p-3 bg-gradient-to-t from-black/90 via-black/70 to-transparent backdrop-blur-sm">
+          {(githubLink || actionLink) && (
+            <div className="absolute bottom-0 left-0 right-0 z-20 md:hidden flex items-center justify-center gap-3 p-4 pt-12 bg-gradient-to-t from-black via-black/70 to-transparent">
               {githubLink && (
                 <a
                   href={githubLink}
@@ -80,15 +86,15 @@ const ProjectCard = ({ title, description, tags, image, liveLink, githubLink, in
                   <span>Code</span>
                 </a>
               )}
-              {liveLink && (
+              {actionLink && (
                 <a
-                  href={liveLink}
+                  href={actionLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 text-black text-sm font-medium border border-white/20 transition-all active:scale-95 active:bg-white"
                 >
-                  <FaExternalLinkAlt size={14} />
-                  <span>Live Demo</span>
+                  <ActionIcon size={isLiveLink ? 14 : 12} />
+                  <span>{isLiveLink ? 'Live' : 'Demo'}</span>
                 </a>
               )}
             </div>
@@ -132,6 +138,7 @@ const Projects = () => {
       tags: ["MERN Stack", "Dashboard", "Analytics"],
       image: petrolBunkThumbnail,
       githubLink: "https://github.com/darshan-gowdaa/petrol-bunk-management-system",
+      demoVideo: "https://drive.google.com/file/d/17Pq3vrNtKKkriepqy_uWykRUAPAh64ey/",
     },
     {
       title: "Headlines Hub",
@@ -163,6 +170,7 @@ const Projects = () => {
       tags: ["MERN Stack", "AI Chatbot", "Management"],
       image: eduWorldThumbnail,
       githubLink: "https://github.com/darshan-gowdaa/eduworld-fullstack",
+      demoVideo: "https://drive.google.com/file/d/17Pq3vrNtKKkriepqy_uWykRUAPAh64ey/",
     },
     {
       title: "Expense Tracker",
@@ -170,7 +178,7 @@ const Projects = () => {
       tags: ["PHP", "MySQL", "JavaScript", "Bootstrap"],
       image: expenseTrackerThumbnail,
       githubLink: "https://github.com/darshan-gowdaa/expense-tracker",
-      liveLink: "https://drive.google.com/file/d/1zOWsi7jQCVbzGqryi4eOY65X6LACZpXT/view?usp=drivesdk",
+      demoVideo: "https://drive.google.com/file/d/1zOWsi7jQCVbzGqryi4eOY65X6LACZpXT/view?usp=drivesdk",
       isVignette: true,
     },
   ], []);
