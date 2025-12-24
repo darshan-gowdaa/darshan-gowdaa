@@ -73,7 +73,7 @@ const Skills = () => {
 
         <LogoLoop
           logos={allSkills}
-          speed={50}
+          speed={100}
           direction="left"
           logoHeight={140}
           gap={40}

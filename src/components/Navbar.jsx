@@ -13,8 +13,6 @@ const Navbar = () => {
   }, [activeSection]);
 
   useEffect(() => {
-    const sections = links.map(link => document.getElementById(link.toLowerCase()));
-
     const observerOptions = {
       root: null,
       rootMargin: '-20% 0px -60% 0px',
@@ -32,15 +30,32 @@ const Navbar = () => {
     };
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
-    sections.forEach(section => {
-      if (section) observer.observe(section);
+
+    // Function to observe all available sections
+    const observeSections = () => {
+      const sections = links.map(link => document.getElementById(link.toLowerCase()));
+      sections.forEach(section => {
+        if (section) observer.observe(section);
+      });
+    };
+
+    // Initial observation
+    observeSections();
+
+    // Use MutationObserver to detect when lazy-loaded sections appear
+    const mutationObserver = new MutationObserver(() => {
+      observeSections();
+    });
+
+    // Watch for new sections being added to the DOM
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true
     });
 
     return () => {
-      sections.forEach(section => {
-        if (section) observer.unobserve(section);
-      });
       observer.disconnect();
+      mutationObserver.disconnect();
     };
   }, []);
 
