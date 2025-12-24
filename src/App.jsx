@@ -1,4 +1,6 @@
 import React, { Suspense, lazy, useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import LiquidEther from './components/react-bits/LiquidEther';
@@ -92,6 +94,9 @@ function App() {
         </Suspense>
       </main>
 
+      {/* Vercel Analytics & Speed Insights */}
+      <Analytics />
+      <SpeedInsights />
     </div>
   );
 }
