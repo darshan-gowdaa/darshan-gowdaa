@@ -1,5 +1,1 @@
-touch CNAME          # Terminal: create file
-echo "darshan-gowdaa.tech" > CNAME
-git add CNAME
-git commit -m "Add custom domain CNAME"
-git push
+darshan-gowdaa.tech
