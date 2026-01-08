@@ -1,7 +1,7 @@
-// src/components/Contact.jsx
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FaMapMarkerAlt, FaEnvelope, FaGithub, FaLinkedin, FaArrowRight, FaPaperPlane } from 'react-icons/fa';
+import React, { useState, useRef } from 'react';
+import { useAnimations } from '../hooks/useAnimations';
+import { FaMapMarkerAlt, FaEnvelope, FaGithub, FaLinkedin, FaPaperPlane, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import emailjs from '@emailjs/browser';
 import { NeonButton } from './ui/NeonButton';
 
 const InputField = ({ label, name, type = "text", placeholder, value, onChange, isTextarea, required }) => {
@@ -34,23 +34,78 @@ const InputField = ({ label, name, type = "text", placeholder, value, onChange, 
 };
 
 const Contact = () => {
+  const containerRef = useRef(null);
+  const toastRef = useRef(null);
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState(null);
+  const [toast, setToast] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => {
+      animateToastExit(() => setToast(null));
+    }, 5000);
+  };
+
+  const { animateContact } = useAnimations();
+  const { animateToastExit } = animateContact(containerRef, toastRef, toast);
+
+  const validateForm = () => {
+    if (!formData.name.trim()) return "Name is required";
+    if (formData.name.length < 2) return "Name must be at least 2 characters";
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) return "Email is required";
+    if (!emailRegex.test(formData.email)) return "Please enter a valid email address";
+    
+    if (!formData.subject.trim()) return "Subject is required";
+    if (formData.subject.length < 5) return "Subject must be at least 5 characters";
+    
+    if (!formData.message.trim()) return "Message is required";
+    if (formData.message.length < 10) return "Message must be at least 10 characters";
+    
+    return null;
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
+    setToast(null);
+
+    const validationError = validateForm();
+    if (validationError) {
+      showToast('error', validationError);
+      return;
+    }
+
     setIsSubmitting(true);
-    // Simulate submission
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setStatus('success');
-    setIsSubmitting(false);
-    setFormData({ name: '', email: '', subject: '', message: '' });
-    setTimeout(() => setStatus(null), 5000);
+
+    const SERVICE_ID = 'service_98r9sx9';
+    const TEMPLATE_ID = 'template_du3zi93';
+    const PUBLIC_KEY = 'HQZF5laClkbYFkSXf';
+
+    const templateParams = {
+      name: formData.name,
+      email: formData.email,
+      title: formData.subject,
+      message: `Name: ${formData.name}\nEmail: ${formData.email}\nSubject: ${formData.subject}\n\nMessage:\n${formData.message}`,
+      time: new Date().toLocaleString(),
+    };
+
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
+      .then(() => {
+        showToast('success', 'Message sent successfully!');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      }, (error) => {
+        console.error(error.text);
+        showToast('error', 'Failed to send message. Please try again later.');
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   const contactDetails = [
@@ -64,34 +119,34 @@ const Contact = () => {
   ];
 
   return (
-    <section id="contact" className="py-24 relative overflow-hidden min-h-screen flex items-center justify-center">
-      {/* Background Elements */}
-      <div className="absolute left-0 bottom-0 w-[600px] h-[600px] bg-white/5 rounded-full blur-[150px] -translate-x-1/2 translate-y-1/2 pointer-events-none" />
+    <section ref={containerRef} id="contact" className="py-24 relative overflow-hidden">
+      {toast && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4 pointer-events-none">
+          <div
+            ref={toastRef}
+            className={`pointer-events-auto flex items-center gap-3 p-4 rounded-xl border backdrop-blur-xl shadow-2xl ${
+              toast.type === 'success' 
+                ? 'bg-green-500/10 border-green-500/20 text-green-400' 
+                : 'bg-red-500/10 border-red-500/20 text-red-400'
+            }`}
+          >
+            {toast.type === 'success' ? <FaCheckCircle size={20} /> : <FaExclamationCircle size={20} />}
+            <span className="font-medium text-sm">{toast.message}</span>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-20"
-        >
-
-          <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">
+        <div className="contact-header text-center mb-16">
+          <h2 className="glass-heading text-4xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">
             Contact Me
           </h2>
-        </motion.div>
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-start">
-
-          {/* Left Column: Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h3 className="text-3xl font-bold text-white mb-6 font-heading">Let's collaborate</h3>
-            <p className="text-gray-400 leading-relaxed mb-12 text-lg">
+        <div className="contact-content grid md:grid-cols-2 gap-10 md:gap-24 items-start">
+          <div className="contact-left">
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 font-heading">Let's collaborate</h3>
+            <p className="text-gray-400 leading-relaxed mb-12 text-base md:text-lg">
               I'm currently looking for new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!
             </p>
 
@@ -104,9 +159,9 @@ const Contact = () => {
                   <div>
                     <span className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">{item.label}</span>
                     {item.href ? (
-                      <a href={item.href} className="text-xl text-white hover:text-gray-300 transition-colors font-medium">{item.value}</a>
+                      <a href={item.href} className="text-lg md:text-xl text-white hover:text-gray-300 transition-colors font-medium break-all">{item.value}</a>
                     ) : (
-                      <span className="text-xl text-white font-medium">{item.value}</span>
+                      <span className="text-lg md:text-xl text-white font-medium">{item.value}</span>
                     )}
                   </div>
                 </div>
@@ -129,23 +184,16 @@ const Contact = () => {
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Right Column: Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white/5 border border-white/15 rounded-3xl p-8 md:p-10 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.06)]"
-          >
+          <div className="contact-right bg-white/5 border border-white/15 rounded-3xl p-6 md:p-10 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.06)]">
             <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-2 gap-6">
-                <InputField label="Name" name="name" value={formData.name} onChange={handleChange} required />
-                <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InputField label="Name" name="name" value={formData.name} onChange={handleChange} />
+                <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} />
               </div>
-              <InputField label="Subject" name="subject" value={formData.subject} onChange={handleChange} required />
-              <InputField label="Message" name="message" isTextarea value={formData.message} onChange={handleChange} required />
+              <InputField label="Subject" name="subject" value={formData.subject} onChange={handleChange} />
+              <InputField label="Message" name="message" isTextarea value={formData.message} onChange={handleChange} />
 
               <NeonButton
                 type="submit"
@@ -159,18 +207,8 @@ const Contact = () => {
                   </>
                 )}
               </NeonButton>
-
-              {status === 'success' && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-6 p-4 bg-green-500/20 border border-green-500/30 rounded-xl text-green-400 text-sm text-center"
-                >
-                  Message sent successfully!
-                </motion.div>
-              )}
             </form>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

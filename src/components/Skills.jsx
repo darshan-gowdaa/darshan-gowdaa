@@ -1,6 +1,6 @@
 // src/components/Skills.jsx
 import { useRef, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useAnimations } from '../hooks/useAnimations';
 import {
   FaHtml5, FaReact, FaNodeJs, FaDatabase,
   FaGitAlt, FaAws, FaBootstrap, FaChartLine
@@ -11,27 +11,25 @@ import {
 } from 'react-icons/si';
 import LogoLoop from './LogoLoop';
 
-// Mobile detection for performance optimization
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
-
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
-    };
-    checkMobile();
-    window.matchMedia('(hover: none) and (pointer: coarse)').addEventListener('change', checkMobile);
-    return () => {
-      window.matchMedia('(hover: none) and (pointer: coarse)').removeEventListener('change', checkMobile);
-    };
+    const check = () => setIsMobile(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+    check();
+    const mq = window.matchMedia('(hover: none) and (pointer: coarse)');
+    mq.addEventListener('change', check);
+    return () => mq.removeEventListener('change', check);
   }, []);
-
   return isMobile;
 };
 
 const Skills = () => {
   const containerRef = useRef(null);
   const isMobile = useIsMobile();
+
+  const { animateSkills } = useAnimations();
+  animateSkills(containerRef);
+
   const allSkills = [
     { node: <FaReact />, title: 'React', href: "https://react.dev" },
     { node: <SiJavascript />, title: 'JavaScript', href: "https://developer.mozilla.org/en-US/docs/Web/JavaScript" },
@@ -50,42 +48,42 @@ const Skills = () => {
     { node: <SiDocker />, title: 'Docker', href: "https://www.docker.com" }
   ];
 
-  // Custom renderer for LogoLoop to ensure monochrome styling
   const renderSkillItem = (item, key) => (
     <div key={key} className="flex flex-col items-center justify-center gap-4 group/skill p-4">
-      <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-colors duration-300 group-hover/skill:shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover/skill:border-white/40 group-hover/skill:bg-white/10">
-        <div className="text-5xl md:text-6xl text-gray-400 transition-colors duration-300 group-hover/skill:text-white drop-shadow-lg">
+      <div className={`w-24 h-24 md:w-32 md:h-32 rounded-3xl backdrop-blur-md flex items-center justify-center transition-colors duration-300
+        ${isMobile 
+          ? 'bg-white/10 border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.15)]' 
+          : 'bg-white/5 border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)] group-hover/skill:shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover/skill:border-white/40 group-hover/skill:bg-white/10'
+        }`}>
+        <div className={`text-5xl md:text-6xl transition-colors duration-300 drop-shadow-lg
+          ${isMobile 
+            ? 'text-white' 
+            : 'text-gray-400 group-hover/skill:text-white'
+          }`}>
           {item.node}
         </div>
       </div>
-      <span className="text-sm md:text-base font-medium text-gray-500 uppercase tracking-widest group-hover/skill:text-white transition-colors duration-300">
+      <span className={`text-sm md:text-base font-medium uppercase tracking-widest transition-colors duration-300
+        ${isMobile 
+          ? 'text-white' 
+          : 'text-gray-500 group-hover/skill:text-white'
+        }`}>
         {item.title}
       </span>
     </div>
   );
 
   return (
-    <section
-      id="skills"
-      className="py-24 relative overflow-hidden"
-      ref={containerRef}
-    >
-      <div className="max-w-7xl mx-auto mb-20 relative z-10 px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-
+    <section id="skills" className="py-24 relative overflow-hidden" ref={containerRef}>
+      <div className="max-w-7xl mx-auto mb-16 relative z-10 px-6">
+        <div className="skills-header text-center">
           <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">
             Skills
           </h2>
-        </motion.div>
+        </div>
       </div>
 
-      <div className="w-full relative">
-        {/* Gradient Fade Masks - matches page background */}
+      <div className="skills-loop w-full relative">
         <div className="absolute left-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
 

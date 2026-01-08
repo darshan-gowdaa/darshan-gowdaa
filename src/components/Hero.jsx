@@ -1,13 +1,14 @@
 import React, { memo, useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { FaGithub, FaLinkedin, FaEnvelope, FaArrowUp, FaArrowRight } from 'react-icons/fa';
-import { motion, useInView } from 'framer-motion';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { useAnimations } from '../hooks/useAnimations';
 import LiquidEther from './react-bits/LiquidEther';
 import TextPressure from './react-bits/TextPressure';
 import { NeonButton } from './ui/NeonButton';
 
 const Hero = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
+  const containerRef = useRef(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -41,26 +42,9 @@ const Hero = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { type: "spring", stiffness: 280, damping: 22 }
-    }
-  };
+  // Initialize animations
+  const { animateHero } = useAnimations();
+  animateHero(containerRef);
 
   return (
     <>
@@ -79,9 +63,9 @@ const Hero = () => {
       <div
         id="home"
         className="h-screen w-full relative z-20 overflow-hidden flex items-center justify-center"
-        ref={ref}
+        ref={containerRef}
       >
-        {/* Liquid Ether Background - optimized for mobile */}
+        {/* Liquid Ether - colorful effect for Hero section */}
         <div className="absolute inset-0 z-0">
           <LiquidEther
             colors={['#5227FF', '#FF9FFC', '#B19EEF']}
@@ -97,26 +81,22 @@ const Hero = () => {
             autoSpeed={isMobile ? 0.3 : 0.5}
             autoIntensity={isMobile ? 1.5 : 2.2}
             takeoverDuration={0.25}
-            autoResumeDelay={1500}
+            autoResumeDelay={2500}
             autoRampDuration={0.6}
           />
         </div>
 
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full pt-44 sm:pt-52 md:pt-60 pb-12 sm:pb-16 md:pb-20">
           {/* Content */}
-          <motion.div
-            className="w-full max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl text-center px-4 sm:px-6 md:px-8 flex flex-col items-center"
-            variants={containerVariants}
-            initial="hidden"
-            animate={isInView ? "visible" : "hidden"}
-          >
-            <motion.div variants={itemVariants} className="mb-6 sm:mb-8 md:mb-10">
+          <div className="w-full max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl text-center px-4 sm:px-6 md:px-8 flex flex-col items-center">
+            
+            <div className="hero-badge mb-6 sm:mb-8 md:mb-10 opacity-0">
               <span className="liquid-glass-badge inline-block bg-clip-text text-gray-200 bg-gradient-to-r from-white to-gray-300 font-medium px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm tracking-widest uppercase">
                 Full-Stack Developer
               </span>
-            </motion.div>
+            </div>
 
-            <div className="relative h-[100px] sm:h-[120px] md:h-[150px] w-full mb-10 sm:mb-14 max-w-5xl mx-auto">
+            <div className="hero-text-pressure relative h-[100px] sm:h-[120px] md:h-[150px] w-full mb-10 sm:mb-14 max-w-5xl mx-auto opacity-0">
               <TextPressure
                 text="Darshan Gowda"
                 flex={true}
@@ -131,17 +111,11 @@ const Hero = () => {
               />
             </div>
 
-            <motion.p
-              variants={itemVariants}
-              className="text-sm sm:text-base md:text-lg text-gray-400 mb-10 sm:mb-14 max-w-3xl md:max-w-4xl mx-auto px-4 leading-relaxed font-light tracking-wide"
-            >
+            <p className="hero-description text-sm sm:text-base md:text-lg text-gray-400 mb-10 sm:mb-14 max-w-3xl md:max-w-4xl mx-auto px-4 leading-relaxed font-light tracking-wide opacity-0">
               I am a software developer and data analytics student with strong skills in the MERN stack, building full-stack web apps that solve real problems. My experience includes developing scalable systems and interactive platforms. I also have foundational knowledge in DevOps and cloud computing, helping deploy and manage applications efficiently. I enjoy working in teams and continuously learning to keep up with evolving technologies.
-            </motion.p>
+            </p>
 
-            <motion.div
-              variants={itemVariants}
-              className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 mb-8 sm:mb-10 md:mb-12 px-2 sm:px-4"
-            >
+            <div className="hero-buttons flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 mb-8 sm:mb-10 md:mb-12 px-2 sm:px-4 opacity-0">
               <NeonButton
                 href="#projects"
                 variant="solid"
@@ -161,27 +135,23 @@ const Hero = () => {
               >
                 Contact Me
               </NeonButton>
-            </motion.div>
+            </div>
 
-            <motion.div
-              variants={itemVariants}
-              className="flex justify-center items-center space-x-3 sm:space-x-4 md:space-x-6 mb-8 sm:mb-10 md:mb-12 px-2"
-            >
+            <div className="hero-socials flex justify-center items-center space-x-3 sm:space-x-4 md:space-x-6 mb-8 sm:mb-10 md:mb-12 px-2">
               {socialLinks.map(({ href, Icon, external }, i) => (
                 <a
                   key={i}
                   href={href}
                   target={external ? "_blank" : undefined}
                   rel={external ? "noopener noreferrer" : undefined}
-                  className="liquid-glass-icon text-gray-300 hover:text-white transition-all p-2 sm:p-2.5 md:p-3 rounded-full transform hover:scale-110 duration-300 select-none"
+                  className="liquid-glass-icon text-gray-300 hover:text-white transition-all p-2 sm:p-2.5 md:p-3 rounded-full transform hover:scale-110 duration-300 select-none opacity-0"
                 >
                   <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8" />
                 </a>
               ))}
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
-
 
       </div>
     </>

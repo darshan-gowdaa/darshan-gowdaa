@@ -1,8 +1,17 @@
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Analytics } from '@vercel/analytics/react';
+
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import About from './components/About';
+import Skills from './components/Skills';
+import Experience from './components/Experience';
+import Projects from './components/Projects';
+import Certifications from './components/Certifications';
+import Contact from './components/Contact';
 import LiquidEther from './components/react-bits/LiquidEther';
 
 // Mobile detection hook for performance optimization
@@ -19,26 +28,21 @@ const useIsMobile = () => {
     return () => mq.removeEventListener('change', checkMobile);
   }, []);
 
+  // Refresh ScrollTrigger on mount and orientation change
+  useEffect(() => {
+    // Standard registration
+    gsap.registerPlugin(ScrollTrigger);
+    
+    // Refresh after a small delay to allow layout to settle
+    const timer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return isMobile;
 };
-
-// Lazy load below-the-fold components for better initial load performance
-const About = lazy(() => import('./components/About'));
-const Skills = lazy(() => import('./components/Skills'));
-const Experience = lazy(() => import('./components/Experience'));
-const Projects = lazy(() => import('./components/Projects'));
-const Certifications = lazy(() => import('./components/Certifications'));
-const Contact = lazy(() => import('./components/Contact'));
-
-// Minimal loading spinner component
-const SectionLoader = () => (
-  <div className="flex items-center justify-center min-h-[400px]">
-    <div className="relative">
-      <div className="w-12 h-12 rounded-full border-2 border-white/10 border-t-white/50 animate-spin" />
-      <div className="absolute inset-0 w-12 h-12 rounded-full border-2 border-transparent border-b-white/30 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
-    </div>
-  </div>
-);
 
 function App() {
   const isMobile = useIsMobile();
@@ -46,7 +50,7 @@ function App() {
   return (
     <div className="bg-gradient-to-br from-[#050505] via-[#050505] to-[#050505] text-white min-h-screen overflow-x-hidden relative">
 
-      {/* Side Liquid Effect - optimized for mobile */}
+      {/* Global Liquid Effect - visible across all sections */}
       <div className="fixed inset-0 h-screen w-full opacity-30 pointer-events-none z-[1] mix-blend-screen">
         <div className="absolute inset-0">
           <LiquidEther
@@ -70,28 +74,13 @@ function App() {
 
       {/* Main Content */}
       <main className="relative">
-        {/* Hero loads eagerly - it's above the fold */}
         <Hero />
-
-        {/* Below-the-fold sections are lazy loaded */}
-        <Suspense fallback={<SectionLoader />}>
-          <About />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <Skills />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <Experience />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <Projects />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <Certifications />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <Contact />
-        </Suspense>
+        <About />
+        <Skills />
+        <Experience />
+        <Projects />
+        <Certifications />
+        <Contact />
       </main>
 
       {/* Vercel Analytics & Speed Insights */}
@@ -102,4 +91,3 @@ function App() {
 }
 
 export default App;
-
