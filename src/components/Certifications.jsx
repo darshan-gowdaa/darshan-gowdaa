@@ -33,6 +33,7 @@ const CertificationCard = ({ title, issuer, description, link, icon }) => {
             rel="noopener noreferrer"
             variant="default"
             className="w-full"
+            aria-label={`View certification for ${title}`}
           >
             View Certificate
           </NeonButton>

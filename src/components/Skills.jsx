@@ -49,7 +49,14 @@ const Skills = () => {
   ];
 
   const renderSkillItem = (item, key) => (
-    <div key={key} className="flex flex-col items-center justify-center gap-4 group/skill p-4">
+    <a
+      key={key}
+      href={item.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex flex-col items-center justify-center gap-4 group/skill p-4 no-underline"
+      aria-label={`Learn more about ${item.title}`}
+    >
       <div className={`w-24 h-24 md:w-32 md:h-32 rounded-3xl backdrop-blur-md flex items-center justify-center transition-colors duration-300
         ${isMobile 
           ? 'bg-white/10 border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.15)]' 
@@ -70,7 +77,7 @@ const Skills = () => {
         }`}>
         {item.title}
       </span>
-    </div>
+    </a>
   );
 
   return (

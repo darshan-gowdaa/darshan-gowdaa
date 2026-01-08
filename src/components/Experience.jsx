@@ -20,7 +20,13 @@ const TimelineContent = ({ title, organization, period, description, certificate
           {period}
         </span>
         {certificateLink && (
-          <a href={certificateLink} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 hover:text-white transition-colors underline underline-offset-4">
+          <a 
+            href={certificateLink} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-xs text-gray-400 hover:text-white transition-colors underline underline-offset-4"
+            aria-label={`View certificate for ${title} at ${organization}`}
+          >
             View Certificate
           </a>
         )}

@@ -1,4 +1,3 @@
-// src/components/Projects.jsx
 import React, { useMemo, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -18,21 +17,20 @@ import expenseTrackerThumbnail from '../assets/expense-tracker-thumbnail.avif';
 gsap.registerPlugin(ScrollTrigger);
 
 const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, githubLink, index, isVignette }) => {
-  // Prefer liveLink over demoVideo
+  // Figure out which link to show for the demo action
   const actionLink = liveLink || demoVideo;
   const isLiveLink = !!liveLink;
   const actionLabel = isLiveLink ? 'Live Demo' : 'Demo Video';
   const ActionIcon = isLiveLink ? FaExternalLinkAlt : FaPlay;
 
   return (
-    <div
-      className="group relative h-full flex flex-col project-card opacity-0"
-    >
+    <div className="group relative h-full flex flex-col project-card opacity-0">
       <div className="relative h-full bg-white/5 backdrop-blur-sm border border-white/15 rounded-3xl overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:border-white/30">
-
         <div className="relative aspect-video overflow-hidden">
+          {/* Image overlays */}
           <div className={`absolute inset-0 z-10 pointer-events-none transition-all duration-500 ${isVignette ? 'shadow-[inset_0_0_60px_rgba(0,0,0,0.9)]' : ''}`} />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
+          
           <LazyImage
             src={image}
             alt={title}
@@ -43,6 +41,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
             rootMargin="100px"
           />
 
+          {/* Desktop action buttons */}
           <div className="absolute inset-0 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex items-center justify-center gap-4 bg-black/60 backdrop-blur-[2px]">
             {githubLink && (
               <a
@@ -51,6 +50,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
                 rel="noopener noreferrer"
                 className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-black hover:scale-105 active:scale-95 cursor-pointer"
                 title="View Source Code"
+                aria-label={`View source code for ${title}`}
               >
                 <FaGithub size={20} />
               </a>
@@ -62,12 +62,14 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
                 rel="noopener noreferrer"
                 className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-black hover:scale-105 active:scale-95 cursor-pointer"
                 title={actionLabel}
+                aria-label={`${actionLabel} for ${title}`}
               >
                 <ActionIcon size={isLiveLink ? 20 : 18} />
               </a>
             )}
           </div>
 
+          {/* Mobile action buttons */}
           {(githubLink || actionLink) && (
             <div className="absolute bottom-0 left-0 right-0 z-20 md:hidden flex items-center justify-center gap-3 p-4 pt-12 bg-gradient-to-t from-black via-black/70 to-transparent">
               {githubLink && (
@@ -76,6 +78,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white text-sm font-medium border border-white/20 backdrop-blur-md transition-all active:scale-95 active:bg-white/20"
+                  aria-label={`View source code for ${title}`}
                 >
                   <FaGithub size={16} />
                   <span>Code</span>
@@ -87,6 +90,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 text-black text-sm font-medium border border-white/20 transition-all active:scale-95 active:bg-white"
+                  aria-label={`${actionLabel} for ${title}`}
                 >
                   <ActionIcon size={isLiveLink ? 14 : 12} />
                   <span>{isLiveLink ? 'Live' : 'Demo'}</span>
@@ -96,15 +100,11 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
           )}
         </div>
 
+        {/* Project content */}
         <div className="p-6 md:p-8 flex flex-col flex-grow">
           <div className="flex flex-wrap gap-2 mb-4">
             {tags.map((tag, i) => (
-              <span
-                key={i}
-                className="liquid-glass-tag"
-              >
-                {tag}
-              </span>
+              <span key={i} className="liquid-glass-tag">{tag}</span>
             ))}
           </div>
 
@@ -127,7 +127,7 @@ const Projects = () => {
   const containerRef = useRef(null);
   const headerRef = useRef(null);
 
-  // Initialize animations
+  // Fire off the project section animations
   const { animateProjects } = useAnimations();
   animateProjects(containerRef, headerRef);
 
@@ -193,13 +193,8 @@ const Projects = () => {
 
   return (
     <section id="projects" className="py-24 relative overflow-hidden">
-
       <div ref={containerRef} className="max-w-7xl mx-auto px-6 relative z-10">
-        <div
-          ref={headerRef}
-          className="text-center mb-16"
-        >
-
+        <div ref={headerRef} className="text-center mb-16">
           <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">
             Projects
           </h2>
@@ -220,4 +215,3 @@ const Projects = () => {
 };
 
 export default Projects;
-

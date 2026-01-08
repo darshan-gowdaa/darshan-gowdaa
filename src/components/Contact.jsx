@@ -178,6 +178,7 @@ const Contact = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-black hover:bg-white hover:border-white transition-all duration-300"
+                    aria-label={`Visit my ${item.icon.type.name.replace('Fa', '')} profile`}
                   >
                     {item.icon}
                   </a>
@@ -189,11 +190,11 @@ const Contact = () => {
           <div className="contact-right bg-white/5 border border-white/15 rounded-3xl p-6 md:p-10 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.06)]">
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputField label="Name" name="name" value={formData.name} onChange={handleChange} />
-                <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} />
+                <InputField label="Name" name="name" value={formData.name} onChange={handleChange} required />
+                <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} required />
               </div>
-              <InputField label="Subject" name="subject" value={formData.subject} onChange={handleChange} />
-              <InputField label="Message" name="message" isTextarea value={formData.message} onChange={handleChange} />
+              <InputField label="Subject" name="subject" value={formData.subject} onChange={handleChange} required />
+              <InputField label="Message" name="message" isTextarea value={formData.message} onChange={handleChange} required />
 
               <NeonButton
                 type="submit"

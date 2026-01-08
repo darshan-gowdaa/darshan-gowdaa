@@ -9,47 +9,52 @@ gsap.registerPlugin(ScrollTrigger);
 export const useAnimations = () => {
     
     const sHero = {
-        animate: (containerRef) => {
+        animate: (containerRef, onComplete) => {
              useGSAP(() => {
-                const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+                const tl = gsap.timeline({ 
+                    defaults: { ease: "power2.out" }
+                });
 
                 tl.fromTo(".hero-badge", 
-                    { y: 30, opacity: 0 },
-                    { y: 0, opacity: 1, duration: 0.9, delay: 0.1 }
+                    { y: 20, opacity: 0 },
+                    { y: 0, opacity: 1, duration: 0.6 }
                 )
+                .call(() => {
+                    if (onComplete) onComplete();
+                })
                 .fromTo(".hero-text-pressure", 
-                    { opacity: 0 },
-                    { opacity: 1, duration: 1.0 }, 
-                    "-=0.6"
+                    { opacity: 0, scale: 0.95 },
+                    { opacity: 1, scale: 1, duration: 0.7 }, 
+                    "-=0.3"
                 )
                 .fromTo(".hero-description",
-                    { y: 30, opacity: 0 },
-                    { y: 0, opacity: 1, duration: 0.9 },
-                    "-=0.7"
+                    { y: 20, opacity: 0 },
+                    { y: 0, opacity: 1, duration: 0.6 },
+                    "-=0.3"
                 )
                 .fromTo(".hero-buttons",
-                    { y: 30, opacity: 0 },
-                    { y: 0, opacity: 1, duration: 0.9 },
-                    "-=0.7"
+                    { y: 20, opacity: 0 },
+                    { y: 0, opacity: 1, duration: 0.6 },
+                    "-=0.3"
                 )
                 .fromTo(".hero-socials a",
-                    { y: 20, opacity: 0, scale: 0.8 },
+                    { y: 15, opacity: 0, scale: 0.8 },
                     { 
                         y: 0, 
                         opacity: 1, 
                         scale: 1, 
-                        duration: 0.6, 
-                        stagger: 0.1,
-                        ease: "back.out(1.7)"
+                        duration: 0.4, 
+                        stagger: 0.08,
+                        ease: "back.out(1.5)"
                     },
-                    "-=0.5"
+                    "-=0.2"
                 );
             }, { scope: containerRef });
         }
     };
 
     const sNavbar = {
-        animate: ({ navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender, mobileNavRef, mobileBubbleRef, mobileLinkRefs, mobileScrollContainerRef }) => {
+        animate: ({ navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender, mobileNavRef, mobileBubbleRef, mobileLinkRefs, mobileScrollContainerRef, show }) => {
             
             // Desktop Bubble
             useGSAP(() => {
@@ -102,20 +107,38 @@ export const useAnimations = () => {
 
             // Navbar Entrance
             useGSAP(() => {
-                if (navRef.current) {
-                    gsap.to(navRef.current, { 
-                        opacity: 1, 
-                        duration: 0.8, 
-                        delay: 0.8, 
-                        ease: "power2.out",
-                        onComplete: () => {
-                            isFirstRender.current = false; 
-                        }
-                    });
+                if (show) {
+                    if (navRef.current) {
+                        gsap.fromTo(navRef.current, 
+                            { opacity: 0, y: -10, xPercent: -50 },
+                            { 
+                                opacity: 1, 
+                                y: 0,
+                                xPercent: -50,
+                                duration: 0.6, 
+                                ease: "power3.out",
+                                onComplete: () => {
+                                    isFirstRender.current = false; 
+                                }
+                            }
+                        );
+                    }
+                    if (mobileNavRef.current) {
+                        gsap.fromTo(mobileNavRef.current, 
+                            { opacity: 0, y: -10, xPercent: -50 },
+                            { 
+                                opacity: 1, 
+                                y: 0,
+                                xPercent: -50,
+                                duration: 0.6, 
+                                ease: "power3.out"
+                            }
+                        );
+                    }
                 }
-            }, { scope: navRef });
+            }, { dependencies: [show], scope: navRef });
 
-             // Close Mobile Animation Helper
+             // Function to handle the mobile menu closing animation
              const closeMobileMenuAnim = (onComplete) => {
                   if (mobileNavRef.current) {
                       onComplete();
