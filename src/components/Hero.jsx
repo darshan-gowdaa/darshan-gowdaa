@@ -7,7 +7,7 @@ import LiquidEther from './react-bits/LiquidEther';
 import TextPressure from './react-bits/TextPressure';
 import { NeonButton } from './ui/NeonButton';
 
-const Hero = () => {
+const Hero = ({ onComplete }) => {
   const containerRef = useRef(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -44,7 +44,7 @@ const Hero = () => {
 
   // Initialize animations
   const { animateHero } = useAnimations();
-  animateHero(containerRef);
+  animateHero(containerRef, onComplete);
 
   return (
     <>
@@ -91,7 +91,7 @@ const Hero = () => {
           <div className="w-full max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl text-center px-4 sm:px-6 md:px-8 flex flex-col items-center">
             
             <div className="hero-badge mb-6 sm:mb-8 md:mb-10 opacity-0">
-              <span className="liquid-glass-badge inline-block bg-clip-text text-gray-200 bg-gradient-to-r from-white to-gray-300 font-medium px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm tracking-widest uppercase">
+              <span className="liquid-glass-badge mobile-hover-default inline-block bg-clip-text text-gray-200 bg-gradient-to-r from-white to-gray-300 font-medium px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm tracking-widest uppercase">
                 Full-Stack Developer
               </span>
             </div>
@@ -121,6 +121,7 @@ const Hero = () => {
                 variant="solid"
                 size="lg"
                 className="w-full sm:w-auto"
+                aria-label="View My Work"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   View My Work
@@ -132,6 +133,7 @@ const Hero = () => {
                 variant="default"
                 size="lg"
                 className="w-full sm:w-auto"
+                aria-label="Contact Me"
               >
                 Contact Me
               </NeonButton>
@@ -145,6 +147,7 @@ const Hero = () => {
                   target={external ? "_blank" : undefined}
                   rel={external ? "noopener noreferrer" : undefined}
                   className="liquid-glass-icon text-gray-300 hover:text-white transition-all p-2 sm:p-2.5 md:p-3 rounded-full transform hover:scale-110 duration-300 select-none opacity-0"
+                  aria-label={Icon.name.replace('Fa', '')}
                 >
                   <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8" />
                 </a>

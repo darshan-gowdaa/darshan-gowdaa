@@ -357,4 +357,11 @@ html {
   .animate-spin-slow {
     animation-duration: 15s;
   }
+
+  /* Default hover state for hero badge on mobile */
+  .liquid-glass-badge.mobile-hover-default {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.4);
+  }
 }

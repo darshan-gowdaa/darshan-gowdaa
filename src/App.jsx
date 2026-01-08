@@ -6,15 +6,15 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import About from './components/About';
-import Skills from './components/Skills';
-import Experience from './components/Experience';
-import Projects from './components/Projects';
-import Certifications from './components/Certifications';
-import Contact from './components/Contact';
+const About = React.lazy(() => import('./components/About'));
+const Skills = React.lazy(() => import('./components/Skills'));
+const Experience = React.lazy(() => import('./components/Experience'));
+const Projects = React.lazy(() => import('./components/Projects'));
+const Certifications = React.lazy(() => import('./components/Certifications'));
+const Contact = React.lazy(() => import('./components/Contact'));
 import LiquidEther from './components/react-bits/LiquidEther';
 
-// Mobile detection hook for performance optimization
+// Custom hook to detect if we're on a mobile device
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -28,7 +28,7 @@ const useIsMobile = () => {
     return () => mq.removeEventListener('change', checkMobile);
   }, []);
 
-  // Refresh ScrollTrigger on mount and orientation change
+  // Force-refresh ScrollTrigger positions after things load in
   useEffect(() => {
     // Standard registration
     gsap.registerPlugin(ScrollTrigger);
@@ -46,11 +46,12 @@ const useIsMobile = () => {
 
 function App() {
   const isMobile = useIsMobile();
+  const [isHeroComplete, setIsHeroComplete] = React.useState(false);
 
   return (
     <div className="bg-gradient-to-br from-[#050505] via-[#050505] to-[#050505] text-white min-h-screen overflow-x-hidden relative">
 
-      {/* Global Liquid Effect - visible across all sections */}
+      {/* Subtle background liquid effect */}
       <div className="fixed inset-0 h-screen w-full opacity-30 pointer-events-none z-[1] mix-blend-screen">
         <div className="absolute inset-0">
           <LiquidEther
@@ -70,17 +71,24 @@ function App() {
         </div>
       </div>
       {/* Navigation */}
-      <Navbar />
+      <Navbar show={isHeroComplete} />
 
       {/* Main Content */}
       <main className="relative">
-        <Hero />
-        <About />
-        <Skills />
-        <Experience />
-        <Projects />
-        <Certifications />
-        <Contact />
+        <Hero onComplete={() => setIsHeroComplete(true)} />
+        <React.Suspense fallback={
+          <div className="w-full py-20 flex flex-col items-center justify-center gap-4">
+            <div className="w-12 h-12 border-2 border-white/10 border-t-white/50 rounded-full animate-spin" />
+            <span className="text-gray-500 text-xs font-medium tracking-widest uppercase animate-pulse">Loading Experience</span>
+          </div>
+        }>
+          <About />
+          <Skills />
+          <Experience />
+          <Projects />
+          <Certifications />
+          <Contact />
+        </React.Suspense>
       </main>
 
       {/* Vercel Analytics & Speed Insights */}

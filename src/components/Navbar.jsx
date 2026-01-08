@@ -5,39 +5,38 @@ import { useAnimations } from '../hooks/useAnimations';
 
 const links = ['Home', 'About', 'Skills', 'Experience', 'Projects', 'Certifications', 'Contact'];
 
-const Navbar = () => {
-  // Core state
+const Navbar = ({ show }) => {
+  // Keeping track of menu state and active section scrolling
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('Home');
   const [isHeadingVisible, setIsHeadingVisible] = useState(false);
+  const [forceShowNavbar, setForceShowNavbar] = useState(false);
   
-  // Desktop refs
+  // Refs for the nav elements and bubble animations
   const navRef = useRef(null);
   const bubbleRef = useRef(null);
   const linkRefs = useRef({});
-  
-  // Mobile refs
   const mobileNavRef = useRef(null);
   const mobileBubbleRef = useRef(null);
   const mobileLinkRefs = useRef({});
   const mobileScrollContainerRef = useRef(null);
-  
+  const forceShowTimeoutRef = useRef(null);
   const isScrolling = useRef(false);
   const isFirstRender = useRef(true);
+
+  // Custom hook to manage the navbar's GSAP animations
+  const { animateNavbar } = useAnimations();
+  const { closeMobileMenuAnim } = animateNavbar({ 
+    navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender,
+    mobileNavRef, mobileBubbleRef, mobileLinkRefs, mobileScrollContainerRef, show
+  });
 
   // Dynamic page title
   useEffect(() => {
     document.title = `${activeSection} | Darshan Gowda`;
   }, [activeSection]);
 
-  // Animation hook
-  const { animateNavbar } = useAnimations();
-  const { closeMobileMenuAnim } = animateNavbar({ 
-    navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender,
-    mobileNavRef, mobileBubbleRef, mobileLinkRefs, mobileScrollContainerRef 
-  });
-
-  // Section intersection observer
+  // Detect which section is currently in view
   useEffect(() => {
     const observerOptions = {
       root: null,
@@ -65,7 +64,6 @@ const Navbar = () => {
 
     observeSections();
 
-    // Handle lazy-loaded sections
     const mutationObserver = new MutationObserver(observeSections);
     mutationObserver.observe(document.body, { childList: true, subtree: true });
 
@@ -75,16 +73,13 @@ const Navbar = () => {
     };
   }, []);
 
-  // Body scroll lock for mobile menu
+  // Body scroll lock
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
 
-  // Heading visibility observer (hide navbar when headings visible)
-  const [forceShowNavbar, setForceShowNavbar] = useState(false);
-  const forceShowTimeoutRef = useRef(null);
-  
+  // Hide navbar when someone is looking at a big heading on mobile
   useEffect(() => {
     const visibleElements = new Map();
     
@@ -93,11 +88,11 @@ const Navbar = () => {
         visibleElements.set(entry.target, entry.isIntersecting);
       });
       
-      const isAnyVisible = Array.from(visibleElements.values()).some(isVisible => isVisible);
+      const isAnyVisible = Array.from(visibleElements.values()).some(Boolean);
       setIsHeadingVisible(isAnyVisible);
     }, {
-      threshold: 0.5, // More of heading needs to be visible before hiding navbar
-      rootMargin: '0px 0px -20% 0px' // More relaxed - heading needs to be more visible
+      threshold: 0.5,
+      rootMargin: '0px 0px -20% 0px'
     });
 
     const updateTargets = () => {
@@ -116,11 +111,10 @@ const Navbar = () => {
     };
   }, []);
 
-  // Exponential easing for quicker start and smooth finish
+  // Smooth scroll easing
   const easeOutExpo = (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
-  // Smooth scroll animation
-  const smoothScrollTo = (targetPosition, duration) => {
+  const smoothScrollTo = useCallback((targetPosition, duration) => {
     const startPosition = window.scrollY;
     const distance = targetPosition - startPosition;
     let startTime = null;
@@ -138,19 +132,20 @@ const Navbar = () => {
       }
     };
     requestAnimationFrame(animation);
-  };
+  }, []);
 
-  const scrollToSection = (sectionId) => {
+  // Function to scroll to sections when a link is clicked
+  const scrollToSection = useCallback((sectionId) => {
     setActiveSection(sectionId);
     setMobileMenuOpen(false);
     
-    // show navbar briefly
+    // Show navbar briefly
     setForceShowNavbar(true);
     if (forceShowTimeoutRef.current) clearTimeout(forceShowTimeoutRef.current);
     forceShowTimeoutRef.current = setTimeout(() => setForceShowNavbar(false), 2500);
     
     const isMobile = window.innerWidth < 768;
-    const maxAttempts = isMobile ? 30 : 1; // 3s on mobile, instant on desktop
+    const maxAttempts = isMobile ? 30 : 1;
     
     const tryScroll = (attempts = 0) => {
       const section = document.getElementById(sectionId.toLowerCase());
@@ -161,7 +156,6 @@ const Navbar = () => {
       
       section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       
-      // mobile: keep trying until near top
       if (isMobile && attempts < maxAttempts) {
         setTimeout(() => {
           const rect = section.getBoundingClientRect();
@@ -170,36 +164,32 @@ const Navbar = () => {
       }
     };
     tryScroll();
-  };
+  }, []);
 
-  // Mobile menu toggle
+  // Handlers for opening/closing the mobile menu view
   const toggleMobileMenu = useCallback(() => {
     setMobileMenuOpen(prev => !prev);
   }, []);
 
-  // Close mobile menu with animation
   const closeMobileMenu = useCallback(() => {
     closeMobileMenuAnim(() => setMobileMenuOpen(false));
   }, [closeMobileMenuAnim]);
 
   return (
     <>
-      {/* Desktop Navbar */}
+      {/* Desktop Navbar - unchanged */}
       <nav
         ref={navRef}
-        className="hidden md:block fixed top-6 left-1/2 -translate-x-1/2 z-50 rounded-full px-3 py-1.5 transition-all duration-300 border border-white/5 shadow-[0_0_20px_rgba(255,255,255,0.1)] backdrop-blur-[3px] bg-black/5 group overflow-hidden"
+        className="hidden md:block fixed top-6 left-1/2 -translate-x-1/2 z-50 rounded-full px-3 py-1.5 border border-white/5 shadow-[0_0_20px_rgba(255,255,255,0.1)] backdrop-blur-[3px] bg-black/5 group overflow-hidden"
         style={{ width: 'fit-content', opacity: 0 }}
       >
-        {/* Gradient borders */}
         <span className="absolute h-px opacity-100 transition-all duration-500 ease-in-out inset-x-0 top-0 bg-gradient-to-r w-3/4 mx-auto from-transparent via-white/50 to-transparent block pointer-events-none" />
         <span className="absolute transition-all duration-500 ease-in-out inset-x-0 h-px bottom-0 bg-gradient-to-r w-3/4 mx-auto from-transparent via-white/50 to-transparent block pointer-events-none" />
 
-        {/* Glass overlay */}
         <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-30" />
         </div>
 
-        {/* Active bubble */}
         <div
           ref={bubbleRef}
           className="absolute rounded-full -z-10 pointer-events-none"
@@ -225,6 +215,7 @@ const Navbar = () => {
                 key={link}
                 ref={el => linkRefs.current[link] = el}
                 onClick={() => scrollToSection(link)}
+                aria-label={`Scroll to ${link} section`}
                 className={`relative px-5 py-2 rounded-full text-base font-medium uppercase tracking-wider transition-colors duration-300 group select-none ${
                   isActive ? 'text-white' : 'text-gray-300 hover:text-white'
                 }`}
@@ -245,13 +236,13 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile Navbar - Expandable */}
+      {/* Mobile navigation structure */}
       <div 
         ref={mobileNavRef}
         className={`md:hidden fixed top-6 left-1/2 -translate-x-1/2 z-50 rounded-[2rem] overflow-hidden ${
           !mobileMenuOpen && isHeadingVisible && !forceShowNavbar
             ? '-translate-y-[200%] opacity-0 pointer-events-none' 
-            : 'translate-y-0 opacity-100'
+            : 'translate-y-0'
         }`}
         style={{
           width: mobileMenuOpen ? '260px' : 'auto',
@@ -263,34 +254,34 @@ const Navbar = () => {
           boxShadow: mobileMenuOpen ? 
             '0 20px 40px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.05)' : 
             '0 10px 20px rgba(0,0,0,0.2), inset 0 0 10px rgba(255,255,255,0.02)',
-          transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease, box-shadow 0.3s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
+          transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease, box-shadow 0.3s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1)',
+          opacity: 0
         }}
       >
-        {/* Neon borders */}
         <span className="absolute h-px opacity-100 inset-x-0 top-0 bg-gradient-to-r w-3/4 mx-auto from-transparent via-white/40 to-transparent pointer-events-none" />
         <span className="absolute h-px opacity-100 inset-x-0 bottom-0 bg-gradient-to-r w-3/4 mx-auto from-transparent via-white/40 to-transparent pointer-events-none" />
         
-        {/* Glass shine */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-30" />
         </div>
 
-        {/* Collapsed: Active trigger */}
+        {/* Current section name shown when menu is closed */}
         <div 
           className={`relative w-full h-[50px] flex items-center justify-center cursor-pointer ${
             mobileMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
-          style={{
-            transition: 'opacity 0.25s ease-out'
-          }}
+          style={{ transition: 'opacity 0.25s ease-out' }}
           onClick={toggleMobileMenu}
+          aria-label="Toggle mobile menu"
+          role="button"
+          tabIndex={0}
         >
           <span className="text-white text-sm font-medium tracking-wider uppercase drop-shadow-md px-6">
             {activeSection}
           </span>
         </div>
 
-        {/* Expanded: Vertical menu */}
+        {/* Expanded nav links for mobile menu */}
         <div 
           className={`absolute inset-0 w-full h-full ${
             mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -305,7 +296,6 @@ const Navbar = () => {
             ref={mobileScrollContainerRef}
             className="w-full h-full flex flex-col items-center justify-start pt-6 pb-4 space-y-1 relative"
           >
-            {/* Mobile bubble - vertical */}
             <div
               ref={mobileBubbleRef}
               className="absolute rounded-full -z-10 pointer-events-none transition-all duration-300"
@@ -329,6 +319,7 @@ const Navbar = () => {
                     e.stopPropagation(); 
                     scrollToSection(link);
                   }}
+                  aria-label={`Scroll to ${link} section`}
                   className={`relative w-full py-1 text-base font-medium uppercase tracking-wider transition-colors duration-300 shrink-0 drop-shadow-md ${
                     isActive ? 'text-white' : 'text-gray-400 hover:text-white/80'
                   }`}
@@ -341,7 +332,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Outside click backdrop */}
+      {/* Backdrop */}
       {mobileMenuOpen && (
         <div 
           className="fixed inset-0 z-40 transparent" 
