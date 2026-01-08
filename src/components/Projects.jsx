@@ -1,15 +1,21 @@
 // src/components/Projects.jsx
-import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+import { useAnimations } from '../hooks/useAnimations';
 import { FaGithub, FaExternalLinkAlt, FaPlay } from 'react-icons/fa';
 import LazyImage from './ui/LazyImage';
 
+import axiomPulseCloneThumbnail from '../assets/axiom-pulse-clone-thumbnail.avif';
 import petrolBunkThumbnail from '../assets/petrol-bunk-management-thumbnail.avif';
 import eduWorldThumbnail from '../assets/eduworld-thumbnail.avif';
 import headlinesHubThumbnail from '../assets/headlines-hub-thumbnail.avif';
 import loginDashboardThumbnail from '../assets/login-dashboard-thumbnail.avif';
 import zapierCloneThumbnail from '../assets/zapier-clone-thumbnail.avif';
 import expenseTrackerThumbnail from '../assets/expense-tracker-thumbnail.avif';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, githubLink, index, isVignette }) => {
   // Prefer liveLink over demoVideo
@@ -19,16 +25,11 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
   const ActionIcon = isLiveLink ? FaExternalLinkAlt : FaPlay;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="group relative h-full flex flex-col"
+    <div
+      className="group relative h-full flex flex-col project-card opacity-0"
     >
       <div className="relative h-full bg-white/5 backdrop-blur-sm border border-white/15 rounded-3xl overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:border-white/30">
 
-        {/* Image Container */}
         <div className="relative aspect-video overflow-hidden">
           <div className={`absolute inset-0 z-10 pointer-events-none transition-all duration-500 ${isVignette ? 'shadow-[inset_0_0_60px_rgba(0,0,0,0.9)]' : ''}`} />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
@@ -42,37 +43,31 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
             rootMargin="100px"
           />
 
-          {/* Overlay Actions - Desktop only */}
           <div className="absolute inset-0 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex items-center justify-center gap-4 bg-black/60 backdrop-blur-[2px]">
             {githubLink && (
-              <motion.a
-                whileHover={{ backgroundColor: "rgba(255, 255, 255, 1)", color: "#000" }}
-                whileTap={{ scale: 0.95 }}
+              <a
                 href={githubLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-colors cursor-pointer"
+                className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-black hover:scale-105 active:scale-95 cursor-pointer"
                 title="View Source Code"
               >
                 <FaGithub size={20} />
-              </motion.a>
+              </a>
             )}
             {actionLink && (
-              <motion.a
-                whileHover={{ backgroundColor: "rgba(255, 255, 255, 1)", color: "#000" }}
-                whileTap={{ scale: 0.95 }}
+              <a
                 href={actionLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-colors cursor-pointer"
+                className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-black hover:scale-105 active:scale-95 cursor-pointer"
                 title={actionLabel}
               >
                 <ActionIcon size={isLiveLink ? 20 : 18} />
-              </motion.a>
+              </a>
             )}
           </div>
 
-          {/* Mobile Action Buttons - Always visible */}
           {(githubLink || actionLink) && (
             <div className="absolute bottom-0 left-0 right-0 z-20 md:hidden flex items-center justify-center gap-3 p-4 pt-12 bg-gradient-to-t from-black via-black/70 to-transparent">
               {githubLink && (
@@ -101,7 +96,6 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
           )}
         </div>
 
-        {/* Content */}
         <div className="p-6 md:p-8 flex flex-col flex-grow">
           <div className="flex flex-wrap gap-2 mb-4">
             {tags.map((tag, i) => (
@@ -123,15 +117,29 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
           </p>
         </div>
 
-        {/* Decorative Bottom Line */}
         <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
-    </motion.div>
+    </div>
   );
 };
 
 const Projects = () => {
+  const containerRef = useRef(null);
+  const headerRef = useRef(null);
+
+  // Initialize animations
+  const { animateProjects } = useAnimations();
+  animateProjects(containerRef, headerRef);
+
   const projects = useMemo(() => [
+    {
+      title: "Axiom Pulse Clone",
+      description: "A pixel-perfect, high-performance clone of the Axiom Trade Pulse token discovery interface. Built with Next.js 16, TypeScript, Redux Toolkit, and Tailwind CSS, featuring real-time price simulations, atomic architecture, and a fully responsive design.",
+      tags: ["Next.js 16", "TypeScript", "Redux Toolkit"],
+      image: axiomPulseCloneThumbnail,
+      githubLink: "https://github.com/darshan-gowdaa/axiom-trade-pulse-clone",
+      liveLink: "https://axiom-pulse-clone-gamma.vercel.app",
+    },
     {
       title: "Petrol Bunk Management System",
       description: "A comprehensive MERN-Stack solution for managing petrol bunk operations. Streamlines inventory tracking, sales reporting, and employee management with real-time data visualization.",
@@ -185,22 +193,17 @@ const Projects = () => {
 
   return (
     <section id="projects" className="py-24 relative overflow-hidden">
-      {/* Background Gradients */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+      <div ref={containerRef} className="max-w-7xl mx-auto px-6 relative z-10">
+        <div
+          ref={headerRef}
           className="text-center mb-16"
         >
 
           <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">
             Projects
           </h2>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
           {projects.map((project, index) => (
@@ -217,3 +220,4 @@ const Projects = () => {
 };
 
 export default Projects;
+

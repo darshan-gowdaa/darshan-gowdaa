@@ -358,16 +358,3 @@ html {
     animation-duration: 15s;
   }
 }
-
-/* Content visibility optimization for below-the-fold sections */
-@media (max-width: 768px) {
-
-  #skills,
-  #experience,
-  #projects,
-  #certifications,
-  #contact {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 600px;
-  }
-}
