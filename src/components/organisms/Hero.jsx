@@ -92,9 +92,7 @@ const Hero = ({ onComplete }) => {
             
             <div className="hero-badge mb-16 sm:mb-8 md:mb-10 opacity-0">
               <span 
-                className={`liquid-glass-badge mobile-hover-default inline-block bg-clip-text text-gray-200 bg-gradient-to-r from-white to-gray-300 font-medium px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm tracking-widest uppercase transition-all duration-300 ${
-                  isMobile ? '!bg-white/15 !border-white/40 shadow-[0_0_25px_rgba(255,255,255,0.25)]' : ''
-                }`}
+                className={`liquid-glass-badge mobile-hover-default inline-block bg-clip-text text-gray-200 bg-gradient-to-r from-white to-gray-300 font-medium px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm tracking-widest uppercase transition-all duration-300`}
               >
                 Full-Stack Developer
               </span>
