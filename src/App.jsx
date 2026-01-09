@@ -1,87 +1,101 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Analytics } from '@vercel/analytics/react';
-
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-const About = React.lazy(() => import('./components/About'));
-const Skills = React.lazy(() => import('./components/Skills'));
-const Experience = React.lazy(() => import('./components/Experience'));
-const Projects = React.lazy(() => import('./components/Projects'));
-const Certifications = React.lazy(() => import('./components/Certifications'));
-const Contact = React.lazy(() => import('./components/Contact'));
-import LiquidEther from './components/react-bits/LiquidEther';
+import Navbar from './components/organisms/Navbar';
+import Hero from './components/organisms/Hero';
+import LiquidEther from './components/atoms/LiquidEther';
 
-// Custom hook to detect if we're on a mobile device
+// lazy load components
+const About = React.lazy(() => import('./components/organisms/About'));
+const Skills = React.lazy(() => import('./components/organisms/Skills'));
+const Experience = React.lazy(() => import('./components/organisms/Experience'));
+const Projects = React.lazy(() => import('./components/organisms/Projects'));
+const Certifications = React.lazy(() => import('./components/organisms/Certifications'));
+const Contact = React.lazy(() => import('./components/organisms/Contact'));
+
+// global constants
+const MOBILE_MEDIA_QUERY = '(hover: none) and (pointer: coarse)';
+const SCROLL_REFRESH_DELAY = 500;
+
+// config for liquid effect
+const getLiquidConfig = (isMobile) => ({
+  colors: ['#FFFFFF', '#C0C0C0', '#808080'],
+  mouseForce: isMobile ? 15 : 30,
+  cursorSize: isMobile ? 80 : 120,
+  isViscous: false,
+  viscous: 10,
+  iterationsViscous: isMobile ? 10 : 20,
+  iterationsPoisson: isMobile ? 10 : 20,
+  resolution: isMobile ? 0.25 : 0.5,
+  isBounce: false,
+  autoDemo: false,
+  autoSpeed: 0,
+  autoIntensity: 0
+});
+
+// loading spinner
+const LoadingFallback = memo(() => (
+  <div className="w-full py-20 flex flex-col items-center justify-center gap-4">
+    <div className="w-12 h-12 border-2 border-white/10 border-t-white/50 rounded-full animate-spin" />
+    <span className="text-gray-500 text-xs font-medium tracking-widest uppercase animate-pulse">
+      Loading Experience
+    </span>
+  </div>
+));
+
+// mobile detection hook
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
-    };
-    checkMobile();
-    const mq = window.matchMedia('(hover: none) and (pointer: coarse)');
+    const checkMobile = () => setIsMobile(window.matchMedia(MOBILE_MEDIA_QUERY).matches);
+    checkMobile(); 
+    
+    const mq = window.matchMedia(MOBILE_MEDIA_QUERY);
     mq.addEventListener('change', checkMobile);
     return () => mq.removeEventListener('change', checkMobile);
-  }, []);
-
-  // Force-refresh ScrollTrigger positions after things load in
-  useEffect(() => {
-    // Standard registration
-    gsap.registerPlugin(ScrollTrigger);
-    
-    // Refresh after a small delay to allow layout to settle
-    const timer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 500);
-
-    return () => clearTimeout(timer);
   }, []);
 
   return isMobile;
 };
 
+// scrolltrigger setup
+const useScrollTrigger = () => {
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger); // register gsap plugin
+    
+    // refresh scrolltrigger after layout settles
+    const timer = setTimeout(() => ScrollTrigger.refresh(), SCROLL_REFRESH_DELAY);
+    return () => clearTimeout(timer);
+  }, []);
+};
+
 function App() {
-  const isMobile = useIsMobile();
-  const [isHeroComplete, setIsHeroComplete] = React.useState(false);
+  const isMobile = useIsMobile(); // detect mobile
+  useScrollTrigger(); // init scrolltrigger
+  const [isHeroComplete, setIsHeroComplete] = useState(false); // hero animation done
 
   return (
     <div className="bg-gradient-to-br from-[#050505] via-[#050505] to-[#050505] text-white min-h-screen overflow-x-hidden relative">
-
-      {/* Subtle background liquid effect */}
+      
+      {/* background liquid effect */}
       <div className="fixed inset-0 h-screen w-full opacity-30 pointer-events-none z-[1] mix-blend-screen">
         <div className="absolute inset-0">
-          <LiquidEther
-            colors={['#FFFFFF', '#C0C0C0', '#808080']}
-            mouseForce={isMobile ? 15 : 30}
-            cursorSize={isMobile ? 80 : 120}
-            isViscous={false}
-            viscous={10}
-            iterationsViscous={isMobile ? 10 : 20}
-            iterationsPoisson={isMobile ? 10 : 20}
-            resolution={isMobile ? 0.25 : 0.5}
-            isBounce={false}
-            autoDemo={false}
-            autoSpeed={0}
-            autoIntensity={0}
-          />
+          <LiquidEther {...getLiquidConfig(isMobile)} />
         </div>
       </div>
-      {/* Navigation */}
+      
+      {/* navbar */}
       <Navbar show={isHeroComplete} />
 
-      {/* Main Content */}
+      {/* main content */}
       <main className="relative">
         <Hero onComplete={() => setIsHeroComplete(true)} />
-        <React.Suspense fallback={
-          <div className="w-full py-20 flex flex-col items-center justify-center gap-4">
-            <div className="w-12 h-12 border-2 border-white/10 border-t-white/50 rounded-full animate-spin" />
-            <span className="text-gray-500 text-xs font-medium tracking-widest uppercase animate-pulse">Loading Experience</span>
-          </div>
-        }>
+        
+        {/* lazy loaded sections */}
+        <React.Suspense fallback={<LoadingFallback />}>
           <About />
           <Skills />
           <Experience />
@@ -91,7 +105,7 @@ function App() {
         </React.Suspense>
       </main>
 
-      {/* Vercel Analytics & Speed Insights */}
+      {/* analytics */}
       <Analytics />
       <SpeedInsights />
     </div>

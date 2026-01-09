@@ -1,8 +1,8 @@
-// src/components/Certifications.jsx
+// src/components/organisms/Certifications.jsx
 import { useRef } from 'react';
-import { useAnimations } from '../hooks/useAnimations';
+import { useAnimations } from '../../hooks/useAnimations';
 import { SiAmazonwebservices, SiInfosys } from 'react-icons/si';
-import { NeonButton } from './ui/NeonButton';
+import { NeonButton } from '../atoms/NeonButton';
 
 const CertificationCard = ({ title, issuer, description, link, icon }) => {
   return (

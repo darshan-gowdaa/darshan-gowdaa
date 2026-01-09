@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
   ],
   build: {
-    // Use esbuild for minification (default in Vite, no extra deps needed)
+    // Use esbuild for minification
     minify: 'esbuild',
     // Code splitting configuration
     rollupOptions: {

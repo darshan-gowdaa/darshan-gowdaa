@@ -1,9 +1,11 @@
+// src/components/atoms/TextPressure.jsx
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
 const dist = (a, b) => {
     const dx = b.x - a.x;
     const dy = b.y - a.y;
-    return Math.sqrt(dx * dx + dy * dy);
+    // make vertical dist start slightly less so it feels better
+    return Math.sqrt(dx * dx + (dy * 0.2) * (dy * 0.2));
 };
 
 const getAttr = (distance, maxDist, minVal, maxVal) => {
@@ -24,7 +26,7 @@ const debounce = (func, delay) => {
 const TextPressure = ({
     text = 'Compressa',
     fontFamily = 'Compressa VF',
-    // This font is just an example, you should not use it in commercial projects.
+    // example font only
     fontUrl = 'https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2',
 
     width = true,
@@ -169,18 +171,7 @@ const TextPressure = ({
           font-display: swap;
         }
         .stroke span {
-          position: relative;
           color: ${textColor};
-        }
-        .stroke span::after {
-          content: attr(data-char);
-          position: absolute;
-          left: 0;
-          top: 0;
-          color: transparent;
-          z-index: -1;
-          -webkit-text-stroke-width: ${strokeWidth}px;
-          -webkit-text-stroke-color: ${strokeColor};
         }
       `}</style>
         );
@@ -201,7 +192,9 @@ const TextPressure = ({
                     transformOrigin: 'center top',
                     margin: 0,
                     fontWeight: 100,
-                    color: stroke ? undefined : textColor
+                    color: stroke ? undefined : textColor,
+                    '--stroke-width': `${strokeWidth}px`,
+                    '--stroke-color': strokeColor
                 }}
             >
                 {chars.map((char, i) => (

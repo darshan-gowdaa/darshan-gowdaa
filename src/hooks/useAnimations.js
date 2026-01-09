@@ -56,7 +56,7 @@ export const useAnimations = () => {
     const sNavbar = {
         animate: ({ navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender, mobileNavRef, mobileBubbleRef, mobileLinkRefs, mobileScrollContainerRef, show }) => {
             
-            // Desktop Bubble
+            // desktop bubble
             useGSAP(() => {
                 const activeLinkEl = linkRefs.current[activeSection];
                 if (activeLinkEl && bubbleRef.current && navRef.current) {
@@ -88,7 +88,7 @@ export const useAnimations = () => {
                 }
             }, { dependencies: [activeSection], scope: navRef });
 
-            // Mobile Bubble
+            // mobile bubble
             useGSAP(() => {
                 const activeMobileLinkEl = mobileLinkRefs.current[activeSection];
                 
@@ -105,40 +105,45 @@ export const useAnimations = () => {
                 }
             }, { dependencies: [activeSection, mobileMenuOpen], scope: mobileNavRef });
 
-            // Navbar Entrance
+            // navbar entrance
             useGSAP(() => {
                 if (show) {
                     if (navRef.current) {
+                        // desktop: simple smooth slide down from top
+                        // no xPercent needed as it's centered by flex wrapper
                         gsap.fromTo(navRef.current, 
-                            { opacity: 0, y: -10, xPercent: -50 },
+                            { opacity: 0, y: -20 },
                             { 
                                 opacity: 1, 
                                 y: 0,
-                                xPercent: -50,
-                                duration: 0.6, 
-                                ease: "power3.out",
+                                duration: 0.8, 
+                                ease: "power4.out", // smooth slide, no bounce
                                 onComplete: () => {
                                     isFirstRender.current = false; 
+                                    gsap.set(navRef.current, { clearProps: "opacity,transform" });
                                 }
                             }
                         );
                     }
                     if (mobileNavRef.current) {
+                        // mobile: simple smooth slide down
                         gsap.fromTo(mobileNavRef.current, 
-                            { opacity: 0, y: -10, xPercent: -50 },
+                            { opacity: 0, y: -20 },
                             { 
                                 opacity: 1, 
                                 y: 0,
-                                xPercent: -50,
-                                duration: 0.6, 
-                                ease: "power3.out"
+                                duration: 0.8, 
+                                ease: "power4.out",
+                                onComplete: () => {
+                                    gsap.set(mobileNavRef.current, { clearProps: "opacity,transform" });
+                                }
                             }
                         );
                     }
                 }
             }, { dependencies: [show], scope: navRef });
 
-             // Function to handle the mobile menu closing animation
+             // closes mobile menu
              const closeMobileMenuAnim = (onComplete) => {
                   if (mobileNavRef.current) {
                       onComplete();
@@ -299,7 +304,7 @@ export const useAnimations = () => {
 
     const sContact = {
         animate: (containerRef, toastRef, toast) => {
-            // Toast Animation
+            // toast animation
              useGSAP(() => {
                 if (toast && toastRef.current) {
                     gsap.fromTo(toastRef.current,

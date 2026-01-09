@@ -1,23 +1,24 @@
+// src/components/organisms/Projects.jsx
 import React, { useMemo, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { useAnimations } from '../hooks/useAnimations';
+import { useAnimations } from '../../hooks/useAnimations';
 import { FaGithub, FaExternalLinkAlt, FaPlay } from 'react-icons/fa';
-import LazyImage from './ui/LazyImage';
+import LazyImage from '../atoms/LazyImage';
 
-import axiomPulseCloneThumbnail from '../assets/axiom-pulse-clone-thumbnail.avif';
-import petrolBunkThumbnail from '../assets/petrol-bunk-management-thumbnail.avif';
-import eduWorldThumbnail from '../assets/eduworld-thumbnail.avif';
-import headlinesHubThumbnail from '../assets/headlines-hub-thumbnail.avif';
-import loginDashboardThumbnail from '../assets/login-dashboard-thumbnail.avif';
-import zapierCloneThumbnail from '../assets/zapier-clone-thumbnail.avif';
-import expenseTrackerThumbnail from '../assets/expense-tracker-thumbnail.avif';
+import axiomPulseCloneThumbnail from '../../assets/axiom-pulse-clone-thumbnail.avif';
+import petrolBunkThumbnail from '../../assets/petrol-bunk-management-thumbnail.avif';
+import eduWorldThumbnail from '../../assets/eduworld-thumbnail.avif';
+import headlinesHubThumbnail from '../../assets/headlines-hub-thumbnail.avif';
+import loginDashboardThumbnail from '../../assets/login-dashboard-thumbnail.avif';
+import zapierCloneThumbnail from '../../assets/zapier-clone-thumbnail.avif';
+import expenseTrackerThumbnail from '../../assets/expense-tracker-thumbnail.avif';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, githubLink, index, isVignette }) => {
-  // Figure out which link to show for the demo action
+  // figure out which link to show
   const actionLink = liveLink || demoVideo;
   const isLiveLink = !!liveLink;
   const actionLabel = isLiveLink ? 'Live Demo' : 'Demo Video';
@@ -27,7 +28,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
     <div className="group relative h-full flex flex-col project-card opacity-0">
       <div className="relative h-full bg-white/5 backdrop-blur-sm border border-white/15 rounded-3xl overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:border-white/30">
         <div className="relative aspect-video overflow-hidden">
-          {/* Image overlays */}
+          {/* image overlays */}
           <div className={`absolute inset-0 z-10 pointer-events-none transition-all duration-500 ${isVignette ? 'shadow-[inset_0_0_60px_rgba(0,0,0,0.9)]' : ''}`} />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
           
@@ -41,7 +42,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
             rootMargin="100px"
           />
 
-          {/* Desktop action buttons */}
+          {/* desktop actions */}
           <div className="absolute inset-0 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex items-center justify-center gap-4 bg-black/60 backdrop-blur-[2px]">
             {githubLink && (
               <a
@@ -69,7 +70,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
             )}
           </div>
 
-          {/* Mobile action buttons */}
+          {/* mobile actions */}
           {(githubLink || actionLink) && (
             <div className="absolute bottom-0 left-0 right-0 z-20 md:hidden flex items-center justify-center gap-3 p-4 pt-12 bg-gradient-to-t from-black via-black/70 to-transparent">
               {githubLink && (
@@ -100,7 +101,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
           )}
         </div>
 
-        {/* Project content */}
+        {/* project info */}
         <div className="p-6 md:p-8 flex flex-col flex-grow">
           <div className="flex flex-wrap gap-2 mb-4">
             {tags.map((tag, i) => (
@@ -127,7 +128,7 @@ const Projects = () => {
   const containerRef = useRef(null);
   const headerRef = useRef(null);
 
-  // Fire off the project section animations
+  // animations
   const { animateProjects } = useAnimations();
   animateProjects(containerRef, headerRef);
 
