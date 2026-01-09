@@ -1,15 +1,15 @@
-// src/components/Skills.jsx
+// src/components/organisms/Skills.jsx
 import { useRef, useState, useEffect } from 'react';
-import { useAnimations } from '../hooks/useAnimations';
+import { useAnimations } from '../../hooks/useAnimations';
 import {
   FaHtml5, FaReact, FaNodeJs, FaDatabase,
   FaGitAlt, FaAws, FaBootstrap, FaChartLine
 } from 'react-icons/fa';
 import {
   SiJavascript, SiTailwindcss, SiMongodb, SiMysql,
-  SiPython, SiExpress, SiDocker
+  SiPython, SiExpress, SiDocker, SiNextdotjs, SiVercel, SiPostgresql
 } from 'react-icons/si';
-import LogoLoop from './LogoLoop';
+import LogoLoop from '../molecules/LogoLoop';
 
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -31,21 +31,21 @@ const Skills = () => {
   animateSkills(containerRef);
 
   const allSkills = [
+    { node: <SiNextdotjs />, title: 'Next.js', href: "https://nextjs.org" },
     { node: <FaReact />, title: 'React', href: "https://react.dev" },
     { node: <SiJavascript />, title: 'JavaScript', href: "https://developer.mozilla.org/en-US/docs/Web/JavaScript" },
-    { node: <FaHtml5 />, title: 'HTML & CSS', href: "https://developer.mozilla.org/en-US/docs/Web/HTML" },
-    { node: <SiTailwindcss />, title: 'Tailwind CSS', href: "https://tailwindcss.com" },
-    { node: <FaBootstrap />, title: 'Bootstrap', href: "https://getbootstrap.com" },
     { node: <FaNodeJs />, title: 'Node.js', href: "https://nodejs.org" },
     { node: <SiExpress />, title: 'Express.js', href: "https://expressjs.com" },
+    { node: <SiTailwindcss />, title: 'Tailwind CSS', href: "https://tailwindcss.com" },
     { node: <SiPython />, title: 'Python', href: "https://www.python.org" },
     { node: <SiMongodb />, title: 'MongoDB', href: "https://www.mongodb.com" },
     { node: <SiMysql />, title: 'MySQL', href: "https://www.mysql.com" },
-    { node: <FaDatabase />, title: 'PostgreSQL', href: "https://www.postgresql.org" },
-    { node: <FaGitAlt />, title: 'Git/GitHub', href: "https://git-scm.com" },
+    { node: <SiPostgresql />, title: 'PostgreSQL', href: "https://www.postgresql.org" },
+    { node: <SiDocker />, title: 'Docker', href: "https://www.docker.com" },
     { node: <FaAws />, title: 'AWS', href: "https://aws.amazon.com" },
-    { node: <FaChartLine />, title: 'Power BI', href: "https://powerbi.microsoft.com" },
-    { node: <SiDocker />, title: 'Docker', href: "https://www.docker.com" }
+    { node: <SiVercel />, title: 'Vercel', href: "https://vercel.com" },
+    { node: <FaGitAlt />, title: 'Git/GitHub', href: "https://git-scm.com" },
+    { node: <FaChartLine />, title: 'Power BI', href: "https://powerbi.microsoft.com" }
   ];
 
   const renderSkillItem = (item, key) => (
@@ -57,14 +57,14 @@ const Skills = () => {
       className="flex flex-col items-center justify-center gap-4 group/skill p-4 no-underline"
       aria-label={`Learn more about ${item.title}`}
     >
-      <div className={`w-24 h-24 md:w-32 md:h-32 rounded-3xl backdrop-blur-md flex items-center justify-center transition-colors duration-300
+      <div className={`w-24 h-24 md:w-32 md:h-32 rounded-3xl flex items-center justify-center transition-all duration-300
         ${isMobile 
-          ? 'bg-white/10 border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.15)]' 
-          : 'bg-white/5 border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)] group-hover/skill:shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover/skill:border-white/40 group-hover/skill:bg-white/10'
+          ? 'bg-transparent border-none shadow-none' 
+          : 'backdrop-blur-md bg-white/5 border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)] group-hover/skill:shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover/skill:border-white/40 group-hover/skill:bg-white/10'
         }`}>
-        <div className={`text-5xl md:text-6xl transition-colors duration-300 drop-shadow-lg
+        <div className={`text-5xl md:text-6xl transition-colors duration-300
           ${isMobile 
-            ? 'text-white' 
+            ? 'text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]' 
             : 'text-gray-400 group-hover/skill:text-white'
           }`}>
           {item.node}
@@ -72,7 +72,7 @@ const Skills = () => {
       </div>
       <span className={`text-sm md:text-base font-medium uppercase tracking-widest transition-colors duration-300
         ${isMobile 
-          ? 'text-white' 
+          ? 'text-white drop-shadow-md' 
           : 'text-gray-500 group-hover/skill:text-white'
         }`}>
         {item.title}
@@ -96,7 +96,7 @@ const Skills = () => {
 
         <LogoLoop
           logos={allSkills}
-          speed={isMobile ? 40 : 100}
+          speed={isMobile ? 80 : 100}
           direction="left"
           logoHeight={isMobile ? 100 : 140}
           gap={isMobile ? 24 : 40}

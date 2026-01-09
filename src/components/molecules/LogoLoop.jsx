@@ -1,3 +1,4 @@
+// src/components/molecules/LogoLoop.jsx
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 
 // Mobile detection hook for performance optimizations

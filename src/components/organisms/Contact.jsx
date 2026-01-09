@@ -1,8 +1,9 @@
+// src/components/organisms/Contact.jsx
 import React, { useState, useRef } from 'react';
-import { useAnimations } from '../hooks/useAnimations';
+import { useAnimations } from '../../hooks/useAnimations';
 import { FaMapMarkerAlt, FaEnvelope, FaGithub, FaLinkedin, FaPaperPlane, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import emailjs from '@emailjs/browser';
-import { NeonButton } from './ui/NeonButton';
+import { NeonButton } from '../atoms/NeonButton';
 
 const InputField = ({ label, name, type = "text", placeholder, value, onChange, isTextarea, required }) => {
   return (

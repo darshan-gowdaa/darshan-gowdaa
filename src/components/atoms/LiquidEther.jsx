@@ -1,4 +1,4 @@
-
+// src/components/atoms/LiquidEther.jsx
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 

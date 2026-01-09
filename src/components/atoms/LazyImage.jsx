@@ -1,4 +1,4 @@
-// src/components/ui/LazyImage.jsx
+// src/components/atoms/LazyImage.jsx
 import React, { useState, useEffect, useRef, memo } from 'react';
 
 /**
@@ -72,11 +72,9 @@ const LazyImage = memo(({
             {/* Placeholder skeleton */}
             {!isLoaded && (
                 <div
-                    className="absolute inset-0 animate-pulse"
+                    className="absolute inset-0 animate-shimmer"
                     style={{
                         background: `linear-gradient(90deg, ${placeholderColor} 25%, rgba(255,255,255,0.1) 50%, ${placeholderColor} 75%)`,
-                        backgroundSize: '200% 100%',
-                        animation: 'shimmer 1.5s infinite',
                     }}
                 />
             )}
@@ -94,14 +92,6 @@ const LazyImage = memo(({
                     {...props}
                 />
             )}
-
-            {/* Shimmer animation keyframes */}
-            <style>{`
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-      `}</style>
         </div>
     );
 });

@@ -1,7 +1,8 @@
-// src/components/Experience.jsx
+// src/components/organisms/Experience.jsx
 import { useRef } from 'react';
-import { useAnimations } from '../hooks/useAnimations';
+import { useAnimations } from '../../hooks/useAnimations';
 import { FaBriefcase, FaGraduationCap } from 'react-icons/fa';
+
 
 const TimelineMarker = ({ icon }) => (
   <div className="flex flex-col items-center">
@@ -11,8 +12,9 @@ const TimelineMarker = ({ icon }) => (
   </div>
 );
 
+
 const TimelineContent = ({ title, organization, period, description, certificateLink }) => (
-  <div className="timeline-content glass-panel relative p-6 md:p-8 rounded-3xl overflow-hidden group opacity-0 translate-y-[30px]">
+  <div className="timeline-content glass-panel relative p-6 md:p-8 rounded-3xl overflow-hidden group opacity-0 translate-y-[30px] border border-white/10 hover:border-white/20 transition-colors duration-300">
     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
     <div className="flex flex-col gap-4 relative z-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
@@ -32,8 +34,8 @@ const TimelineContent = ({ title, organization, period, description, certificate
         )}
       </div>
       <div>
-        <h3 className="text-2xl font-bold text-white mb-1 font-heading">{title}</h3>
-        <p className="text-lg text-gray-400 font-light">{organization}</p>
+        <h3 className="text-xl md:text-2xl font-bold text-white mb-1 font-heading loading-tight">{title}</h3>
+        <p className="text-base md:text-lg text-gray-400 font-light">{organization}</p>
       </div>
       <p className="text-gray-400 leading-relaxed text-sm md:text-base border-t border-white/5 pt-4">
         {description}
@@ -42,27 +44,28 @@ const TimelineContent = ({ title, organization, period, description, certificate
   </div>
 );
 
+
 const TimelineItem = ({ item, index }) => {
   const isEven = index % 2 === 0;
   return (
     <div className={`timeline-item relative flex flex-col md:flex-row gap-8 md:gap-0 ${isEven ? 'md:flex-row-reverse' : ''}`}>
       <div className="hidden md:block md:w-1/2" />
-      <div className="absolute left-0 md:left-1/2 md:-translate-x-1/2 flex justify-center w-12 md:w-auto">
+      <div className="absolute -translate-x-1/2 md:left-1/2 md:-translate-x-1/2 flex justify-center">
         <TimelineMarker icon={item.icon} />
       </div>
-      <div className={`pl-16 md:pl-0 w-full md:w-1/2 ${isEven ? 'md:pr-16 md:text-right' : 'md:pl-16 md:text-left'}`}>
+      <div className={`pl-14 md:pl-0 w-full md:w-1/2 ${isEven ? 'md:pr-16 md:text-right' : 'md:pl-16 md:text-left'}`}>
         <TimelineContent {...item} />
       </div>
     </div>
   );
 };
 
+
 const Experience = () => {
   const sectionRef = useRef(null);
 
   const { animateExperience } = useAnimations();
   animateExperience(sectionRef);
-
 
   const timelineItems = [
     {
@@ -101,14 +104,17 @@ const Experience = () => {
           </h2>
         </div>
 
-        {/* spine background */}
+        {/* Vertical spine line */}
         <div className="absolute left-6 md:left-1/2 top-[200px] bottom-24 w-px bg-white/5 md:-translate-x-1/2" />
-        {/* spine animated */}
         <div className="timeline-spine absolute left-6 md:left-1/2 top-[200px] bottom-24 w-px bg-gradient-to-b from-white via-white/50 to-transparent md:-translate-x-1/2 origin-top" />
 
         <div className="space-y-12">
           {timelineItems.map((item, index) => (
-            <TimelineItem key={index} item={item} index={index} />
+            <TimelineItem 
+              key={index} 
+              item={item} 
+              index={index} 
+            />
           ))}
         </div>
 
@@ -116,5 +122,6 @@ const Experience = () => {
     </section>
   );
 };
+
 
 export default Experience;
