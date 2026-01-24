@@ -8,31 +8,78 @@ import LiquidEther from '../atoms/LiquidEther';
 import TextPressure from '../atoms/TextPressure';
 import { NeonButton } from '../atoms/NeonButton';
 
+// Performance configuration for LiquidEther
+const LIQUID_CONFIG = {
+  high: {
+    resolution: 0.6, // High visual fidelity
+    iterationsViscous: 32,
+    iterationsPoisson: 32,
+    viscous: 30,
+    mouseForce: 25,
+    cursorSize: 100,
+    dt: 1 / 60
+  },
+  medium: {
+    resolution: 0.4, // Good balance for laptops/tablets
+    iterationsViscous: 22,
+    iterationsPoisson: 22,
+    viscous: 25,
+    mouseForce: 20,
+    cursorSize: 80,
+    dt: 1 / 60
+  },
+  low: {
+    resolution: 0.2, // Pixelated/blurry but smooth FPS
+    iterationsViscous: 14,
+    iterationsPoisson: 14,
+    viscous: 20,
+    mouseForce: 15,
+    cursorSize: 60,
+    dt: 1 / 50 // Slower simulation stablity
+  }
+};
+
+const getInitialTier = () => {
+  if (typeof window === 'undefined') return 'medium';
+
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+  const cores = navigator.hardwareConcurrency || 4;
+  // deviceMemory is Chrome-only, default to 4GB if missing
+  const ram = navigator.deviceMemory || 4;
+  const isLowPower = cores <= 4 || ram <= 4;
+
+  if (isMobile) {
+    return isLowPower ? 'low' : 'medium';
+  }
+  // Desktop
+  return isLowPower ? 'medium' : 'high';
+};
+
 const Hero = ({ onComplete }) => {
   const containerRef = useRef(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [tier, setTier] = useState('medium');
+  // We keep isMobile for layout logic if needed, or derive it
+  const isMobile = typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false;
 
-  // mobile check for perf
+  // Detect Performance Tier
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+    const detectTier = () => {
+      setTier(getInitialTier());
     };
-    checkMobile();
-    const mq = window.matchMedia('(hover: none) and (pointer: coarse)');
-    mq.addEventListener('change', checkMobile);
-    return () => mq.removeEventListener('change', checkMobile);
+    detectTier();
+    // Re-check on resize in case they move windows between screens? 
+    // Mostly useful if we wanted to detect changes, but hardware doesn't change. 
+    // We'll leave it static after mount for stability.
   }, []);
 
-  // show scroll button
+  // Show scroll button logic
   useEffect(() => {
     const handleScroll = () => setShowScrollButton(window.scrollY > 300);
-    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // social links
   const socialLinks = useMemo(() => [
     { href: "https://github.com/darshan-gowdaa", Icon: FaGithub, external: true },
     { href: "https://www.linkedin.com/in/Darshan-Gowda-G-S", Icon: FaLinkedin, external: true },
@@ -43,62 +90,65 @@ const Hero = ({ onComplete }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // init animations
   const { animateHero } = useAnimations();
+  // Safe to call here as useAnimations returns a hook-calling function
   animateHero(containerRef, onComplete);
+
+  const config = LIQUID_CONFIG[tier];
 
   return (
     <>
-      {/* scroll to top */}
+      {/* Scroll to Top Button */}
       {showScrollButton && (
         <button
           onClick={scrollToTop}
-          className="liquid-glass-icon !fixed !bottom-10 sm:!bottom-12 !right-6 sm:!right-8 !z-[9999] text-gray-300 hover:text-white transition-all p-3 sm:p-3.5 md:p-4 rounded-full transform hover:scale-110 duration-300 flex items-center justify-center group touch-manipulation select-none animate-fadeIn"
+          className="fixed bottom-8 right-6 z-50 p-3 rounded-full bg-black/20 backdrop-blur-sm border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 hover:border-white/30 transition-all duration-300 transform hover:scale-110 flex items-center justify-center group"
           aria-label="Scroll to top"
         >
-          <FaArrowUp className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-y-[-2px] transition-transform" />
+          <FaArrowUp className="w-5 h-5 group-hover:-translate-y-1 transition-transform duration-300" />
         </button>
       )}
 
-      <div
+      <section
         id="home"
-        className="h-screen w-full relative z-20 overflow-hidden flex items-center justify-center"
         ref={containerRef}
+        className="relative h-screen w-full overflow-hidden flex flex-col items-center justify-start bg-black"
       >
-        {/* liquid background */}
+        {/* Liquid Background */}
         <div className="absolute inset-0 z-0">
           <LiquidEther
             colors={['#5227FF', '#FF9FFC', '#B19EEF']}
-            mouseForce={isMobile ? 12 : 20}
-            cursorSize={isMobile ? 60 : 100}
+            mouseForce={config.mouseForce}
+            cursorSize={config.cursorSize}
             isViscous={false}
-            viscous={isMobile ? 20 : 30}
-            iterationsViscous={isMobile ? 16 : 32}
-            iterationsPoisson={isMobile ? 16 : 32}
-            resolution={isMobile ? 0.25 : 0.5}
+            viscous={config.viscous}
+            iterationsViscous={config.iterationsViscous}
+            iterationsPoisson={config.iterationsPoisson}
+            resolution={config.resolution}
+            dt={config.dt}
             isBounce={false}
             autoDemo={true}
-            autoSpeed={isMobile ? 0.3 : 0.5}
-            autoIntensity={isMobile ? 1.5 : 2.2}
+            autoSpeed={tier === 'low' ? 0.2 : 0.4}
+            autoIntensity={tier === 'low' ? 1.5 : 2.0}
             takeoverDuration={0.25}
             autoResumeDelay={2500}
             autoRampDuration={0.6}
           />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-start sm:justify-center min-h-[85vh] sm:min-h-screen w-full pt-12 sm:pt-40 md:pt-48 pb-12 sm:pb-16 md:pb-20">
-          {/* content */}
-          <div className="w-full max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl text-center px-4 sm:px-6 md:px-8 flex flex-col items-center">
-            
-            <div className="hero-badge mb-16 sm:mb-8 md:mb-10 opacity-0">
-              <span 
-                className={`liquid-glass-badge mobile-hover-default inline-block bg-clip-text text-gray-200 bg-gradient-to-r from-white to-gray-300 font-medium px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm tracking-widest uppercase transition-all duration-300`}
-              >
-                Full-Stack Developer
-              </span>
-            </div>
+        {/* Content Container */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center h-full gap-4 sm:gap-6 md:gap-8 pt-20 sm:pt-24">
 
-            <div className="hero-text-pressure relative h-[120px] sm:h-[120px] md:h-[150px] w-full mb-2 sm:mb-14 max-w-5xl mx-auto opacity-0 px-2 sm:px-0">
+          {/* Badge */}
+          <div className="hero-badge opacity-0">
+            <span className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-sm font-medium tracking-wider text-gray-200 uppercase shadow-lg shadow-purple-500/10">
+              Full-Stack Developer
+            </span>
+          </div>
+
+          {/* Main Title - Text Pressure */}
+          <div className="hero-text-pressure w-full max-w-5xl opacity-0">
+            <div className="relative w-full h-[80px] sm:h-[120px] md:h-[140px] flex items-center justify-center">
               <TextPressure
                 text="Darshan Gowda"
                 flex={true}
@@ -109,60 +159,61 @@ const Hero = ({ onComplete }) => {
                 italic={true}
                 textColor="#ffffff"
                 strokeColor="#ff0000"
-                minFontSize={36}
+                minFontSize={24}
               />
             </div>
-
-            <p className="hero-description text-base sm:text-base md:text-lg text-gray-300 mb-8 sm:mb-14 max-w-3xl md:max-w-4xl mx-auto px-4 leading-relaxed font-light tracking-wide opacity-0">
-              Software developer & data analytics student crafting responsive web, mobile, and desktop apps that solve real problems. Deploy scalable MERN solutions with AWS, Docker, and cybersecurity fundamentals. Team player who lives for clean code and next-gen tech.
-            </p>
-
-            <div className="hero-buttons flex flex-col sm:flex-row flex-wrap justify-center gap-4 sm:gap-4 mb-8 sm:mb-10 md:mb-12 px-2 sm:px-4 opacity-0 mt-8 sm:mt-0">
-              <NeonButton
-                href="#projects"
-                variant="solid"
-                size="lg"
-                className="w-full sm:w-auto"
-                aria-label="View My Work"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  View My Work
-                  <FaArrowRight className="transform group-hover:translate-x-1 transition-transform duration-300" size={14} />
-                </span>
-              </NeonButton>
-              <NeonButton
-                href="#contact"
-                variant="default"
-                size="lg"
-                className="w-full sm:w-auto"
-                aria-label="Contact Me"
-              >
-                Contact Me
-              </NeonButton>
-            </div>
-
-            <div className="hero-socials flex justify-center items-center gap-8 sm:gap-4 md:gap-6 px-2 pb-8 sm:pb-0">
-              {socialLinks.map(({ href, Icon, external }, i) => (
-                <a
-                  key={i}
-                  href={href}
-                  target={external ? "_blank" : undefined}
-                  rel={external ? "noopener noreferrer" : undefined}
-                  className={`liquid-glass-icon transition-all p-3 sm:p-2.5 md:p-3 rounded-full duration-300 select-none opacity-0 ${
-                    isMobile 
-                      ? '!bg-white/15 !border-white/40 shadow-[0_0_25px_rgba(255,255,255,0.25)] text-white scale-110' 
-                      : 'text-gray-300 hover:text-white transform hover:scale-110'
-                  }`}
-                  aria-label={Icon.name.replace('Fa', '')}
-                >
-                  <Icon className="w-6 h-6 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8" />
-                </a>
-              ))}
-            </div>
           </div>
-        </div>
 
-      </div>
+          {/* Description */}
+          <p className="hero-description text-center text-gray-300 text-base sm:text-lg md:text-xl max-w-2xl leading-relaxed font-light opacity-0 px-4">
+            Software developer & data analytics student crafting responsive web, mobile, and desktop apps.
+            Detailed-oriented team player who lives for clean code and next-gen tech.
+          </p>
+
+          {/* Buttons */}
+          <div className="hero-buttons flex flex-col sm:flex-row items-center gap-4 w-auto opacity-0">
+            <NeonButton
+              href="#projects"
+              variant="solid"
+              size="lg"
+              className="w-48 sm:w-auto"
+              aria-label="View My Work"
+            >
+              <span className="flex items-center justify-center gap-2">
+                View My Work
+                <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+              </span>
+            </NeonButton>
+
+            <NeonButton
+              href="#contact"
+              variant="default"
+              size="lg"
+              className="w-48 sm:w-auto"
+              aria-label="Contact Me"
+            >
+              Contact Me
+            </NeonButton>
+          </div>
+
+          {/* Social Links */}
+          <div className="hero-socials flex items-center gap-6 mt-2 sm:mt-4">
+            {socialLinks.map(({ href, Icon, external }, i) => (
+              <a
+                key={i}
+                href={href}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noopener noreferrer" : undefined}
+                className="p-3 text-gray-400 hover:text-white transition-all duration-300 hover:scale-110 transform"
+                aria-label={Icon.name.replace('Fa', '')}
+              >
+                <Icon className="w-6 h-6 sm:w-7 sm:h-7" />
+              </a>
+            ))}
+          </div>
+
+        </div>
+      </section>
     </>
   );
 };
