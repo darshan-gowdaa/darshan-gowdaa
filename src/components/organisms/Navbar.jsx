@@ -30,7 +30,7 @@ const Navbar = ({ show }) => {
   const [activeSection, setActiveSection] = useState('Home');
   const [isHeadingVisible, setIsHeadingVisible] = useState(false);
   const [forceShowNavbar, setForceShowNavbar] = useState(false);
-  
+
   // animation refs
   const navRef = useRef(null);
   const bubbleRef = useRef(null);
@@ -50,7 +50,7 @@ const Navbar = ({ show }) => {
 
   // animations hook
   const { animateNavbar } = useAnimations();
-  const { closeMobileMenuAnim } = animateNavbar({ 
+  const { closeMobileMenuAnim } = animateNavbar({
     navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender,
     mobileNavRef, mobileBubbleRef, mobileLinkRefs, mobileScrollContainerRef, show
   });
@@ -198,7 +198,7 @@ const Navbar = ({ show }) => {
         key={link}
         ref={el => refs.current[link] = el}
         onClick={(e) => { isMobile && e.stopPropagation(); scrollToSection(link); }}
-        className={isMobile 
+        className={isMobile
           ? "relative w-full py-1 text-base font-medium uppercase tracking-wider transition-colors duration-300 shrink-0 drop-shadow-md text-white"
           : `nav-link-btn ${isActive ? 'text-white' : 'text-gray-300 hover:text-white'}`
         }
