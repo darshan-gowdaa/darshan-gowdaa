@@ -1,8 +1,6 @@
 // src/components/organisms/Hero.jsx
 import React, { memo, useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { FaGithub, FaLinkedin, FaEnvelope, FaArrowUp, FaArrowRight } from 'react-icons/fa';
-import gsap from 'gsap';
-import { useGSAP } from '@gsap/react';
 import { useAnimations } from '../../hooks/useAnimations';
 import LiquidEther from '../atoms/LiquidEther';
 import TextPressure from '../atoms/TextPressure';
@@ -59,8 +57,7 @@ const Hero = ({ onComplete }) => {
   const containerRef = useRef(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [tier, setTier] = useState('medium');
-  // We keep isMobile for layout logic if needed, or derive it
-  const isMobile = typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false;
+
 
   // Detect Performance Tier
   useEffect(() => {

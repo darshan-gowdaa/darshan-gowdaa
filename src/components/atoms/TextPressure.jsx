@@ -175,7 +175,7 @@ const TextPressure = ({
         }
       `}</style>
         );
-    }, [fontFamily, fontUrl, textColor, strokeColor, strokeWidth]);
+    }, [fontFamily, fontUrl, textColor]);
 
     return (
         <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-transparent">

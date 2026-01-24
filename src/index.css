@@ -245,7 +245,6 @@ html { scroll-behavior: smooth; }
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  transition: color 0.3s ease;
   user-select: none;
   outline: none;
   
