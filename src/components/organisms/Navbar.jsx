@@ -1,7 +1,5 @@
 // src/components/organisms/Navbar.jsx
 import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
-import gsap from 'gsap';
-import { useGSAP } from '@gsap/react';
 import { useAnimations } from '../../hooks/useAnimations';
 
 // site sections
@@ -41,6 +39,7 @@ const Navbar = ({ show }) => {
   const mobileScrollContainerRef = useRef(null);
   const isScrolling = useRef(false);
   const isFirstRender = useRef(true);
+  const isBubbleInitialized = useRef(false);
   const forceShowTimeoutRef = useRef(null);
 
 
@@ -50,9 +49,9 @@ const Navbar = ({ show }) => {
 
   // animations hook
   const { animateNavbar } = useAnimations();
-  const { closeMobileMenuAnim } = animateNavbar({
-    navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender,
-    mobileNavRef, mobileBubbleRef, mobileLinkRefs, mobileScrollContainerRef, show
+  animateNavbar({
+    navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender, isBubbleInitialized,
+    mobileNavRef, mobileBubbleRef, mobileLinkRefs, show
   });
 
 
@@ -71,18 +70,20 @@ const Navbar = ({ show }) => {
     };
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
+    // Slight delay to ensure DOM 
     const observeSections = () => {
-      const sections = links.map(link => document.getElementById(link.toLowerCase()));
-      sections.forEach(section => section && observer.observe(section));
+      links.forEach(link => {
+        const section = document.getElementById(link.toLowerCase());
+        if (section) observer.observe(section);
+      });
     };
 
     observeSections();
-    const mutationObserver = new MutationObserver(observeSections);
-    mutationObserver.observe(document.body, { childList: true, subtree: true });
+    const t = setTimeout(observeSections, 500);
 
     return () => {
       observer.disconnect();
-      mutationObserver.disconnect();
+      clearTimeout(t);
     };
   }, []);
 
@@ -103,40 +104,20 @@ const Navbar = ({ show }) => {
       setIsHeadingVisible(isAnyVisible);
     }, { threshold: 0.5, rootMargin: '0px 0px -20% 0px' });
 
-    const updateTargets = () => document.querySelectorAll('h2.glass-heading').forEach(h => observer.observe(h));
-    setTimeout(updateTargets, 100);
-    const mutationObserver = new MutationObserver(updateTargets);
-    mutationObserver.observe(document.body, { childList: true, subtree: true });
+    const updateTargets = () => {
+      const headings = document.querySelectorAll('h2.glass-heading');
+      headings.forEach(h => observer.observe(h));
+    };
+
+    // Initial check and a backup check
+    updateTargets();
+    const t = setTimeout(updateTargets, 1000);
 
     return () => {
       observer.disconnect();
-      mutationObserver.disconnect();
+      clearTimeout(t);
     };
   }, []);
-
-
-  // smooth scroll math
-  const easeOutExpo = (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
-
-  const smoothScrollTo = (targetPosition, duration) => {
-    const startPosition = window.scrollY;
-    const distance = targetPosition - startPosition;
-    let startTime = null;
-
-    const animation = (currentTime) => {
-      if (startTime === null) startTime = currentTime;
-      const timeElapsed = currentTime - startTime;
-      const progress = Math.min(timeElapsed / duration, 1);
-      window.scrollTo(0, startPosition + (distance * easeOutExpo(progress)));
-      if (timeElapsed < duration) {
-        requestAnimationFrame(animation);
-      } else {
-        isScrolling.current = false;
-      }
-    };
-    requestAnimationFrame(animation);
-  };
-
 
   // close menu on outside click
   useEffect(() => {
@@ -157,16 +138,37 @@ const Navbar = ({ show }) => {
 
   // scroll to section
   const scrollToSection = (sectionId) => {
-    setActiveSection(sectionId);
     isScrolling.current = true;
-    setTimeout(() => setMobileMenuOpen(false), 600);
+
+    // 1. READ: Calculate target position
+    let targetTop = null;
+    const element = document.getElementById(sectionId.toLowerCase());
+    if (element) {
+      targetTop = element.getBoundingClientRect().top + window.scrollY;
+    }
+
+    // 2. WRITE: Updates state and DOM
+    if (document.body.style.overflow === 'hidden') {
+      document.body.style.overflow = '';
+    }
+
+    setMobileMenuOpen(false);
+    setActiveSection(sectionId);
+
     setForceShowNavbar(true);
     if (forceShowTimeoutRef.current) clearTimeout(forceShowTimeoutRef.current);
     forceShowTimeoutRef.current = setTimeout(() => setForceShowNavbar(false), 2500);
-    const element = document.getElementById(sectionId.toLowerCase());
-    if (element) {
-      const top = element.getBoundingClientRect().top + window.scrollY;
-      smoothScrollTo(top, 1000);
+
+    // 3. ANIMATE
+    if (targetTop !== null) {
+      window.scrollTo({
+        top: targetTop,
+        behavior: 'smooth'
+      });
+
+      setTimeout(() => {
+        isScrolling.current = false;
+      }, 800);
     } else {
       isScrolling.current = false;
     }
@@ -174,45 +176,49 @@ const Navbar = ({ show }) => {
 
 
   const toggleMobileMenu = useCallback(() => setMobileMenuOpen(prev => !prev), []);
-  const closeMobileMenu = useCallback(() => closeMobileMenuAnim(() => setMobileMenuOpen(false)), [closeMobileMenuAnim]);
 
   // mobile menu styles
   const mobileStyles = {
     width: mobileMenuOpen ? '234px' : '150px',
     height: mobileMenuOpen ? '265px' : '40px',
     background: mobileMenuOpen ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.02)',
-    backdropFilter: mobileMenuOpen ? 'blur(16px)' : 'blur(12px)',
-    WebkitBackdropFilter: mobileMenuOpen ? 'blur(16px)' : 'blur(12px)',
+    backdropFilter: mobileMenuOpen ? 'blur(12px)' : 'blur(8px)',
+    WebkitBackdropFilter: mobileMenuOpen ? 'blur(12px)' : 'blur(8px)',
     border: mobileMenuOpen ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(255, 255, 255, 0.4)',
-    boxShadow: mobileMenuOpen ? '0 20px 40px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,255,255,0.02)' : '0 0 25px rgba(255, 255, 255, 0.25)',
-    transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s, backdrop-filter 0.4s, transform 0.3s ease-in-out, opacity 0.3s ease-in-out',
-    willChange: 'width, height'
+    boxShadow: mobileMenuOpen ? '0 20px 40px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.02)' : '0 0 15px rgba(255, 255, 255, 0.15)',
+    transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s, transform 0.3s ease-in-out, opacity 0.3s ease-in-out',
+    willChange: 'width, height',
+    transform: 'translateZ(0)',
+    backfaceVisibility: 'hidden',
+    contain: 'layout paint'
   };
 
 
   // render nav links
-  const renderLinks = (refs, isMobile = false) => links.map((link) => {
-    const isActive = activeSection === link;
-    return (
-      <button
-        key={link}
-        ref={el => refs.current[link] = el}
-        onClick={(e) => { isMobile && e.stopPropagation(); scrollToSection(link); }}
-        className={isMobile
-          ? "relative w-full py-1 text-base font-medium uppercase tracking-wider transition-colors duration-300 shrink-0 drop-shadow-md text-white"
-          : `nav-link-btn ${isActive ? 'text-white' : 'text-gray-300 hover:text-white'}`
-        }
-        style={isMobile ? { textShadow: '0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(255,255,255,0.3)' } : {}}
-      >
-        <span className="relative z-10">{link}</span>
-        {!isActive && !isMobile && (
-          <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
-            <div className="absolute inset-0 bg-white/5 opacity-0 transition-opacity duration-300" />
-          </div>
-        )}
-      </button>
-    );
-  });
+  const renderLinks = (refs, isMobile = false) => {
+    return links.map((link) => {
+      const isActive = activeSection === link;
+      return (
+        <button
+          key={link}
+          ref={el => refs.current[link] = el}
+          onClick={(e) => { isMobile && e.stopPropagation(); scrollToSection(link); }}
+          className={isMobile
+            ? "relative w-full py-1 text-base font-medium uppercase tracking-wider transition-colors duration-300 shrink-0 drop-shadow-md text-white"
+            : `nav-link-btn ${isActive ? 'text-white' : 'text-gray-300 hover:text-white'}`
+          }
+          style={isMobile ? { textShadow: '0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(255,255,255,0.3)' } : {}}
+        >
+          <span className="relative z-10">{link}</span>
+          {!isActive && !isMobile && (
+            <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
+              <div className="absolute inset-0 bg-white/5 opacity-0 transition-opacity duration-300" />
+            </div>
+          )}
+        </button>
+      );
+    });
+  };
 
 
   return (
@@ -224,7 +230,7 @@ const Navbar = ({ show }) => {
           <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-30" />
           </div>
-          <div ref={bubbleRef} className="nav-bubble-desktop" style={{ top: 0, left: 0, width: 0, height: 0 }} />
+          <div ref={bubbleRef} className="nav-bubble-desktop" style={{ top: 0, left: 0, width: 0, height: 0, willChange: 'transform, width, height', transition: 'none' }} />
           <div className="flex items-center p-1 relative z-10">{renderLinks(linkRefs)}</div>
         </nav>
       </div>
@@ -239,7 +245,7 @@ const Navbar = ({ show }) => {
           </div>
           <div className={`absolute inset-0 w-full h-full ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} style={{ transition: mobileMenuOpen ? 'opacity 0.35s ease-out 0.15s' : 'opacity 0.2s ease-in' }}>
             <div ref={mobileScrollContainerRef} className="w-full h-full flex flex-col items-center justify-start pt-2 pb-4 space-y-1 relative">
-              <div ref={mobileBubbleRef} className="nav-mobile-bubble" style={{ height: '0px', top: '0px', width: '220px', left: '50%', transform: 'translateX(-50%)', opacity: mobileMenuOpen ? 1 : 0 }} />
+              <div ref={mobileBubbleRef} className="nav-mobile-bubble" style={{ height: '0px', top: '0px', width: '220px', left: '50%', transform: 'translateX(-50%)', opacity: mobileMenuOpen ? 1 : 0, willChange: 'transform, height', transition: 'none' }} />
               {renderLinks(mobileLinkRefs, true)}
             </div>
           </div>

@@ -45,14 +45,16 @@ const LoadingFallback = memo(() => (
   </div>
 ));
 
+LoadingFallback.displayName = 'LoadingFallback';
+
 // mobile detection hook
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.matchMedia(MOBILE_MEDIA_QUERY).matches);
-    checkMobile(); 
-    
+    checkMobile();
+
     const mq = window.matchMedia(MOBILE_MEDIA_QUERY);
     mq.addEventListener('change', checkMobile);
     return () => mq.removeEventListener('change', checkMobile);
@@ -65,7 +67,7 @@ const useIsMobile = () => {
 const useScrollTrigger = () => {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger); // register gsap plugin
-    
+
     // refresh scrolltrigger after layout settles
     const timer = setTimeout(() => ScrollTrigger.refresh(), SCROLL_REFRESH_DELAY);
     return () => clearTimeout(timer);
@@ -79,21 +81,21 @@ function App() {
 
   return (
     <div className="bg-gradient-to-br from-[#050505] via-[#050505] to-[#050505] text-white min-h-screen overflow-x-hidden relative">
-      
+
       {/* background liquid effect */}
       <div className="fixed inset-0 h-screen w-full opacity-30 pointer-events-none z-[1] mix-blend-screen">
         <div className="absolute inset-0">
           <LiquidEther {...getLiquidConfig(isMobile)} />
         </div>
       </div>
-      
+
       {/* navbar */}
       <Navbar show={isHeroComplete} />
 
       {/* main content */}
       <main className="relative">
         <Hero onComplete={() => setIsHeroComplete(true)} />
-        
+
         {/* lazy loaded sections */}
         <React.Suspense fallback={<LoadingFallback />}>
           <About />

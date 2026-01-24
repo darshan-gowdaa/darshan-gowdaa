@@ -2,7 +2,6 @@
 import React, { useMemo, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useGSAP } from '@gsap/react';
 import { useAnimations } from '../../hooks/useAnimations';
 import { FaGithub, FaExternalLinkAlt, FaPlay } from 'react-icons/fa';
 import LazyImage from '../atoms/LazyImage';
@@ -17,7 +16,7 @@ import expenseTrackerThumbnail from '../../assets/expense-tracker-thumbnail.avif
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, githubLink, index, isVignette }) => {
+const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, githubLink, isVignette }) => {
   // figure out which link to show
   const actionLink = liveLink || demoVideo;
   const isLiveLink = !!liveLink;
@@ -31,7 +30,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
           {/* image overlays */}
           <div className={`absolute inset-0 z-10 pointer-events-none transition-all duration-500 ${isVignette ? 'shadow-[inset_0_0_60px_rgba(0,0,0,0.9)]' : ''}`} />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
-          
+
           <LazyImage
             src={image}
             alt={title}

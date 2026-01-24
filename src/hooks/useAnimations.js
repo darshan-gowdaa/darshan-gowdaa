@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 // src/hooks/useAnimations.js
-import { useRef } from 'react';
+// import { useRef } from 'react'; // Unused
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -7,82 +8,87 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 export const useAnimations = () => {
-    
+
     const sHero = {
         animate: (containerRef, onComplete) => {
-             useGSAP(() => {
-                const tl = gsap.timeline({ 
+            useGSAP(() => {
+                const tl = gsap.timeline({
                     defaults: { ease: "power2.out" }
                 });
 
-                tl.fromTo(".hero-badge", 
+                tl.fromTo(".hero-badge",
                     { y: 20, opacity: 0 },
                     { y: 0, opacity: 1, duration: 0.6 }
                 )
-                .call(() => {
-                    if (onComplete) onComplete();
-                })
-                .fromTo(".hero-text-pressure", 
-                    { opacity: 0, scale: 0.95 },
-                    { opacity: 1, scale: 1, duration: 0.7 }, 
-                    "-=0.3"
-                )
-                .fromTo(".hero-description",
-                    { y: 20, opacity: 0 },
-                    { y: 0, opacity: 1, duration: 0.6 },
-                    "-=0.3"
-                )
-                .fromTo(".hero-buttons",
-                    { y: 20, opacity: 0 },
-                    { y: 0, opacity: 1, duration: 0.6 },
-                    "-=0.3"
-                )
-                .fromTo(".hero-socials a",
-                    { y: 15, opacity: 0, scale: 0.8 },
-                    { 
-                        y: 0, 
-                        opacity: 1, 
-                        scale: 1, 
-                        duration: 0.4, 
-                        stagger: 0.08,
-                        ease: "back.out(1.5)"
-                    },
-                    "-=0.2"
-                );
+                    .call(() => {
+                        if (onComplete) onComplete();
+                    })
+                    .fromTo(".hero-text-pressure",
+                        { opacity: 0, scale: 0.95 },
+                        { opacity: 1, scale: 1, duration: 0.7 },
+                        "-=0.3"
+                    )
+                    .fromTo(".hero-description",
+                        { y: 20, opacity: 0 },
+                        { y: 0, opacity: 1, duration: 0.6 },
+                        "-=0.3"
+                    )
+                    .fromTo(".hero-buttons",
+                        { y: 20, opacity: 0 },
+                        { y: 0, opacity: 1, duration: 0.6 },
+                        "-=0.3"
+                    )
+                    .fromTo(".hero-socials a",
+                        { y: 15, opacity: 0, scale: 0.8 },
+                        {
+                            y: 0,
+                            opacity: 1,
+                            scale: 1,
+                            duration: 0.4,
+                            stagger: 0.08,
+                            ease: "back.out(1.5)"
+                        },
+                        "-=0.2"
+                    );
             }, { scope: containerRef });
         }
     };
 
     const sNavbar = {
-        animate: ({ navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender, mobileNavRef, mobileBubbleRef, mobileLinkRefs, mobileScrollContainerRef, show }) => {
-            
+        animate: ({ navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender, isBubbleInitialized, mobileNavRef, mobileBubbleRef, mobileLinkRefs, show }) => {
+
             // desktop bubble
             useGSAP(() => {
                 const activeLinkEl = linkRefs.current[activeSection];
                 if (activeLinkEl && bubbleRef.current && navRef.current) {
                     const navRect = navRef.current.getBoundingClientRect();
                     const linkRect = activeLinkEl.getBoundingClientRect();
-                    
+
                     const relativeLeft = linkRect.left - navRect.left;
                     const width = linkRect.width;
                     const height = linkRect.height;
                     const relativeTop = linkRect.top - navRect.top;
 
-                    if (isFirstRender.current) {
+
+                    // decouple from entrance
+                    if (!isBubbleInitialized.current) {
                         gsap.set(bubbleRef.current, {
-                            left: relativeLeft,
-                            top: relativeTop,
+                            x: relativeLeft,
+                            y: relativeTop,
                             width: width,
                             height: height
                         });
+                        isBubbleInitialized.current = true;
                     } else {
                         gsap.to(bubbleRef.current, {
-                            left: relativeLeft,
-                            top: relativeTop,
+                            x: relativeLeft,
+                            y: relativeTop,
                             width: width,
                             height: height,
                             duration: 0.8,
-                            ease: "power3.out"
+                            ease: "power3.out",
+                            overwrite: 'auto',
+                            force3D: true
                         });
                     }
                 }
@@ -91,16 +97,18 @@ export const useAnimations = () => {
             // mobile bubble
             useGSAP(() => {
                 const activeMobileLinkEl = mobileLinkRefs.current[activeSection];
-                
+
                 if (activeMobileLinkEl && mobileBubbleRef.current) {
                     const relativeTop = activeMobileLinkEl.offsetTop;
                     const height = activeMobileLinkEl.offsetHeight;
-                    
+
                     gsap.to(mobileBubbleRef.current, {
-                        top: relativeTop,
+                        y: relativeTop,
+                        xPercent: -50,
                         height: height,
                         duration: 0.6,
-                        ease: "power3.out"
+                        ease: "power3.out",
+                        overwrite: 'auto'
                     });
                 }
             }, { dependencies: [activeSection, mobileMenuOpen], scope: mobileNavRef });
@@ -109,30 +117,29 @@ export const useAnimations = () => {
             useGSAP(() => {
                 if (show) {
                     if (navRef.current) {
-                        // desktop: simple smooth slide down from top
-                        // no xPercent needed as it's centered by flex wrapper
-                        gsap.fromTo(navRef.current, 
+                        // desktop: slide down
+                        gsap.fromTo(navRef.current,
                             { opacity: 0, y: -20 },
-                            { 
-                                opacity: 1, 
+                            {
+                                opacity: 1,
                                 y: 0,
-                                duration: 0.8, 
-                                ease: "power4.out", // smooth slide, no bounce
+                                duration: 0.8,
+                                ease: "power4.out",
                                 onComplete: () => {
-                                    isFirstRender.current = false; 
+                                    isFirstRender.current = false;
                                     gsap.set(navRef.current, { clearProps: "opacity,transform" });
                                 }
                             }
                         );
                     }
                     if (mobileNavRef.current) {
-                        // mobile: simple smooth slide down
-                        gsap.fromTo(mobileNavRef.current, 
+                        // mobile: slide down
+                        gsap.fromTo(mobileNavRef.current,
                             { opacity: 0, y: -20 },
-                            { 
-                                opacity: 1, 
+                            {
+                                opacity: 1,
                                 y: 0,
-                                duration: 0.8, 
+                                duration: 0.8,
                                 ease: "power4.out",
                                 onComplete: () => {
                                     gsap.set(mobileNavRef.current, { clearProps: "opacity,transform" });
@@ -143,16 +150,16 @@ export const useAnimations = () => {
                 }
             }, { dependencies: [show], scope: navRef });
 
-             // closes mobile menu
-             const closeMobileMenuAnim = (onComplete) => {
-                  if (mobileNavRef.current) {
-                      onComplete();
-                  } else {
-                     onComplete();
-                  }
-             };
+            // closes mobile menu
+            const closeMobileMenuAnim = (onComplete) => {
+                if (mobileNavRef.current) {
+                    onComplete();
+                } else {
+                    onComplete();
+                }
+            };
 
-             return { closeMobileMenuAnim };
+            return { closeMobileMenuAnim };
         }
     };
 
@@ -203,8 +210,9 @@ export const useAnimations = () => {
 
                 gsap.fromTo('.timeline-spine',
                     { scaleY: 0 },
-                    { scaleY: 1, ease: 'none',
-                      scrollTrigger: { trigger: containerRef.current, start: 'top 70%', end: 'bottom 70%', scrub: 0.5 }
+                    {
+                        scaleY: 1, ease: 'none',
+                        scrollTrigger: { trigger: containerRef.current, start: 'top 70%', end: 'bottom 70%', scrub: 0.5 }
                     }
                 );
 
@@ -214,9 +222,9 @@ export const useAnimations = () => {
                     const marker = item.querySelector('.timeline-marker');
                     const isEven = i % 2 === 0;
 
-                    gsap.fromTo(content, 
+                    gsap.fromTo(content,
                         { x: isEven ? -30 : 30, opacity: 0 },
-                        { 
+                        {
                             x: 0, y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', force3D: true,
                             scrollTrigger: { trigger: item, start: 'top 80%', toggleActions: "play none none reverse" }
                         }
@@ -248,7 +256,7 @@ export const useAnimations = () => {
                         let startPos = { opacity: 0, y: 50 };
                         if (col === 0) startPos.x = -100;
                         if (col === 2) startPos.x = 100;
-                        
+
                         gsap.fromTo(card, startPos, {
                             x: 0, y: 0, opacity: 1, duration: 0.8, ease: "power3.out", force3D: true,
                             scrollTrigger: { trigger: card, start: "top 80%", toggleActions: "play none none reverse" }
@@ -292,7 +300,7 @@ export const useAnimations = () => {
                     const fromLeft = i % 2 === 0;
                     gsap.fromTo(card,
                         { x: fromLeft ? -80 : 80, opacity: 0 },
-                        { 
+                        {
                             x: 0, y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', force3D: true,
                             scrollTrigger: { trigger: card, start: 'top 80%', toggleActions: "play none none reverse" }
                         }
@@ -305,7 +313,7 @@ export const useAnimations = () => {
     const sContact = {
         animate: (containerRef, toastRef, toast) => {
             // toast animation
-             useGSAP(() => {
+            useGSAP(() => {
                 if (toast && toastRef.current) {
                     gsap.fromTo(toastRef.current,
                         { y: -20, opacity: 0, scale: 0.9 },
@@ -313,9 +321,9 @@ export const useAnimations = () => {
                     );
                 }
             }, { dependencies: [toast] });
-            
+
             const animateToastExit = (onComplete) => {
-                 if (toastRef.current) {
+                if (toastRef.current) {
                     gsap.to(toastRef.current, { y: -20, opacity: 0, scale: 0.9, duration: 0.3, onComplete: onComplete });
                 } else {
                     onComplete();
