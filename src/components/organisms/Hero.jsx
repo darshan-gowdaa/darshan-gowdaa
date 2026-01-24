@@ -176,10 +176,10 @@ const Hero = ({ onComplete }) => {
               href="#projects"
               variant="solid"
               size="lg"
-              className="w-48 sm:w-auto"
+              className="w-56 sm:w-auto"
               aria-label="View My Work"
             >
-              <span className="flex items-center justify-center gap-2">
+              <span className="flex items-center justify-center gap-2 whitespace-nowrap">
                 View My Work
                 <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
               </span>
@@ -189,7 +189,7 @@ const Hero = ({ onComplete }) => {
               href="#contact"
               variant="default"
               size="lg"
-              className="w-48 sm:w-auto"
+              className="w-56 sm:w-auto"
               aria-label="Contact Me"
             >
               Contact Me
