@@ -28,7 +28,10 @@ const Skills = () => {
   const isMobile = useIsMobile();
 
   const { animateSkills } = useAnimations();
-  animateSkills(containerRef);
+  useEffect(() => {
+    const cleanup = animateSkills(containerRef);
+    return cleanup;
+  }, [animateSkills]);
 
   const allSkills = [
     { node: <SiNextdotjs />, title: 'Next.js', href: "https://nextjs.org" },

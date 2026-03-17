@@ -1,5 +1,5 @@
 // src/components/organisms/Projects.jsx
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAnimations } from '../../hooks/useAnimations';
@@ -129,7 +129,10 @@ const Projects = () => {
 
   // animations
   const { animateProjects } = useAnimations();
-  animateProjects(containerRef, headerRef);
+  useEffect(() => {
+    const cleanup = animateProjects(containerRef, headerRef);
+    return cleanup;
+  }, [animateProjects]);
 
   const projects = useMemo(() => [
     {
