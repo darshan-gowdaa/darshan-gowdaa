@@ -308,10 +308,10 @@ html {
   position: relative;
 }
 
-/* skip rendering off-screen sections */
+/* was using content-visibility: auto here but it breaks gsap scrolltrigger
+   because the browser skips layout for off-screen elements and returns wrong positions */
 .section-lazy {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 800px;
+  will-change: transform;
 }
 
 .text-pressure-title.stroke span::after {

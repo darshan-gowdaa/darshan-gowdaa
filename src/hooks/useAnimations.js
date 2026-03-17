@@ -244,7 +244,7 @@ export const useAnimations = () => {
             useGSAP(() => {
                 gsap.from(headerRef.current, {
                     y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
-                    scrollTrigger: { trigger: headerRef.current, start: "top 85%", toggleActions: "play none none reverse" }
+                    scrollTrigger: { trigger: headerRef.current, start: "top 85%", toggleActions: "play none none reverse", invalidateOnRefresh: true }
                 });
 
                 const cards = gsap.utils.toArray('.project-card', containerRef.current);
@@ -259,7 +259,7 @@ export const useAnimations = () => {
 
                         gsap.fromTo(card, startPos, {
                             x: 0, y: 0, opacity: 1, duration: 0.8, ease: "power3.out", force3D: true,
-                            scrollTrigger: { trigger: card, start: "top 80%", toggleActions: "play none none reverse" }
+                            scrollTrigger: { trigger: card, start: "top 80%", toggleActions: "play none none reverse", invalidateOnRefresh: true }
                         });
                     });
                 });
@@ -269,7 +269,7 @@ export const useAnimations = () => {
                         const fromLeft = i % 2 === 0;
                         gsap.fromTo(card, { x: fromLeft ? -100 : 100, opacity: 0 }, {
                             x: 0, y: 0, opacity: 1, duration: 0.8, ease: "power3.out",
-                            scrollTrigger: { trigger: card, start: "top 75%", toggleActions: "play none none reverse" }
+                            scrollTrigger: { trigger: card, start: "top 75%", toggleActions: "play none none reverse", invalidateOnRefresh: true }
                         });
                     });
                 });
@@ -279,10 +279,14 @@ export const useAnimations = () => {
                         const fromLeft = i % 2 === 0;
                         gsap.fromTo(card, { x: fromLeft ? -80 : 80, opacity: 0 }, {
                             x: 0, y: 0, opacity: 1, duration: 0.7, ease: "power3.out",
-                            scrollTrigger: { trigger: card, start: "top 75%", toggleActions: "play none none reverse" }
+                            scrollTrigger: { trigger: card, start: "top 75%", toggleActions: "play none none reverse", invalidateOnRefresh: true }
                         });
                     });
                 });
+
+                // lazy-loaded, mounts after App's 500ms refresh, so force our own
+                const t = setTimeout(() => ScrollTrigger.refresh(), 300);
+                return () => clearTimeout(t);
             }, { scope: containerRef });
         }
     };
@@ -309,7 +313,7 @@ export const useAnimations = () => {
 
                 // lazy-loaded components mount after App's 500ms refresh fires,
                 // so we need our own refresh to recalculate trigger positions
-                const t = setTimeout(() => ScrollTrigger.refresh(), 150);
+                const t = setTimeout(() => ScrollTrigger.refresh(), 300);
                 return () => clearTimeout(t);
             }, { scope: containerRef });
         }
