@@ -67,7 +67,7 @@ const Certifications = () => {
   ];
 
   return (
-    <section id="certifications" className="py-24 relative overflow-hidden" ref={sectionRef}>
+    <section id="certifications" className="py-24 relative overflow-hidden section-lazy" ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-6 relative z-10">
 
         <div className="cert-header flex flex-col items-center text-center mb-16">

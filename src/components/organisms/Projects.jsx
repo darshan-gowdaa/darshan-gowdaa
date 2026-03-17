@@ -192,7 +192,7 @@ const Projects = () => {
   ], []);
 
   return (
-    <section id="projects" className="py-24 relative overflow-hidden">
+    <section id="projects" className="py-24 relative overflow-hidden section-lazy">
       <div ref={containerRef} className="max-w-7xl mx-auto px-6 relative z-10">
         <div ref={headerRef} className="text-center mb-16">
           <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">

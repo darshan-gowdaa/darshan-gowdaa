@@ -17,7 +17,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Kill default outlines & taps, enable text selection only where needed */
+/* reset tap highlight and selection for everything */
 *, *::before, *::after {
   -webkit-tap-highlight-color: transparent;
   cursor: default;
@@ -34,8 +34,10 @@ input, textarea, [contenteditable] {
 
 /* MOBILE TOUCH - Active states only */
 @media (hover: none) and (pointer: coarse) {
-  .touch-hover:active { transform: scale(0.98); }
-  
+  .touch-hover:active {
+    transform: scale(0.98);
+  }
+
   /* Tap feedback for glass elements */
   .liquid-glass-icon:active,
   .liquid-glass-badge:active,
@@ -50,61 +52,80 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
 
-/* Smart cursors - no override spam */
+/* cursor overrides */
 .cursor-pointer,
 a, button, [role="button"], [onclick],
 input[type="submit"], input[type="button"] {
   cursor: pointer;
 }
 
-/* Drag states propagate to children */
+/* grab cursor needs to go to children too */
 .cursor-grab, [style*="cursor: grab"] {
   cursor: grab !important;
 }
-.cursor-grab *, [style*="cursor: grab"] * { cursor: inherit !important; }
+
+.cursor-grab *, [style*="cursor: grab"] * {
+  cursor: inherit !important;
+}
 
 .cursor-grabbing, [style*="cursor: grabbing"] {
   cursor: grabbing !important;
 }
-.cursor-grabbing *, [style*="cursor: grabbing"] * { cursor: inherit !important; }
 
-/* SCROLL MAGIC - Smooth & custom */
-html { scroll-behavior: smooth; }
+.cursor-grabbing *, [style*="cursor: grabbing"] * {
+  cursor: inherit !important;
+}
 
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #000000; }
+/* smooth scrolling and custom scrollbar */
+html {
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #333333;
   border-radius: 4px;
 }
-::-webkit-scrollbar-thumb:hover { background: #555555; }
 
-/* GLASS SYSTEM - Shared base + variants */
+::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+/* glass effect base class */
 .glass-base {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
-/* Mobile blur reduction - perf win */
+/* reduce blur a bit on mobile, seemed laggy */
 @media (hover: none) and (pointer: coarse) {
-  .glass-base { backdrop-filter: blur(6px); }
+  .glass-base {
+    backdrop-filter: blur(6px);
+  }
 }
 
-/* Hero pill - single shimmer sweep */
+/* heading pill with shimmer hover effect */
 .glass-heading {
   display: inline-block;
   padding: 0.875rem 2.5rem;
   background: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.02) 50%,
-    rgba(255, 255, 255, 0.05) 100%);
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.05) 100%);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 2rem;
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  
-  /* Core glow stack */
+
+  /* glow */
   box-shadow:
     0 0 30px rgba(255, 255, 255, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
@@ -120,22 +141,26 @@ html { scroll-behavior: smooth; }
 .glass-heading::before {
   content: '';
   position: absolute;
-  top: 0; left: -100%;
-  width: 60%; height: 100%;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
   transform: skewX(-20deg);
   transition: left 0.8s, transition-duration 0.6s;
 }
 
-.glass-heading:hover::before { left: 160%; }
+.glass-heading:hover::before {
+  left: 160%;
+}
 
-/* Card system - consistent depth */
+/* card styles */
 .liquid-glass-card-enhanced,
 .glass-panel {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  
-  /* Unified shadow stack */
+
+  /* shadows */
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.37),
     inset 0 0 20px rgba(255, 255, 255, 0.02);
@@ -150,13 +175,14 @@ html { scroll-behavior: smooth; }
     inset 0 0 18px rgba(255, 255, 255, 0.08);
 }
 
-/* Button spectrum - white → glass → icon */
+/* button variants */
 .liquid-glass-primary {
   background: #ffffff;
   color: #000000;
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
   transition: all 0.3s ease;
 }
+
 .liquid-glass-primary:hover {
   box-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
 }
@@ -183,35 +209,54 @@ html { scroll-behavior: smooth; }
   box-shadow: 0 0 25px rgba(255, 255, 255, 0.25);
 }
 
-/* Tag specific - Tailwind + glass */
+/* tag styles */
 .liquid-glass-tag {
   @apply text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-full text-gray-300;
 }
 
-/* ANIMATIONS - Lightweight keyframes */
-@keyframes spin-slow { 
-  to { transform: rotate(360deg); } 
-}
-.animate-spin-slow { 
-  animation: spin-slow 10s linear infinite; 
-}
-@media (hover: none) and (pointer: coarse) {
-  .animate-spin-slow { animation-duration: 15s; }
+/* keyframe animations */
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-@keyframes fadeIn { to { opacity: 1; } }
-.animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+.animate-spin-slow {
+  animation: spin-slow 10s linear infinite;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .animate-spin-slow {
+    animation-duration: 15s;
+  }
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
+
 .animate-shimmer {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
-/* NAVBAR BUBBLES - Shared bubble logic */
+/* navbar bubble shared styles */
 .nav-bubble-desktop,
 .nav-mobile-bubble {
   position: absolute;
@@ -220,9 +265,9 @@ html { scroll-behavior: smooth; }
   pointer-events: none;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px);
-  
-  /* Single bubble shadow stack */
-  box-shadow: 
+
+  /* bubble shadow */
+  box-shadow:
     inset 0 4px 6px rgba(255, 255, 255, 0.4),
     inset 0 -4px 6px rgba(255, 255, 255, 0.2),
     0 8px 16px rgba(0, 0, 0, 0.3),
@@ -247,11 +292,11 @@ html { scroll-behavior: smooth; }
   letter-spacing: 0.05em;
   user-select: none;
   outline: none;
-  
-  /* Glow text - single stack */
-  text-shadow: 
-    0 0 10px rgba(255,255,255,0.5),
-    0 0 20px rgba(255,255,255,0.3);
+
+  /* text glow */
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.5),
+    0 0 20px rgba(255, 255, 255, 0.3);
 }
 
 .nav-mobile-glass {
@@ -262,10 +307,18 @@ html { scroll-behavior: smooth; }
 .text-pressure-title.stroke span {
   position: relative;
 }
+
+/* skip rendering off-screen sections */
+.section-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 800px;
+}
+
 .text-pressure-title.stroke span::after {
   content: attr(data-char);
   position: absolute;
-  left: 0; top: 0;
+  left: 0;
+  top: 0;
   color: transparent;
   z-index: -10;
   -webkit-text-stroke-width: var(--stroke-width, 2px);

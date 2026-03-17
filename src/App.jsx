@@ -1,11 +1,13 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, Suspense } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import Navbar from './components/organisms/Navbar';
 import Hero from './components/organisms/Hero';
-import LiquidEther from './components/atoms/LiquidEther';
+
+// lazy load background effect too since its heavy
+const LiquidEther = React.lazy(() => import('./components/atoms/LiquidEther'));
 
 // lazy load components
 const About = React.lazy(() => import('./components/organisms/About'));
@@ -68,6 +70,11 @@ const useScrollTrigger = () => {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger); // register gsap plugin
 
+    // helps with perf during fast scrolling I think
+    ScrollTrigger.config({
+      limitCallbacks: true, // skip callbacks during fast scrolling
+    });
+
     // refresh scrolltrigger after layout settles
     const timer = setTimeout(() => ScrollTrigger.refresh(), SCROLL_REFRESH_DELAY);
     return () => clearTimeout(timer);
@@ -82,12 +89,16 @@ function App() {
   return (
     <div className="bg-gradient-to-br from-[#050505] via-[#050505] to-[#050505] text-white min-h-screen overflow-x-hidden relative">
 
-      {/* background liquid effect */}
-      <div className="fixed inset-0 h-screen w-full opacity-30 pointer-events-none z-[1] mix-blend-screen">
-        <div className="absolute inset-0">
-          <LiquidEther {...getLiquidConfig(isMobile)} />
-        </div>
-      </div>
+      {/* liquid bg - skip on mobile so it doesn't lag */}
+      {!isMobile && (
+        <Suspense fallback={null}>
+          <div className="fixed inset-0 h-screen w-full opacity-30 pointer-events-none z-[1] mix-blend-screen">
+            <div className="absolute inset-0">
+              <LiquidEther {...getLiquidConfig(false)} />
+            </div>
+          </div>
+        </Suspense>
+      )}
 
       {/* navbar */}
       <Navbar show={isHeroComplete} />
