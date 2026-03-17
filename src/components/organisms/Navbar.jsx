@@ -38,6 +38,7 @@ const Navbar = ({ show }) => {
   const mobileLinkRefs = useRef({});
   const mobileScrollContainerRef = useRef(null);
   const isScrolling = useRef(false);
+  const pendingSectionRef = useRef(null);
   const isFirstRender = useRef(true);
   const isBubbleInitialized = useRef(false);
   const forceShowTimeoutRef = useRef(null);
@@ -49,38 +50,75 @@ const Navbar = ({ show }) => {
 
   // shared animation helper
   const { animateNavbar } = useAnimations();
-  animateNavbar({
-    navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender, isBubbleInitialized,
-    mobileNavRef, mobileBubbleRef, mobileLinkRefs, show
-  });
+  useEffect(() => {
+    const cleanup = animateNavbar({
+      navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender, isBubbleInitialized,
+      mobileNavRef, mobileBubbleRef, mobileLinkRefs, show
+    });
+    return cleanup;
+  }, [activeSection, mobileMenuOpen, show, animateNavbar]);
 
 
   // track active section
   useEffect(() => {
-    const observerOptions = { root: null, rootMargin: '-20% 0px -60% 0px', threshold: 0 };
-    const observerCallback = (entries) => {
-      if (isScrolling.current) return;
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const id = entry.target.id;
-          const sectionName = id.charAt(0).toUpperCase() + id.slice(1);
-          setActiveSection(sectionName);
+    let rafId = null;
+
+    const getSections = () => links
+      .map((link) => ({
+        name: link,
+        el: document.getElementById(link.toLowerCase())
+      }))
+      .filter((item) => item.el);
+
+    const updateActiveFromScroll = () => {
+      if (isScrolling.current) {
+        if (pendingSectionRef.current) {
+          setActiveSection((prev) => (prev === pendingSectionRef.current ? prev : pendingSectionRef.current));
+        }
+        return;
+      }
+
+      const sections = getSections();
+      if (!sections.length) return;
+
+      const anchorY = window.innerHeight * 0.35;
+      let best = null;
+
+      sections.forEach(({ name, el }) => {
+        const rect = el.getBoundingClientRect();
+        const containsAnchor = rect.top <= anchorY && rect.bottom >= anchorY;
+        const distance = Math.abs(rect.top - anchorY);
+
+        if (containsAnchor) {
+          if (!best || !best.containsAnchor || distance < best.distance) {
+            best = { name, distance, containsAnchor: true };
+          }
+        } else if (!best || (!best.containsAnchor && distance < best.distance)) {
+          best = { name, distance, containsAnchor: false };
         }
       });
+
+      if (best) {
+        setActiveSection((prev) => (prev === best.name ? prev : best.name));
+      }
     };
 
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
-    // Delay to ensure DOM is fully rendered
+    const onScroll = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateActiveFromScroll);
+    };
+
     const t = setTimeout(() => {
-      links.forEach(link => {
-        const section = document.getElementById(link.toLowerCase());
-        if (section) observer.observe(section);
-      });
+      updateActiveFromScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
     }, 100);
 
     return () => {
-      observer.disconnect();
       clearTimeout(t);
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
     };
   }, []);
 
@@ -135,6 +173,7 @@ const Navbar = ({ show }) => {
   // scroll to section
   const scrollToSection = (sectionId) => {
     isScrolling.current = true;
+    pendingSectionRef.current = sectionId;
 
     // 1. READ: Calculate target position
     let targetTop = null;
@@ -162,11 +201,46 @@ const Navbar = ({ show }) => {
         behavior: 'smooth'
       });
 
-      setTimeout(() => {
+      // Keep the clicked nav active until destination is actually visible.
+      const anchorY = window.innerHeight * 0.35;
+      const lockStart = performance.now();
+      const maxLockMs = 2200;
+      let rafId = null;
+
+      const finishScrollLock = () => {
+        if (rafId) cancelAnimationFrame(rafId);
         isScrolling.current = false;
-      }, 800);
+        pendingSectionRef.current = null;
+      };
+
+      const ensureTargetVisible = () => {
+        const target = document.getElementById(sectionId.toLowerCase());
+        if (!target) {
+          finishScrollLock();
+          return;
+        }
+
+        const rect = target.getBoundingClientRect();
+        const isVisibleAtAnchor = rect.top <= anchorY && rect.bottom >= anchorY;
+
+        if (isVisibleAtAnchor) {
+          finishScrollLock();
+          return;
+        }
+
+        // If smooth scroll takes too long (or user interrupts), release lock gracefully.
+        if (performance.now() - lockStart > maxLockMs) {
+          finishScrollLock();
+          return;
+        }
+
+        rafId = requestAnimationFrame(ensureTargetVisible);
+      };
+
+      rafId = requestAnimationFrame(ensureTargetVisible);
     } else {
       isScrolling.current = false;
+      pendingSectionRef.current = null;
     }
   };
 

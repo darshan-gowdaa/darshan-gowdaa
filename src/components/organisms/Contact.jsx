@@ -1,5 +1,5 @@
 // src/components/organisms/Contact.jsx
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
 import { FaMapMarkerAlt, FaEnvelope, FaGithub, FaLinkedin, FaPaperPlane, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import emailjs from '@emailjs/browser';
@@ -45,15 +45,24 @@ const Contact = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const { animateContactSection, animateToastEnter, animateToastExit } = useAnimations();
+
   const showToast = (type, message) => {
     setToast({ type, message });
     setTimeout(() => {
-      animateToastExit(() => setToast(null));
+      animateToastExit(toastRef, () => setToast(null));
     }, 5000);
   };
 
-  const { animateContact } = useAnimations();
-  const { animateToastExit } = animateContact(containerRef, toastRef, toast);
+  useEffect(() => {
+    const cleanup = animateContactSection(containerRef);
+    return cleanup;
+  }, [animateContactSection]);
+
+  useEffect(() => {
+    if (!toast) return;
+    animateToastEnter(toastRef);
+  }, [toast, animateToastEnter]);
 
   const validateForm = () => {
     if (!formData.name.trim()) return "Name is required";

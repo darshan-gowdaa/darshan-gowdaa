@@ -1,5 +1,5 @@
 // src/components/organisms/Experience.jsx
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
 import { FaBriefcase, FaGraduationCap } from 'react-icons/fa';
 
@@ -65,7 +65,10 @@ const Experience = () => {
   const sectionRef = useRef(null);
 
   const { animateExperience } = useAnimations();
-  animateExperience(sectionRef);
+  useEffect(() => {
+    const cleanup = animateExperience(sectionRef);
+    return cleanup;
+  }, [animateExperience]);
 
   const timelineItems = [
     {

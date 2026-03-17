@@ -1,5 +1,5 @@
 // src/components/organisms/Certifications.jsx
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
 import { SiAmazonwebservices, SiInfosys } from 'react-icons/si';
 import { NeonButton } from '../atoms/NeonButton';
@@ -47,7 +47,10 @@ const Certifications = () => {
   const sectionRef = useRef(null);
 
   const { animateCertifications } = useAnimations();
-  animateCertifications(sectionRef);
+  useEffect(() => {
+    const cleanup = animateCertifications(sectionRef);
+    return cleanup;
+  }, [animateCertifications]);
 
   const certifications = [
     {

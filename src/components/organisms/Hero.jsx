@@ -88,7 +88,10 @@ const Hero = ({ onComplete }) => {
   }, []);
 
   const { animateHero } = useAnimations();
-  animateHero(containerRef, onComplete);
+  useEffect(() => {
+    const cleanup = animateHero(containerRef, onComplete);
+    return cleanup;
+  }, [animateHero, onComplete]);
 
   const config = LIQUID_CONFIG[tier];
 

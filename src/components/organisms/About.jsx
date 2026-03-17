@@ -21,7 +21,10 @@ const About = () => {
   const isMobile = useIsMobile();
 
   const { animateAbout } = useAnimations();
-  animateAbout(sectionRef);
+  useEffect(() => {
+    const cleanup = animateAbout(sectionRef);
+    return cleanup;
+  }, [animateAbout]);
 
   return (
     <section id="about" className="py-24 px-4 sm:px-8 relative overflow-hidden section-lazy" ref={sectionRef}>
