@@ -1,8 +1,5 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 // src/hooks/useAnimations.js
-// import { useRef } from 'react'; // Unused
 import gsap from 'gsap';
-import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -11,7 +8,7 @@ export const useAnimations = () => {
 
     const sHero = {
         animate: (containerRef, onComplete) => {
-            useGSAP(() => {
+            gsap.context(() => {
                 const tl = gsap.timeline({
                     defaults: { ease: "power2.out" }
                 });
@@ -50,7 +47,7 @@ export const useAnimations = () => {
                         },
                         "-=0.2"
                     );
-            }, { scope: containerRef });
+            }, containerRef?.current);
         }
     };
 
@@ -58,7 +55,7 @@ export const useAnimations = () => {
         animate: ({ navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender, isBubbleInitialized, mobileNavRef, mobileBubbleRef, mobileLinkRefs, show }) => {
 
             // desktop bubble
-            useGSAP(() => {
+            gsap.context(() => {
                 const activeLinkEl = linkRefs.current[activeSection];
                 if (activeLinkEl && bubbleRef.current && navRef.current) {
                     const navRect = navRef.current.getBoundingClientRect();
@@ -92,10 +89,10 @@ export const useAnimations = () => {
                         });
                     }
                 }
-            }, { dependencies: [activeSection], scope: navRef });
+            }, navRef?.current);
 
             // mobile bubble
-            useGSAP(() => {
+            gsap.context(() => {
                 const activeMobileLinkEl = mobileLinkRefs.current[activeSection];
 
                 if (activeMobileLinkEl && mobileBubbleRef.current) {
@@ -108,13 +105,14 @@ export const useAnimations = () => {
                         height: height,
                         duration: 0.6,
                         ease: "power3.out",
-                        overwrite: 'auto'
+                        overwrite: 'auto',
+                        force3D: true
                     });
                 }
-            }, { dependencies: [activeSection, mobileMenuOpen], scope: mobileNavRef });
+            }, mobileNavRef?.current);
 
             // navbar entrance
-            useGSAP(() => {
+            gsap.context(() => {
                 if (show) {
                     if (navRef.current) {
                         // desktop: slide down
@@ -148,15 +146,11 @@ export const useAnimations = () => {
                         );
                     }
                 }
-            }, { dependencies: [show], scope: navRef });
+            }, navRef?.current);
 
             // closes mobile menu
             const closeMobileMenuAnim = (onComplete) => {
-                if (mobileNavRef.current) {
-                    onComplete();
-                } else {
-                    onComplete();
-                }
+              onComplete();
             };
 
             return { closeMobileMenuAnim };
@@ -165,7 +159,7 @@ export const useAnimations = () => {
 
     const sAbout = {
         animate: (containerRef) => {
-            useGSAP(() => {
+            gsap.context(() => {
                 gsap.from('.about-header', {
                     y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
                     scrollTrigger: { trigger: '.about-header', start: 'top 85%', toggleActions: "play none none reverse" }
@@ -180,13 +174,13 @@ export const useAnimations = () => {
                     x: 80, opacity: 0, duration: 0.8, delay: 0.1, ease: 'power3.out', force3D: true,
                     scrollTrigger: { trigger: '.about-right', start: 'top 75%', toggleActions: "play none none reverse" }
                 });
-            }, { scope: containerRef });
+            }, containerRef?.current);
         }
     };
 
     const sSkills = {
         animate: (containerRef) => {
-            useGSAP(() => {
+            gsap.context(() => {
                 gsap.from('.skills-header', {
                     y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
                     scrollTrigger: { trigger: '.skills-header', start: 'top 85%', toggleActions: "play none none reverse" }
@@ -196,13 +190,13 @@ export const useAnimations = () => {
                     x: 100, opacity: 0, duration: 0.9, ease: 'power3.out', force3D: true,
                     scrollTrigger: { trigger: '.skills-loop', start: 'top 75%', toggleActions: "play none none reverse" }
                 });
-            }, { scope: containerRef });
+            }, containerRef?.current);
         }
     };
 
     const sExperience = {
         animate: (containerRef) => {
-            useGSAP(() => {
+            gsap.context(() => {
                 gsap.from('.exp-header', {
                     y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
                     scrollTrigger: { trigger: '.exp-header', start: 'top 85%', toggleActions: "play none none reverse" }
@@ -235,13 +229,13 @@ export const useAnimations = () => {
                         scrollTrigger: { trigger: item, start: 'top 90%', toggleActions: "play none none reverse", invalidateOnRefresh: true }
                     });
                 });
-            }, { scope: containerRef });
+            }, containerRef?.current);
         }
     };
 
     const sProjects = {
         animate: (containerRef, headerRef) => {
-            useGSAP(() => {
+            gsap.context(() => {
                 gsap.from(headerRef.current, {
                     y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
                     scrollTrigger: { trigger: headerRef.current, start: "top 85%", toggleActions: "play none none reverse", invalidateOnRefresh: true }
@@ -268,7 +262,7 @@ export const useAnimations = () => {
                     cards.forEach((card, i) => {
                         const fromLeft = i % 2 === 0;
                         gsap.fromTo(card, { x: fromLeft ? -100 : 100, opacity: 0 }, {
-                            x: 0, y: 0, opacity: 1, duration: 0.8, ease: "power3.out",
+                            x: 0, y: 0, opacity: 1, duration: 0.8, ease: "power3.out", force3D: true,
                             scrollTrigger: { trigger: card, start: "top 75%", toggleActions: "play none none reverse", invalidateOnRefresh: true }
                         });
                     });
@@ -278,7 +272,7 @@ export const useAnimations = () => {
                     cards.forEach((card, i) => {
                         const fromLeft = i % 2 === 0;
                         gsap.fromTo(card, { x: fromLeft ? -80 : 80, opacity: 0 }, {
-                            x: 0, y: 0, opacity: 1, duration: 0.7, ease: "power3.out",
+                            x: 0, y: 0, opacity: 1, duration: 0.7, ease: "power3.out", force3D: true,
                             scrollTrigger: { trigger: card, start: "top 75%", toggleActions: "play none none reverse", invalidateOnRefresh: true }
                         });
                     });
@@ -287,13 +281,13 @@ export const useAnimations = () => {
                 // lazy-loaded, mounts after App's 500ms refresh, so force our own
                 const t = setTimeout(() => ScrollTrigger.refresh(), 300);
                 return () => clearTimeout(t);
-            }, { scope: containerRef });
+            }, containerRef?.current);
         }
     };
 
     const sCertifications = {
         animate: (containerRef) => {
-            useGSAP(() => {
+            gsap.context(() => {
                 gsap.from('.cert-header', {
                     y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
                     scrollTrigger: { trigger: '.cert-header', start: 'top 90%', toggleActions: "play none none reverse", invalidateOnRefresh: true }
@@ -315,21 +309,21 @@ export const useAnimations = () => {
                 // so we need our own refresh to recalculate trigger positions
                 const t = setTimeout(() => ScrollTrigger.refresh(), 300);
                 return () => clearTimeout(t);
-            }, { scope: containerRef });
+            }, containerRef?.current);
         }
     };
 
     const sContact = {
         animate: (containerRef, toastRef, toast) => {
             // toast animation
-            useGSAP(() => {
+            gsap.context(() => {
                 if (toast && toastRef.current) {
                     gsap.fromTo(toastRef.current,
                         { y: -20, opacity: 0, scale: 0.9 },
                         { y: 0, opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.7)" }
                     );
                 }
-            }, { dependencies: [toast] });
+            });
 
             const animateToastExit = (onComplete) => {
                 if (toastRef.current) {
@@ -339,7 +333,7 @@ export const useAnimations = () => {
                 }
             };
 
-            useGSAP(() => {
+            gsap.context(() => {
                 gsap.from(".contact-header", {
                     y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
                     scrollTrigger: { trigger: ".contact-header", start: "top 85%", toggleActions: "play none none reverse" }
@@ -354,7 +348,7 @@ export const useAnimations = () => {
                     x: 80, opacity: 0, duration: 0.7, ease: 'power3.out', force3D: true,
                     scrollTrigger: { trigger: ".contact-right", start: "top 75%", toggleActions: "play none none reverse" }
                 });
-            }, { scope: containerRef });
+            }, containerRef?.current);
 
             return { animateToastExit };
         }

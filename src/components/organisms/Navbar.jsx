@@ -1,5 +1,5 @@
 // src/components/organisms/Navbar.jsx
-import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
+import React, { memo, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
 
 // site sections
@@ -47,7 +47,7 @@ const Navbar = ({ show }) => {
   useEffect(() => { document.title = `${activeSection} | Darshan Gowda`; }, [activeSection]);
 
 
-  // animations hook
+  // shared animation helper
   const { animateNavbar } = useAnimations();
   animateNavbar({
     navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender, isBubbleInitialized,
@@ -70,16 +70,13 @@ const Navbar = ({ show }) => {
     };
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
-    // Slight delay to ensure DOM 
-    const observeSections = () => {
+    // Delay to ensure DOM is fully rendered
+    const t = setTimeout(() => {
       links.forEach(link => {
         const section = document.getElementById(link.toLowerCase());
         if (section) observer.observe(section);
       });
-    };
-
-    observeSections();
-    const t = setTimeout(observeSections, 500);
+    }, 100);
 
     return () => {
       observer.disconnect();
@@ -104,14 +101,11 @@ const Navbar = ({ show }) => {
       setIsHeadingVisible(isAnyVisible);
     }, { threshold: 0.5, rootMargin: '0px 0px -20% 0px' });
 
-    const updateTargets = () => {
+    // Delay to ensure DOM and lazy-loaded headings are ready
+    const t = setTimeout(() => {
       const headings = document.querySelectorAll('h2.glass-heading');
       headings.forEach(h => observer.observe(h));
-    };
-
-    // Initial check and a backup check
-    updateTargets();
-    const t = setTimeout(updateTargets, 1000);
+    }, 300);
 
     return () => {
       observer.disconnect();
@@ -126,6 +120,8 @@ const Navbar = ({ show }) => {
         setMobileMenuOpen(false);
       }
     };
+
+    if (!mobileMenuOpen) return;
 
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
@@ -178,7 +174,7 @@ const Navbar = ({ show }) => {
   const toggleMobileMenu = useCallback(() => setMobileMenuOpen(prev => !prev), []);
 
   // mobile menu styles
-  const mobileStyles = {
+  const mobileStyles = useMemo(() => ({
     width: mobileMenuOpen ? '234px' : '150px',
     height: mobileMenuOpen ? '265px' : '40px',
     background: mobileMenuOpen ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.02)',
@@ -191,7 +187,7 @@ const Navbar = ({ show }) => {
     transform: 'translateZ(0)',
     backfaceVisibility: 'hidden',
     contain: 'layout paint'
-  };
+  }), [mobileMenuOpen]);
 
 
   // render nav links
