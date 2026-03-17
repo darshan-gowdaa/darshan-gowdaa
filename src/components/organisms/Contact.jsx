@@ -84,9 +84,9 @@ const Contact = () => {
 
     setIsSubmitting(true);
 
-    const SERVICE_ID = 'service_98r9sx9';
-    const TEMPLATE_ID = 'template_du3zi93';
-    const PUBLIC_KEY = 'HQZF5laClkbYFkSXf';
+    const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
     const templateParams = {
       name: formData.name,
@@ -120,7 +120,7 @@ const Contact = () => {
   ];
 
   return (
-    <section ref={containerRef} id="contact" className="py-24 relative overflow-hidden">
+    <section ref={containerRef} id="contact" className="py-24 relative overflow-hidden section-lazy">
       {toast && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4 pointer-events-none">
           <div

@@ -81,7 +81,7 @@ const Skills = () => {
   );
 
   return (
-    <section id="skills" className="py-24 relative overflow-hidden" ref={containerRef}>
+    <section id="skills" className="py-24 relative overflow-hidden section-lazy" ref={containerRef}>
       <div className="max-w-7xl mx-auto mb-16 relative z-10 px-6">
         <div className="skills-header text-center">
           <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">

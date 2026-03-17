@@ -2,12 +2,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
+import compression from 'vite-plugin-compression'
 
 export default defineConfig({
   base: process.env.VERCEL ? '/' : '/darshan-gowdaa/',
   plugins: [
     react(),
     tailwindcss(),
+    // gzip compression
+    compression({
+      algorithm: 'gzip',
+      threshold: 1024, // only compress files > 1KB
+    }),
+    // brotli is better compression than gzip
+    compression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      threshold: 1024,
+    }),
   ],
   build: {
     // Use esbuild for minification
@@ -16,13 +28,13 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Separate vendor chunks for better caching
+          // put big libraries in their own chunks
           'vendor-react': ['react', 'react-dom'],
           'vendor-motion': ['framer-motion'],
           'vendor-three': ['three'],
           'vendor-icons': ['react-icons'],
         },
-        // Asset file naming with hash for cache busting
+        // hash in filename so browser re-downloads when updated
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name.split('.');
           const ext = info[info.length - 1];
@@ -35,12 +47,12 @@ export default defineConfig({
         entryFileNames: 'assets/js/[name]-[hash].js',
       },
     },
-    // Increase chunk size warning limit (some vendor libs are large)
+    // increase warning limit, some vendor libs are just big
     chunkSizeWarningLimit: 600,
-    // Enable source maps for debugging (optional, can disable for smaller builds)
+    // no source maps in prod build
     sourcemap: false,
-    // Target modern browsers for smaller bundle
-    target: 'es2020',
+    // only target modern browsers
+    target: 'esnext',
   },
   // Optimize dependencies
   optimizeDeps: {

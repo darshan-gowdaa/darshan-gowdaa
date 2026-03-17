@@ -23,6 +23,9 @@
   <link rel="icon" type="image/avif" href="/favicon.avif" />
   <link rel="apple-touch-icon" href="/favicon.avif" />
 
+  <!-- preload main entry -->
+  <link rel="modulepreload" href="/src/main.jsx" />
+
   <!-- Theme Color -->
   <meta name="theme-color" content="#050505" />
   <meta name="msapplication-TileColor" content="#050505" />
@@ -51,24 +54,24 @@
   <meta name="geo.region" content="IN-KA" />
   <meta name="geo.placename" content="Bengaluru" />
 
-  <!-- Preconnect to critical third-party origins -->
+  <!-- connect to google fonts early -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <!-- Preload critical font files for faster loading -->
+  <!-- preload fonts -->
   <link rel="preload" as="style"
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&display=swap" />
-  <!-- Preload TextPressure font (used in Hero) -->
+  <!-- font for the big name animation on hero -->
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2" />
 
-  <!-- DNS prefetch for external resources -->
+  <!-- dns prefetch for external links -->
   <link rel="dns-prefetch" href="https://github.com" />
   <link rel="dns-prefetch" href="https://www.linkedin.com" />
   <link rel="dns-prefetch" href="https://drive.google.com" />
   <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-  <!-- Google Fonts - Async loading to avoid render blocking -->
+  <!-- load fonts async so they don't block rendering -->
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&display=swap"
     media="print" onload="this.media='all'" />
@@ -137,7 +140,7 @@
 
 <body>
   <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
+  <script type="module" src="/src/main.jsx" fetchpriority="high"></script>
 </body>
 
 </html>

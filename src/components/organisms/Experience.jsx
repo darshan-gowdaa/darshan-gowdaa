@@ -95,7 +95,7 @@ const Experience = () => {
   ];
 
   return (
-    <section id="experience" className="py-24 relative overflow-hidden" ref={sectionRef}>
+    <section id="experience" className="py-24 relative overflow-hidden section-lazy" ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-6 relative z-10">
 
         <div className="exp-header text-center mb-16">

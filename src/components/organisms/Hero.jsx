@@ -2,14 +2,16 @@
 import React, { memo, useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { FaGithub, FaLinkedin, FaEnvelope, FaArrowUp, FaArrowRight } from 'react-icons/fa';
 import { useAnimations } from '../../hooks/useAnimations';
-import LiquidEther from '../atoms/LiquidEther';
-import TextPressure from '../atoms/TextPressure';
 import { NeonButton } from '../atoms/NeonButton';
+
+// lazy load these - they're too big for the initial bundle
+const LiquidEther = React.lazy(() => import('../atoms/LiquidEther'));
+const TextPressure = React.lazy(() => import('../atoms/TextPressure'));
 
 // Performance configuration for LiquidEther
 const LIQUID_CONFIG = {
   high: {
-    resolution: 0.6, // High visual fidelity
+    resolution: 0.6, // good quality
     iterationsViscous: 32,
     iterationsPoisson: 32,
     viscous: 30,
@@ -18,7 +20,7 @@ const LIQUID_CONFIG = {
     dt: 1 / 60
   },
   medium: {
-    resolution: 0.4, // Good balance for laptops/tablets
+    resolution: 0.4, // medium quality
     iterationsViscous: 22,
     iterationsPoisson: 22,
     viscous: 25,
@@ -27,13 +29,13 @@ const LIQUID_CONFIG = {
     dt: 1 / 60
   },
   low: {
-    resolution: 0.2, // Pixelated/blurry but smooth FPS
+    resolution: 0.2, // lower quality but runs fine on weak hardware
     iterationsViscous: 14,
     iterationsPoisson: 14,
     viscous: 20,
     mouseForce: 15,
     cursorSize: 60,
-    dt: 1 / 50 // Slower simulation stablity
+    dt: 1 / 50 // slower tick for stability
   }
 };
 
@@ -42,7 +44,7 @@ const getInitialTier = () => {
 
   const isMobile = window.matchMedia('(max-width: 768px)').matches;
   const cores = navigator.hardwareConcurrency || 4;
-  // deviceMemory is Chrome-only, default to 4GB if missing
+  // fallback if browser doesn't support deviceMemory
   const ram = navigator.deviceMemory || 4;
   const isLowPower = cores <= 4 || ram <= 4;
 
@@ -65,9 +67,7 @@ const Hero = ({ onComplete }) => {
       setTier(getInitialTier());
     };
     detectTier();
-    // Re-check on resize in case they move windows between screens? 
-    // Mostly useful if we wanted to detect changes, but hardware doesn't change. 
-    // We'll leave it static after mount for stability.
+    // only runs once on mount, hardware doesn't really change
   }, []);
 
   // Show scroll button logic
@@ -88,7 +88,6 @@ const Hero = ({ onComplete }) => {
   }, []);
 
   const { animateHero } = useAnimations();
-  // Safe to call here as useAnimations returns a hook-calling function
   animateHero(containerRef, onComplete);
 
   const config = LIQUID_CONFIG[tier];
@@ -113,24 +112,26 @@ const Hero = ({ onComplete }) => {
       >
         {/* Liquid Background */}
         <div className="absolute inset-0 z-0">
-          <LiquidEther
-            colors={['#5227FF', '#FF9FFC', '#B19EEF']}
-            mouseForce={config.mouseForce}
-            cursorSize={config.cursorSize}
-            isViscous={false}
-            viscous={config.viscous}
-            iterationsViscous={config.iterationsViscous}
-            iterationsPoisson={config.iterationsPoisson}
-            resolution={config.resolution}
-            dt={config.dt}
-            isBounce={false}
-            autoDemo={true}
-            autoSpeed={tier === 'low' ? 0.2 : 0.4}
-            autoIntensity={tier === 'low' ? 1.5 : 2.0}
-            takeoverDuration={0.25}
-            autoResumeDelay={2500}
-            autoRampDuration={0.6}
-          />
+          <React.Suspense fallback={<div className="absolute inset-0 bg-black" />}>
+            <LiquidEther
+              colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+              mouseForce={config.mouseForce}
+              cursorSize={config.cursorSize}
+              isViscous={false}
+              viscous={config.viscous}
+              iterationsViscous={config.iterationsViscous}
+              iterationsPoisson={config.iterationsPoisson}
+              resolution={config.resolution}
+              dt={config.dt}
+              isBounce={false}
+              autoDemo={true}
+              autoSpeed={tier === 'low' ? 0.2 : 0.4}
+              autoIntensity={tier === 'low' ? 1.5 : 2.0}
+              takeoverDuration={0.25}
+              autoResumeDelay={2500}
+              autoRampDuration={0.6}
+            />
+          </React.Suspense>
         </div>
 
         {/* Content Container */}
@@ -146,8 +147,11 @@ const Hero = ({ onComplete }) => {
           {/* Main Title - Text Pressure */}
           <div className="hero-text-pressure w-full max-w-5xl opacity-0">
             <div className="relative w-full h-[80px] sm:h-[120px] md:h-[140px] flex items-center justify-center">
-              <TextPressure
-                text="Darshan Gowda"
+              <React.Suspense fallback={
+                <span className="text-4xl sm:text-6xl md:text-7xl font-bold text-white tracking-tight">DARSHAN GOWDA</span>
+              }>
+                <TextPressure
+                text="DARSHAN GOWDA"
                 flex={true}
                 alpha={false}
                 stroke={false}
@@ -158,6 +162,7 @@ const Hero = ({ onComplete }) => {
                 strokeColor="#ff0000"
                 minFontSize={24}
               />
+              </React.Suspense>
             </div>
           </div>
 

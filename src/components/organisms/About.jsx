@@ -24,7 +24,7 @@ const About = () => {
   animateAbout(sectionRef);
 
   return (
-    <section id="about" className="py-24 px-4 sm:px-8 relative overflow-hidden" ref={sectionRef}>
+    <section id="about" className="py-24 px-4 sm:px-8 relative overflow-hidden section-lazy" ref={sectionRef}>
       <div className="max-w-[1600px] w-full mx-auto">
 
         <div className="about-header text-center mb-16">

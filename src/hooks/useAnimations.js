@@ -226,13 +226,13 @@ export const useAnimations = () => {
                         { x: isEven ? -30 : 30, opacity: 0 },
                         {
                             x: 0, y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', force3D: true,
-                            scrollTrigger: { trigger: item, start: 'top 80%', toggleActions: "play none none reverse" }
+                            scrollTrigger: { trigger: item, start: 'top 90%', toggleActions: "play none none reverse", invalidateOnRefresh: true }
                         }
                     );
 
                     gsap.to(marker, {
                         scale: 1, opacity: 1, duration: 0.5, delay: 0.15, ease: 'back.out(1.7)',
-                        scrollTrigger: { trigger: item, start: 'top 80%', toggleActions: "play none none reverse" }
+                        scrollTrigger: { trigger: item, start: 'top 90%', toggleActions: "play none none reverse", invalidateOnRefresh: true }
                     });
                 });
             }, { scope: containerRef });
@@ -292,7 +292,7 @@ export const useAnimations = () => {
             useGSAP(() => {
                 gsap.from('.cert-header', {
                     y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
-                    scrollTrigger: { trigger: '.cert-header', start: 'top 85%', toggleActions: "play none none reverse" }
+                    scrollTrigger: { trigger: '.cert-header', start: 'top 90%', toggleActions: "play none none reverse", invalidateOnRefresh: true }
                 });
 
                 const cards = gsap.utils.toArray('.cert-card', containerRef.current);
@@ -302,10 +302,15 @@ export const useAnimations = () => {
                         { x: fromLeft ? -80 : 80, opacity: 0 },
                         {
                             x: 0, y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', force3D: true,
-                            scrollTrigger: { trigger: card, start: 'top 80%', toggleActions: "play none none reverse" }
+                            scrollTrigger: { trigger: card, start: 'top 90%', toggleActions: "play none none reverse", invalidateOnRefresh: true }
                         }
                     );
                 });
+
+                // lazy-loaded components mount after App's 500ms refresh fires,
+                // so we need our own refresh to recalculate trigger positions
+                const t = setTimeout(() => ScrollTrigger.refresh(), 150);
+                return () => clearTimeout(t);
             }, { scope: containerRef });
         }
     };
