@@ -3,12 +3,15 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
 import compression from 'vite-plugin-compression'
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 
 export default defineConfig({
   base: process.env.VERCEL ? '/' : '/darshan-gowdaa/',
   plugins: [
     react(),
     tailwindcss(),
+    // optimize images during build
+    ViteImageOptimizer(),
     // gzip compression
     compression({
       algorithm: 'gzip',
@@ -51,8 +54,10 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     // no source maps in prod build
     sourcemap: false,
-    // only target modern browsers
-    target: 'esnext',
+  },
+  // drop console logs and debuggers from the production build
+  esbuild: {
+    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
   },
   // Optimize dependencies
   optimizeDeps: {
