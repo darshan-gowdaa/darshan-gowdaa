@@ -151,10 +151,10 @@ const Hero = ({ onComplete }) => {
           <div className="hero-text-pressure w-full max-w-5xl opacity-0">
             <div className="relative w-full h-[80px] sm:h-[120px] md:h-[140px] flex items-center justify-center">
               <React.Suspense fallback={
-                <span className="text-4xl sm:text-6xl md:text-7xl font-bold text-white tracking-tight">DARSHAN GOWDA</span>
+                <span className="text-4xl sm:text-6xl md:text-7xl font-bold text-white tracking-tight">DARSHAN GOWDA G S</span>
               }>
                 <TextPressure
-                text="DARSHAN GOWDA"
+                text="DARSHAN GOWDA G S"
                 flex={true}
                 alpha={false}
                 stroke={false}

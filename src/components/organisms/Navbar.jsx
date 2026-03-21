@@ -45,7 +45,7 @@ const Navbar = ({ show }) => {
 
 
   // update page title
-  useEffect(() => { document.title = `${activeSection} | Darshan Gowda`; }, [activeSection]);
+  useEffect(() => { document.title = `${activeSection} | Darshan Gowda G S`; }, [activeSection]);
 
 
   // shared animation helper
