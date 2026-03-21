@@ -43,8 +43,8 @@ const About = () => {
               <div className="absolute inset-0 border border-white/5 rounded-full scale-110 opacity-20 animate-spin-slow pointer-events-none" />
               <TiltedCard
                 imageSrc={profileImage}
-                altText="Darshan Gowda"
-                captionText="Darshan Gowda"
+                altText="Darshan Gowda G S"
+                captionText="Darshan Gowda G S"
                 containerHeight="100%"
                 containerWidth="100%"
                 imageHeight={isMobile ? "280px" : "400px"}
