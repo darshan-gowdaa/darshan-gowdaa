@@ -992,6 +992,45 @@ export default function LiquidEther({
                     window.removeEventListener('resize', this._resize);
                     document.removeEventListener('visibilitychange', this._onVisibility);
                     Mouse.dispose();
+
+                    if (this.output && this.output.scene) {
+                        this.output.scene.traverse((child) => {
+                            if (child.geometry) child.geometry.dispose();
+                            if (child.material) {
+                                if (Array.isArray(child.material)) {
+                                    child.material.forEach(m => m.dispose());
+                                } else {
+                                    child.material.dispose();
+                                }
+                            }
+                        });
+                    }
+
+                    if (this.output && this.output.simulation) {
+                        const sim = this.output.simulation;
+                        for (let key in sim.fbos) {
+                            if (sim.fbos[key]) sim.fbos[key].dispose();
+                        }
+                        
+                        // traverse through all shader passes internally
+                        const passes = [sim.advection, sim.externalForce, sim.viscous, sim.divergence, sim.poisson, sim.pressure];
+                        passes.forEach(pass => {
+                            if (pass && pass.scene) {
+                                pass.scene.traverse((child) => {
+                                    if (child.geometry) child.geometry.dispose();
+                                    if (child.material) {
+                                        if (Array.isArray(child.material)) {
+                                            child.material.forEach(m => m.dispose());
+                                        } else {
+                                            child.material.dispose();
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    if (paletteTex) paletteTex.dispose();
+
                     if (Common.renderer) {
                         const canvas = Common.renderer.domElement;
                         if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, Suspense } from 'react';
+import React, { useState, useEffect, memo, Suspense, useCallback } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Analytics } from '@vercel/analytics/react';
@@ -85,6 +85,7 @@ function App() {
   const isMobile = useIsMobile(); // detect mobile
   useScrollTrigger(); // init scrolltrigger
   const [isHeroComplete, setIsHeroComplete] = useState(false); // hero animation done
+  const handleHeroComplete = useCallback(() => setIsHeroComplete(true), []);
 
   return (
     <div className="bg-gradient-to-br from-[#050505] via-[#050505] to-[#050505] text-white min-h-screen overflow-x-hidden relative">
@@ -105,7 +106,7 @@ function App() {
 
       {/* main content */}
       <main className="relative">
-        <Hero onComplete={() => setIsHeroComplete(true)} />
+        <Hero onComplete={handleHeroComplete} />
 
         {/* lazy loaded sections */}
         <React.Suspense fallback={<LoadingFallback />}>
