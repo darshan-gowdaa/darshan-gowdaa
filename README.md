@@ -41,17 +41,17 @@
 </div>
 
 <div align="center">
-
+  <img src="https://github-readme-stats.vercel.app/api?username=Darshan-Gowdaa&hide_title=false&hide_rank=true&show_icons=true&include_all_commits=true&count_private=true&disable_animations=false&theme=merko&locale=en&hide_border=false&order=1" height="150" alt="stats graph"  />
   <img src="https://github-readme-stats.vercel.app/api/top-langs?username=Darshan-Gowdaa&locale=en&hide_title=false&layout=compact&card_width=320&langs_count=5&theme=dark&hide_border=false&order=2" height="150" alt="languages graph"  />
 </div>
 
 ###
 
-<!-- <picture>
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Darshan-Gowdaa/Darshan-Gowdaa/output/pacman-contribution-graph-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Darshan-Gowdaa/Darshan-Gowdaa/output/pacman-contribution-graph.svg">
   <img alt="pacman contribution graph" src="https://raw.githubusercontent.com/Darshan-Gowdaa/Darshan-Gowdaa/output/pacman-contribution-graph.svg">
-</picture> -->
+</picture>
 
 ###
 
@@ -61,6 +61,3 @@
 ![projects_section](https://github.com/user-attachments/assets/8f6c6871-8fcc-4d20-a8fe-9007fb519ed8)
 ![certifications_section](https://github.com/user-attachments/assets/eaeb59fb-feef-4562-9c7e-db10ddeece99)
 ![contact_section](https://github.com/user-attachments/assets/d369ec72-1324-4a23-aecc-2966c60e87d6)
-
-
-
