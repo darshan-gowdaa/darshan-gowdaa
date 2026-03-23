@@ -35,13 +35,13 @@
 
 <div align="center">
 
-| **Profile Visits:** | <img src="https://count.getloli.com/@:darshan-gowdaa?theme=minecraft&padding=5&scale=0.8&align=center&pixelated=1&darkmode=auto" /> |
+| **Profile Visits:** | <img src="https://count.getloli.com/@:Darshan-Gowdaa?theme=minecraft&padding=5&scale=0.8&align=center&pixelated=1&darkmode=auto" /> |
 |---|---|
 
 </div>
 
 <div align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=darshan-gowdaa&hide_title=false&hide_rank=true&show_icons=true&include_all_commits=true&count_private=true&disable_animations=false&theme=merko&locale=en&hide_border=false&order=1" height="150" alt="stats graph"  />
+
   <img src="https://github-readme-stats.vercel.app/api/top-langs?username=Darshan-Gowdaa&locale=en&hide_title=false&layout=compact&card_width=320&langs_count=5&theme=dark&hide_border=false&order=2" height="150" alt="languages graph"  />
 </div>
 
