@@ -35,7 +35,7 @@
 
 <div align="center">
 
-| **Profile Visits:** | <img src="https://count.getloli.com/@:Darshan-Gowdaa?theme=minecraft&padding=5&scale=0.8&align=center&pixelated=1&darkmode=auto" /> |
+| **Profile Visits:** | <img src="https://count.getloli.com/@:darshan-gowdaa?theme=minecraft&padding=5&scale=0.8&align=center&pixelated=1&darkmode=auto" /> |
 |---|---|
 
 </div>
