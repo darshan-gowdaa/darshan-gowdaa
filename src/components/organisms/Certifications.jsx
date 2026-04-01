@@ -1,7 +1,8 @@
 // src/components/organisms/Certifications.jsx
 import { useEffect, useRef } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
-import { SiAmazonwebservices, SiInfosys } from 'react-icons/si';
+import { SiInfosys } from 'react-icons/si';
+import { FaAws } from 'react-icons/fa';
 import { NeonButton } from '../atoms/NeonButton';
 
 const CertificationCard = ({ title, issuer, description, link, icon }) => {
@@ -58,7 +59,7 @@ const Certifications = () => {
       issuer: "AWS Academy",
       description: "Cloud Foundations & Architecture. Gained hands-on experience with core AWS services and distributed systems.",
       link: "https://drive.google.com/drive/folders/1VSngU3XZfkpLdXzRRIWZLZrRpWLmHTQ6?usp=sharing",
-      icon: <SiAmazonwebservices />
+      icon: <FaAws />
     },
     {
       title: "Cybersecurity Foundation",

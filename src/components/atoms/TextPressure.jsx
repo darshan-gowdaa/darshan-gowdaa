@@ -59,6 +59,20 @@ const TextPressure = ({
     const chars = text.split('');
 
     useEffect(() => {
+        const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+        // Set initial center position
+        if (containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            mouseRef.current.x = rect.left + rect.width / 2;
+            mouseRef.current.y = rect.top + rect.height / 2;
+            cursorRef.current.x = mouseRef.current.x;
+            cursorRef.current.y = mouseRef.current.y;
+        }
+
+        // On mobile, skip pointer listeners — no hover cursor to track
+        if (isMobile) return;
+
         const handleMouseMove = e => {
             cursorRef.current.x = e.clientX;
             cursorRef.current.y = e.clientY;
@@ -71,14 +85,6 @@ const TextPressure = ({
 
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('touchmove', handleTouchMove, { passive: true });
-
-        if (containerRef.current) {
-            const { left, top, width, height } = containerRef.current.getBoundingClientRect();
-            mouseRef.current.x = left + width / 2;
-            mouseRef.current.y = top + height / 2;
-            cursorRef.current.x = mouseRef.current.x;
-            cursorRef.current.y = mouseRef.current.y;
-        }
 
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
@@ -118,6 +124,22 @@ const TextPressure = ({
     }, [setSize]);
 
     useEffect(() => {
+        const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+        // On mobile: set static center-based variation settings, skip RAF loop entirely
+        if (isMobile) {
+            requestAnimationFrame(() => {
+                spansRef.current.forEach(span => {
+                    if (!span) return;
+                    const wdth = width ? 100 : 100;
+                    const wght = weight ? 500 : 400;
+                    const italVal = italic ? '0.50' : '0';
+                    span.style.fontVariationSettings = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;
+                });
+            });
+            return;
+        }
+
         let rafId;
         const animate = () => {
             mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) / 15;

@@ -16,7 +16,7 @@ import expenseTrackerThumbnail from '../../assets/expense-tracker-thumbnail.avif
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, githubLink, isVignette }) => {
+const ProjectCard = ({ index, title, description, tags, image, liveLink, demoVideo, githubLink, isVignette }) => {
   // figure out which link to show
   const actionLink = liveLink || demoVideo;
   const isLiveLink = !!liveLink;
@@ -34,6 +34,7 @@ const ProjectCard = ({ title, description, tags, image, liveLink, demoVideo, git
           <LazyImage
             src={image}
             alt={title}
+            priority={index === 0}
             className="w-full h-full object-cover transition-transform duration-700"
             wrapperClassName="w-full h-full"
             placeholderColor="rgba(20, 20, 20, 0.8)"
