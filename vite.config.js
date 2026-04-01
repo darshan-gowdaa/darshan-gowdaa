@@ -25,27 +25,19 @@ export default defineConfig({
     }),
   ],
   build: {
-    // Use esbuild for minification
-    minify: 'esbuild',
     // Code splitting configuration
     rollupOptions: {
       output: {
-        manualChunks: {
-          // put big libraries in their own chunks
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-motion': ['framer-motion'],
-          'vendor-three': ['three'],
-          'vendor-icons': ['react-icons'],
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) return 'vendor-react';
+            if (id.includes('framer-motion')) return 'vendor-motion';
+            if (id.includes('three')) return 'vendor-three';
+            if (id.includes('react-icons')) return 'vendor-icons';
+          }
         },
         // hash in filename so browser re-downloads when updated
-        assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.');
-          const ext = info[info.length - 1];
-          if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp|avif/i.test(ext)) {
-            return `assets/images/[name]-[hash][extname]`;
-          }
-          return `assets/[name]-[hash][extname]`;
-        },
+        assetFileNames: 'assets/[name]-[hash][extname]',
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
       },
@@ -54,10 +46,6 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     // no source maps in prod build
     sourcemap: false,
-  },
-  // drop console logs and debuggers from the production build
-  esbuild: {
-    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
   },
   // Optimize dependencies
   optimizeDeps: {
