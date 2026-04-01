@@ -10,12 +10,7 @@ export const useAnimations = () => {
     if (!containerRef?.current) return () => {};
 
     const ctx = gsap.context(() => {
-      const isMobile = window.innerWidth < 768;
       const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
-
-      if (isMobile) {
-        tl.timeScale(2.5); // speeds up the timeline to finish under 0.25s per step
-      }
 
       tl.fromTo('.hero-badge', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 })
         .call(() => {
@@ -161,15 +156,23 @@ export const useAnimations = () => {
         scrollTrigger: { trigger: '.about-header', start: 'top 85%', toggleActions: 'play none none reverse' }
       });
 
-      const mm = gsap.matchMedia();
-      mm.add('(min-width: 768px)', () => {
-        gsap.from('.about-left', { x: -80, opacity: 0, duration: 0.8, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: '.about-left', start: 'top 75%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
-        gsap.from('.about-right', { x: 80, opacity: 0, duration: 0.8, delay: 0.1, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: '.about-right', start: 'top 75%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
+      gsap.from('.about-left', {
+        x: -80,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power3.out',
+        force3D: true,
+        scrollTrigger: { trigger: '.about-left', start: 'top 75%', toggleActions: 'play none none reverse' }
       });
 
-      mm.add('(max-width: 767px)', () => {
-        gsap.from('.about-left', { y: 30, opacity: 0, duration: 0.8, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: '.about-left', start: 'top 75%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
-        gsap.from('.about-right', { y: 30, opacity: 0, duration: 0.8, delay: 0.1, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: '.about-right', start: 'top 75%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
+      gsap.from('.about-right', {
+        x: 80,
+        opacity: 0,
+        duration: 0.8,
+        delay: 0.1,
+        ease: 'power3.out',
+        force3D: true,
+        scrollTrigger: { trigger: '.about-right', start: 'top 75%', toggleActions: 'play none none reverse' }
       });
     }, containerRef.current);
 
@@ -188,12 +191,13 @@ export const useAnimations = () => {
         scrollTrigger: { trigger: '.skills-header', start: 'top 85%', toggleActions: 'play none none reverse' }
       });
 
-      const mm = gsap.matchMedia();
-      mm.add('(min-width: 768px)', () => {
-        gsap.from('.skills-loop', { x: 100, opacity: 0, duration: 0.9, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: '.skills-loop', start: 'top 75%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
-      });
-      mm.add('(max-width: 767px)', () => {
-        gsap.from('.skills-loop', { y: 30, opacity: 0, duration: 0.9, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: '.skills-loop', start: 'top 75%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
+      gsap.from('.skills-loop', {
+        x: 100,
+        opacity: 0,
+        duration: 0.9,
+        ease: 'power3.out',
+        force3D: true,
+        scrollTrigger: { trigger: '.skills-loop', start: 'top 75%', toggleActions: 'play none none reverse' }
       });
     }, containerRef.current);
 
@@ -223,26 +227,32 @@ export const useAnimations = () => {
       );
 
       const items = gsap.utils.toArray('.timeline-item', containerRef.current);
-      const mm = gsap.matchMedia();
+      items.forEach((item, i) => {
+        const content = item.querySelector('.timeline-content');
+        const marker = item.querySelector('.timeline-marker');
+        const isEven = i % 2 === 0;
 
-      mm.add('(min-width: 768px)', () => {
-        items.forEach((item, i) => {
-          const content = item.querySelector('.timeline-content');
-          const marker = item.querySelector('.timeline-marker');
-          const isEven = i % 2 === 0;
+        gsap.fromTo(
+          content,
+          { x: isEven ? -30 : 30, opacity: 0 },
+          {
+            x: 0,
+            y: 0,
+            opacity: 1,
+            duration: 0.7,
+            ease: 'power3.out',
+            force3D: true,
+            scrollTrigger: { trigger: item, start: 'top 90%', toggleActions: 'play none none reverse', invalidateOnRefresh: true }
+          }
+        );
 
-          gsap.fromTo(content, { x: isEven ? -30 : 30, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: item, start: 'top 90%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
-          gsap.to(marker, { scale: 1, opacity: 1, duration: 0.5, delay: 0.15, ease: 'back.out(1.7)', scrollTrigger: { trigger: item, start: 'top 90%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
-        });
-      });
-
-      mm.add('(max-width: 767px)', () => {
-        items.forEach((item) => {
-          const content = item.querySelector('.timeline-content');
-          const marker = item.querySelector('.timeline-marker');
-
-          gsap.fromTo(content, { y: 30, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: item, start: 'top 90%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
-          gsap.to(marker, { scale: 1, opacity: 1, duration: 0.5, delay: 0.15, ease: 'back.out(1.7)', scrollTrigger: { trigger: item, start: 'top 90%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
+        gsap.to(marker, {
+          scale: 1,
+          opacity: 1,
+          duration: 0.5,
+          delay: 0.15,
+          ease: 'back.out(1.7)',
+          scrollTrigger: { trigger: item, start: 'top 90%', toggleActions: 'play none none reverse', invalidateOnRefresh: true }
         });
       });
     }, containerRef.current);
@@ -307,8 +317,9 @@ export const useAnimations = () => {
       });
 
       mm.add('(max-width: 767px)', () => {
-        cards.forEach((card) => {
-          gsap.fromTo(card, { y: 30, opacity: 0 }, {
+        cards.forEach((card, i) => {
+          const fromLeft = i % 2 === 0;
+          gsap.fromTo(card, { x: fromLeft ? -80 : 80, opacity: 0 }, {
             x: 0,
             y: 0,
             opacity: 1,
@@ -349,27 +360,21 @@ export const useAnimations = () => {
       });
 
       const cards = gsap.utils.toArray('.cert-card', containerRef.current);
-      const mm = gsap.matchMedia();
-
-      mm.add('(min-width: 768px)', () => {
-        cards.forEach((card, i) => {
-          const fromLeft = i % 2 === 0;
-          gsap.fromTo(
-            card,
-            { x: fromLeft ? -80 : 80, opacity: 0 },
-            { x: 0, y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: card, start: 'top 90%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } }
-          );
-        });
-      });
-
-      mm.add('(max-width: 767px)', () => {
-        cards.forEach((card) => {
-          gsap.fromTo(
-            card,
-            { y: 30, opacity: 0 },
-            { x: 0, y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: card, start: 'top 90%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } }
-          );
-        });
+      cards.forEach((card, i) => {
+        const fromLeft = i % 2 === 0;
+        gsap.fromTo(
+          card,
+          { x: fromLeft ? -80 : 80, opacity: 0 },
+          {
+            x: 0,
+            y: 0,
+            opacity: 1,
+            duration: 0.7,
+            ease: 'power3.out',
+            force3D: true,
+            scrollTrigger: { trigger: card, start: 'top 90%', toggleActions: 'play none none reverse', invalidateOnRefresh: true }
+          }
+        );
       });
 
       refreshTimeout = setTimeout(() => ScrollTrigger.refresh(), 300);
@@ -393,15 +398,22 @@ export const useAnimations = () => {
         scrollTrigger: { trigger: '.contact-header', start: 'top 85%', toggleActions: 'play none none reverse' }
       });
 
-      const mm = gsap.matchMedia();
-      mm.add('(min-width: 768px)', () => {
-        gsap.from('.contact-left', { x: -80, opacity: 0, duration: 0.7, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: '.contact-left', start: 'top 75%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
-        gsap.from('.contact-right', { x: 80, opacity: 0, duration: 0.7, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: '.contact-right', start: 'top 75%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
+      gsap.from('.contact-left', {
+        x: -80,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power3.out',
+        force3D: true,
+        scrollTrigger: { trigger: '.contact-left', start: 'top 75%', toggleActions: 'play none none reverse' }
       });
 
-      mm.add('(max-width: 767px)', () => {
-        gsap.from('.contact-left', { y: 30, opacity: 0, duration: 0.7, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: '.contact-left', start: 'top 75%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
-        gsap.from('.contact-right', { y: 30, opacity: 0, duration: 0.7, ease: 'power3.out', force3D: true, scrollTrigger: { trigger: '.contact-right', start: 'top 75%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
+      gsap.from('.contact-right', {
+        x: 80,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power3.out',
+        force3D: true,
+        scrollTrigger: { trigger: '.contact-right', start: 'top 75%', toggleActions: 'play none none reverse' }
       });
     }, containerRef.current);
 
