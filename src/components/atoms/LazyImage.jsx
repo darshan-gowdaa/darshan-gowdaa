@@ -16,6 +16,7 @@ const LazyImage = memo(({
     placeholderColor = 'rgba(255, 255, 255, 0.05)',
     threshold = 0.1,
     rootMargin = '50px',
+    priority = false,
     ...props
 }) => {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -84,8 +85,9 @@ const LazyImage = memo(({
                 <img
                     src={src}
                     alt={alt}
-                    loading="lazy"
+                    loading={priority ? 'eager' : 'lazy'}
                     decoding="async"
+                    fetchPriority={priority ? 'high' : 'auto'}
                     onLoad={handleLoad}
                     className={`transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'
                         } ${className}`}

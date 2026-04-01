@@ -108,15 +108,13 @@ function App() {
       <main className="relative">
         <Hero onComplete={handleHeroComplete} />
 
-        {/* lazy loaded sections */}
-        <React.Suspense fallback={<LoadingFallback />}>
-          <About />
-          <Skills />
-          <Experience />
-          <Projects />
-          <Certifications />
-          <Contact />
-        </React.Suspense>
+        {/* lazy loaded sections — separate suspense boundaries for independent hydration */}
+        <React.Suspense fallback={<LoadingFallback />}><About /></React.Suspense>
+        <React.Suspense fallback={<LoadingFallback />}><Skills /></React.Suspense>
+        <React.Suspense fallback={<LoadingFallback />}><Experience /></React.Suspense>
+        <React.Suspense fallback={<LoadingFallback />}><Projects /></React.Suspense>
+        <React.Suspense fallback={<LoadingFallback />}><Certifications /></React.Suspense>
+        <React.Suspense fallback={<LoadingFallback />}><Contact /></React.Suspense>
       </main>
 
       {/* analytics */}

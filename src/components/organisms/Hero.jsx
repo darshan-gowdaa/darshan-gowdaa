@@ -36,6 +36,15 @@ const LIQUID_CONFIG = {
     mouseForce: 15,
     cursorSize: 60,
     dt: 1 / 50 // slower tick for stability
+  },
+  mobile: {
+    resolution: 0.15, // minimal quality for mobile GPU budget
+    iterationsViscous: 8,
+    iterationsPoisson: 8,
+    viscous: 15,
+    mouseForce: 10,
+    cursorSize: 50,
+    dt: 1 / 40 // lower tick rate to save battery
   }
 };
 
@@ -43,15 +52,11 @@ const getInitialTier = () => {
   if (typeof window === 'undefined') return 'medium';
 
   const isMobile = window.matchMedia('(max-width: 768px)').matches;
+  if (isMobile) return 'mobile'; // always use lightest tier on mobile
+
   const cores = navigator.hardwareConcurrency || 4;
-  // fallback if browser doesn't support deviceMemory
   const ram = navigator.deviceMemory || 4;
   const isLowPower = cores <= 4 || ram <= 4;
-
-  if (isMobile) {
-    return isLowPower ? 'low' : 'medium';
-  }
-  // Desktop
   return isLowPower ? 'medium' : 'high';
 };
 
@@ -128,8 +133,8 @@ const Hero = ({ onComplete }) => {
               dt={config.dt}
               isBounce={false}
               autoDemo={true}
-              autoSpeed={tier === 'low' ? 0.2 : 0.4}
-              autoIntensity={tier === 'low' ? 1.5 : 2.0}
+              autoSpeed={tier === 'mobile' ? 0.1 : tier === 'low' ? 0.2 : 0.4}
+              autoIntensity={tier === 'mobile' ? 1.0 : tier === 'low' ? 1.5 : 2.0}
               takeoverDuration={0.25}
               autoResumeDelay={2500}
               autoRampDuration={0.6}

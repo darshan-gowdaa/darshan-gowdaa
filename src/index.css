@@ -76,26 +76,23 @@ input[type="submit"], input[type="button"] {
   cursor: inherit !important;
 }
 
-/* smooth scrolling and custom scrollbar */
-html {
-  scroll-behavior: smooth;
-}
+@media (hover: hover) and (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
 
-::-webkit-scrollbar {
-  width: 8px;
-}
+  ::-webkit-scrollbar-track {
+    background: #000000;
+  }
 
-::-webkit-scrollbar-track {
-  background: #000000;
-}
+  ::-webkit-scrollbar-thumb {
+    background: #333333;
+    border-radius: 4px;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: #333333;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555555;
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555555;
+  }
 }
 
 /* glass effect base class */
@@ -106,8 +103,18 @@ html {
 
 /* reduce blur a bit on mobile, seemed laggy */
 @media (hover: none) and (pointer: coarse) {
+  .glass-base,
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .liquid-glass-card-enhanced,
+  .glass-panel,
+  .hero-badge span {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
   .glass-base {
-    backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.6);
   }
 }
 
@@ -311,7 +318,7 @@ html {
 /* was using content-visibility: auto here but it breaks gsap scrolltrigger
    because the browser skips layout for off-screen elements and returns wrong positions */
 .section-lazy {
-  will-change: transform;
+  /* will-change: transform removed to save GPU memory; GSAP force3D will promote as needed during animation */
 }
 
 .text-pressure-title.stroke span::after {
