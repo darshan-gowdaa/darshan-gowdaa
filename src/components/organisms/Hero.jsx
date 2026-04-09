@@ -64,8 +64,13 @@ const Hero = ({ onComplete }) => {
   const containerRef = useRef(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [tier, setTier] = useState('medium');
+  const [loadLiquid, setLoadLiquid] = useState(false);
 
-
+  // Defer heavy background load
+  useEffect(() => {
+    const timer = setTimeout(() => setLoadLiquid(true), 250);
+    return () => clearTimeout(timer);
+  }, []);
   // Detect Performance Tier
   useEffect(() => {
     const detectTier = () => {
@@ -120,26 +125,28 @@ const Hero = ({ onComplete }) => {
       >
         {/* Liquid Background */}
         <div className="absolute inset-0 z-0">
-          <React.Suspense fallback={<div className="absolute inset-0 bg-black" />}>
-            <LiquidEther
-              colors={['#5227FF', '#FF9FFC', '#B19EEF']}
-              mouseForce={config.mouseForce}
-              cursorSize={config.cursorSize}
-              isViscous={false}
-              viscous={config.viscous}
-              iterationsViscous={config.iterationsViscous}
-              iterationsPoisson={config.iterationsPoisson}
-              resolution={config.resolution}
-              dt={config.dt}
-              isBounce={false}
-              autoDemo={true}
-              autoSpeed={tier === 'mobile' ? 0.1 : tier === 'low' ? 0.2 : 0.4}
-              autoIntensity={tier === 'mobile' ? 1.0 : tier === 'low' ? 1.5 : 2.0}
-              takeoverDuration={0.25}
-              autoResumeDelay={2500}
-              autoRampDuration={0.6}
-            />
-          </React.Suspense>
+          {loadLiquid && (
+            <React.Suspense fallback={<div className="absolute inset-0 bg-black" />}>
+              <LiquidEther
+                colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+                mouseForce={config.mouseForce}
+                cursorSize={config.cursorSize}
+                isViscous={false}
+                viscous={config.viscous}
+                iterationsViscous={config.iterationsViscous}
+                iterationsPoisson={config.iterationsPoisson}
+                resolution={config.resolution}
+                dt={config.dt}
+                isBounce={false}
+                autoDemo={true}
+                autoSpeed={tier === 'mobile' ? 0.1 : tier === 'low' ? 0.2 : 0.4}
+                autoIntensity={tier === 'mobile' ? 1.0 : tier === 'low' ? 1.5 : 2.0}
+                takeoverDuration={0.25}
+                autoResumeDelay={2500}
+                autoRampDuration={0.6}
+              />
+            </React.Suspense>
+          )}
         </div>
 
         {/* Content Container */}

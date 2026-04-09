@@ -48,6 +48,7 @@ const TextPressure = ({
     const containerRef = useRef(null);
     const titleRef = useRef(null);
     const spansRef = useRef([]);
+    const charCentersRef = useRef([]);
 
     const mouseRef = useRef({ x: 0, y: 0 });
     const cursorRef = useRef({ x: 0, y: 0 });
@@ -108,6 +109,18 @@ const TextPressure = ({
                 setScaleY(yRatio);
                 setLineHeight(yRatio);
             }
+
+            // Cache char centers after layout recalculation to prevent reflows in loop
+            if (spansRef.current.length > 0) {
+                charCentersRef.current = spansRef.current.map(span => {
+                    if (!span) return {x: 0, y: 0};
+                    const rect = span.getBoundingClientRect();
+                    return {
+                        x: rect.x + rect.width / 2,
+                        y: rect.y + rect.height / 2
+                    };
+                });
+            }
         });
     }, [chars.length, minFontSize, scale]);
 
@@ -128,14 +141,11 @@ const TextPressure = ({
                 const titleRect = titleRef.current.getBoundingClientRect();
                 const maxDist = titleRect.width / 2;
 
-                spansRef.current.forEach(span => {
+                spansRef.current.forEach((span, i) => {
                     if (!span) return;
 
-                    const rect = span.getBoundingClientRect();
-                    const charCenter = {
-                        x: rect.x + rect.width / 2,
-                        y: rect.y + rect.height / 2
-                    };
+                    const charCenter = charCentersRef.current[i];
+                    if (!charCenter) return;
 
                     const d = dist(mouseRef.current, charCenter);
 
