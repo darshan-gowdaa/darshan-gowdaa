@@ -150,7 +150,7 @@ const Projects = () => {
       tags: ["MERN Stack", "Dashboard", "Analytics"],
       image: petrolBunkThumbnail,
       githubLink: "https://github.com/darshan-gowdaa/petrol-bunk-management-system",
-      demoVideo: "https://drive.google.com/file/d/17Pq3vrNtKKkriepqy_uWykRUAPAh64ey/",
+      liveLink: "https://petrol-bunk-management-system-alpha.vercel.app/",
     },
     {
       title: "Headlines Hub",
@@ -182,7 +182,7 @@ const Projects = () => {
       tags: ["MERN Stack", "AI Chatbot", "Management"],
       image: eduWorldThumbnail,
       githubLink: "https://github.com/darshan-gowdaa/eduworld-fullstack",
-      demoVideo: "https://drive.google.com/drive/folders/1hGJpzq83Luf3ZU3eaJoWdDkaDJ_uAF5h?usp=sharing",
+      liveLink: "https://eduworld-phi.vercel.app/",
     },
     {
       title: "Expense Tracker",
