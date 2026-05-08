@@ -1,0 +1,66 @@
+# Darshan Gowda G S — Full-Stack Developer & Data Analytics Portfolio
+
+> Personal portfolio website of Darshan Gowda G S, a Full-Stack Developer and Data Analytics postgraduate student based in Bengaluru, India. This is a single-page React application showcasing professional experience, technical projects, skills, certifications, and contact information. The site is hosted on Vercel at https://darshan-gowdaa.tech and built with React 19, Vite, Tailwind CSS, GSAP, Framer Motion, and Three.js.
+
+- This portfolio is a single-page application (SPA) — all content is rendered client-side within one route
+- The site uses a dark theme with glassmorphism design, liquid ether WebGL background, and scroll-triggered animations
+- Sections: Hero, About, Skills, Experience, Projects, Certifications, Contact
+- Contact form is powered by EmailJS for direct email delivery
+- The owner is open to new opportunities and collaborations
+
+## About
+
+- **Name:** Darshan Gowda G S
+- **Role:** Full-Stack Developer & Data Enthusiast
+- **Location:** Bengaluru, Karnataka, India
+- **Email:** darshangowdaa223@gmail.com
+- **Education:**
+  - MSc in Data Analytics — Christ University, Bengaluru (2025–2027)
+  - BCA (Bachelor of Computer Applications) — St. Joseph's University, Bengaluru (2022–2025)
+- **Specializations:** MERN Stack, Data Analytics, Machine Learning, Mobile Development (Android Studio & React Native), Data Visualization (Power BI, Python)
+- **Key achievements:** Cut API calls by 60%, reduced report generation time by 65%, published research on deep learning frontiers
+
+## Technical Skills
+
+- **Languages:** JavaScript, TypeScript, Python, PHP
+- **Frontend:** React, Next.js, Tailwind CSS, Bootstrap, HTML5, CSS3
+- **Backend:** Node.js, Express.js
+- **Databases:** MongoDB, MySQL, PostgreSQL
+- **DevOps & Cloud:** Docker, AWS (EC2, Lambda, S3), Vercel, Git/GitHub
+- **Data & Analytics:** Power BI, Python data science & ML libraries
+- **Mobile:** Android Studio, React Native
+
+## Experience
+
+- [Software Development Intern — WspacesAI Labs Private Limited](https://drive.google.com/file/d/1zN0Dpgxt9sQVyzFuG2YFxRMBQlzm-60c/view?usp=sharing): Jan 2025 – May 2025. Spearheaded frontend development using React and Vite. Optimized CRM workflows, achieving a 30% increase in operational efficiency.
+- **BCA — St. Joseph's University, Bengaluru:** 2022–2025. Foundation in computer science, web technologies, database management, and software engineering.
+- **MSc Data Analytics — Christ University, Bengaluru:** 2025–2027. Advanced data analytics, machine learning algorithms, and big data technologies.
+
+## Projects
+
+- [Axiom Pulse Clone](https://axiom-pulse-clone-gamma.vercel.app): Pixel-perfect, high-performance clone of the Axiom Trade Pulse token discovery interface. Built with Next.js 16, TypeScript, Redux Toolkit, and Tailwind CSS. Features real-time price simulations, atomic architecture, and fully responsive design. [Source code](https://github.com/darshan-gowdaa/axiom-trade-pulse-clone)
+- [Petrol Bunk Management System](https://petrol-bunk-management-system-alpha.vercel.app/): Comprehensive MERN-Stack solution for managing petrol bunk operations. Streamlines inventory tracking, sales reporting, and employee management with real-time data visualization. [Source code](https://github.com/darshan-gowdaa/petrol-bunk-management-system)
+- [Headlines Hub](https://headlineshub-react.vercel.app/): Modern news aggregator leveraging NewsAPI. Features infinite scrolling, category filtering, and responsive reading experience. Built with React and Vite. [Source code](https://github.com/darshan-gowdaa/headlinesHub-React)
+- [Zapier Interface Clone](https://darshan-gowdaa.github.io/Zapier-Clone-React/): Meticulous recreation of the Zapier Interface tab, demonstrating advanced search logic, dynamic filtering, and complex state management with React and TypeScript. [Source code](https://github.com/darshan-gowdaa/Zapier-Clone-React)
+- [Login & Dashboard Panel](https://darshan-gowdaa.github.io/Login-and-Dashboard-Vite/): Pixel-perfect admin dashboard featuring interactive charts (Recharts), user management tables, and comprehensive authentication flows. Built with Vite + JSX and Tailwind CSS. [Source code](https://github.com/darshan-gowdaa/Login-and-Dashboard-Vite)
+- [EduWorld-FullStack](https://eduworld-phi.vercel.app/): Complete education management ecosystem featuring admission portals, course administration, and an integrated AI chatbot for student enquiries. MERN Stack. [Source code](https://github.com/darshan-gowdaa/eduworld-fullstack)
+- [Expense Tracker](https://github.com/darshan-gowdaa/expense-tracker): Full-stack web application to manage finances. CRUD capabilities for tracking income/expenses. Built with PHP, MySQL, JavaScript, and Bootstrap (LAMP stack). [Demo Video](https://drive.google.com/file/d/1zOWsi7jQCVbzGqryi4eOY65X6LACZpXT/view?usp=drivesdk)
+
+## Certifications
+
+- [AWS Academy Graduate — Cloud Foundations & Architecture](https://drive.google.com/drive/folders/1VSngU3XZfkpLdXzRRIWZLZrRpWLmHTQ6?usp=sharing): Hands-on experience with core AWS services and distributed systems.
+- [Cybersecurity Foundation — Infosys Springboard](https://drive.google.com/drive/folders/1i2oZ1cNJpIdKR3BSpGi85pGLvRn5DR2l?usp=drive_link): Comprehensive training in security protocols, risk management, and network defense strategies.
+
+## Social & Contact
+
+- [GitHub](https://github.com/darshan-gowdaa)
+- [LinkedIn](https://www.linkedin.com/in/Darshan-Gowda-G-S)
+- **Email:** darshangowdaa223@gmail.com
+- **Location:** Bengaluru, India
+
+## Optional
+
+- [Portfolio source code on GitHub](https://github.com/Darshan-Gowdaa/Darshan-Gowdaa): Full source code for this portfolio website (React 19, Vite 8, Tailwind CSS 4, GSAP, Framer Motion, Three.js)
+- [Resume / CV](https://darshan-gowdaa.tech/#contact): Available upon request via the contact form
+- [Sitemap](https://darshan-gowdaa.tech/sitemap.xml): XML sitemap for search engine indexing
+- [robots.txt](https://darshan-gowdaa.tech/robots.txt): Crawler access policy

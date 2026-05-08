@@ -39,6 +39,7 @@ build/
 
 # Temporary files
 *.txt
+!public/llms.txt
 !README.txt
 
 .vercel
