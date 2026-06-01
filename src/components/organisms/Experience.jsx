@@ -1,13 +1,12 @@
-// src/components/organisms/Experience.jsx
 import { useEffect, useRef } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
-import { FaBriefcase, FaGraduationCap } from 'react-icons/fa';
+import { timelineItems } from '../../data/experienceData';
 
 
-const TimelineMarker = ({ icon }) => (
+const TimelineMarker = ({ icon: Icon }) => (
   <div className="flex flex-col items-center">
     <div className="timeline-marker w-12 h-12 md:w-16 md:h-16 rounded-full bg-black border border-white/20 flex items-center justify-center z-20 relative shadow-[0_0_20px_rgba(255,255,255,0.15)] opacity-0 scale-0">
-      <span className="text-white text-lg md:text-2xl">{icon}</span>
+      <span className="text-white text-lg md:text-2xl"><Icon /></span>
     </div>
   </div>
 );
@@ -69,33 +68,6 @@ const Experience = () => {
     const cleanup = animateExperience(sectionRef);
     return cleanup;
   }, [animateExperience]);
-
-  const timelineItems = [
-    {
-      icon: <FaGraduationCap />,
-      title: "Bachelor of Computer Applications",
-      period: "2022 - 2025",
-      organization: "St. Joseph's University, Bengaluru",
-      description: "Building a robust foundation in computer science, focusing on web technologies, database management, and software engineering principles.",
-      certificateLink: ""
-    },
-    {
-      icon: <FaBriefcase />,
-      title: "Software Development Intern",
-      period: "Jan 2025 - May 2025",
-      organization: "WspacesAI Labs Private Limited",
-      description: "Spearheaded frontend development using React and Vite. Optimized CRM workflows, achieving a 30% increase in operational efficiency.",
-      certificateLink: "https://drive.google.com/file/d/1zN0Dpgxt9sQVyzFuG2YFxRMBQlzm-60c/view?usp=sharing"
-    },
-    {
-      icon: <FaGraduationCap />,
-      title: "MSc in Data Analytics",
-      period: "2025 - 2027",
-      organization: "Christ University, Bengaluru",
-      description: "Specializing in advanced data analytics, machine learning algorithms, and big data technologies to drive data-informed decision making.",
-      certificateLink: ""
-    }
-  ];
 
   return (
     <section id="experience" className="py-24 relative overflow-hidden section-lazy" ref={sectionRef}>

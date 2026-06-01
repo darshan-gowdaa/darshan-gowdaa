@@ -22,6 +22,7 @@ jobs:
         uses: abozanona/pacman-contribution-graph@main
         with:
           github_user_name: ${{ github.repository_owner }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           output_path: dist/pacman-contribution-graph.svg
 
       - name: Push pacman-contribution-graph.svg to the output branch

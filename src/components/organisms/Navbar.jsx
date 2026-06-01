@@ -245,21 +245,6 @@ const Navbar = ({ show }) => {
 
   const toggleMobileMenu = useCallback(() => setMobileMenuOpen(prev => !prev), []);
 
-  // mobile menu styles
-  const mobileStyles = useMemo(() => ({
-    width: mobileMenuOpen ? '234px' : '150px',
-    height: mobileMenuOpen ? '265px' : '40px',
-    background: mobileMenuOpen ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.02)',
-    backdropFilter: mobileMenuOpen ? 'blur(12px)' : 'blur(8px)',
-    WebkitBackdropFilter: mobileMenuOpen ? 'blur(12px)' : 'blur(8px)',
-    border: mobileMenuOpen ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(255, 255, 255, 0.4)',
-    boxShadow: mobileMenuOpen ? '0 20px 40px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.02)' : '0 0 15px rgba(255, 255, 255, 0.15)',
-    transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s, transform 0.3s ease-in-out, opacity 0.3s ease-in-out',
-    willChange: 'width, height',
-    transform: 'translateZ(0)',
-    backfaceVisibility: 'hidden',
-    contain: 'layout paint'
-  }), [mobileMenuOpen]);
 
 
   // render nav links
@@ -305,7 +290,7 @@ const Navbar = ({ show }) => {
 
       {/* mobile nav */}
       <div className="md:hidden fixed top-6 inset-x-0 flex justify-center z-50 pointer-events-none">
-        <div ref={mobileNavRef} className={`pointer-events-auto rounded-3xl overflow-hidden nav-mobile-glass ${!mobileMenuOpen && isHeadingVisible && !forceShowNavbar ? '-translate-y-[200%] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`} style={mobileStyles}>
+        <div ref={mobileNavRef} className={`pointer-events-auto rounded-3xl overflow-hidden nav-mobile-glass nav-mobile-base ${mobileMenuOpen ? 'nav-mobile-open' : 'nav-mobile-closed'} ${!mobileMenuOpen && isHeadingVisible && !forceShowNavbar ? '-translate-y-[200%] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
           <GradientBorder />
           <GlassOverlay />
           <button aria-label="Toggle navigation menu" aria-expanded={mobileMenuOpen} className={`relative w-full h-[40px] flex items-center justify-center cursor-pointer ${mobileMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ transition: 'opacity 0.25s ease-out', background: 'none', border: 'none' }} onClick={toggleMobileMenu}>

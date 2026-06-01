@@ -1,5 +1,6 @@
 // src/components/organisms/Contact.jsx
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAnimations } from '../../hooks/useAnimations';
 import { FaMapMarkerAlt, FaEnvelope, FaGithub, FaLinkedin, FaPaperPlane, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import emailjs from '@emailjs/browser';
@@ -35,6 +36,26 @@ const InputField = ({ label, name, type = "text", placeholder, value, onChange, 
     </div>
   );
 };
+
+const ToastMessage = React.forwardRef(({ toast }, ref) => {
+  if (!toast) return null;
+  return createPortal(
+    <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4 pointer-events-none">
+      <div
+        ref={ref}
+        className={`pointer-events-auto flex items-center gap-3 p-4 rounded-xl border backdrop-blur-xl shadow-2xl ${
+          toast.type === 'success' 
+            ? 'bg-green-500/10 border-green-500/20 text-green-400' 
+            : 'bg-red-500/10 border-red-500/20 text-red-400'
+        }`}
+      >
+        {toast.type === 'success' ? <FaCheckCircle size={20} /> : <FaExclamationCircle size={20} />}
+        <span className="font-medium text-sm">{toast.message}</span>
+      </div>
+    </div>,
+    document.body
+  );
+});
 
 const Contact = () => {
   const containerRef = useRef(null);
@@ -132,21 +153,7 @@ const Contact = () => {
 
   return (
     <section ref={containerRef} id="contact" className="py-24 relative overflow-hidden section-lazy">
-      {toast && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4 pointer-events-none">
-          <div
-            ref={toastRef}
-            className={`pointer-events-auto flex items-center gap-3 p-4 rounded-xl border backdrop-blur-xl shadow-2xl ${
-              toast.type === 'success' 
-                ? 'bg-green-500/10 border-green-500/20 text-green-400' 
-                : 'bg-red-500/10 border-red-500/20 text-red-400'
-            }`}
-          >
-            {toast.type === 'success' ? <FaCheckCircle size={20} /> : <FaExclamationCircle size={20} />}
-            <span className="font-medium text-sm">{toast.message}</span>
-          </div>
-        </div>
-      )}
+      <ToastMessage toast={toast} ref={toastRef} />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="contact-header text-center mb-16">

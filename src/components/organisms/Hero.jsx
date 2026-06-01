@@ -113,7 +113,7 @@ const Hero = ({ onComplete }) => {
       {showScrollButton && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-6 z-50 p-3 rounded-full liquid-glass-icon glass-base text-gray-300 hover:text-white transition-all duration-300 flex items-center justify-center group shadow-[0_8px_20px_rgba(0,0,0,0.6)]"
+          className="fixed bottom-8 right-6 z-50 p-3 rounded-full glass-element glass-base text-gray-300 hover:text-white transition-all duration-300 flex items-center justify-center group shadow-[0_8px_20px_rgba(0,0,0,0.6)]"
           aria-label="Scroll to top"
         >
           <FaArrowUp className="w-5 h-5 group-hover:-translate-y-1 transition-transform duration-300" />
@@ -141,8 +141,8 @@ const Hero = ({ onComplete }) => {
                 dt={config.dt}
                 isBounce={false}
                 autoDemo={true}
-                autoSpeed={tier === 'mobile' ? 0.1 : tier === 'low' ? 0.2 : 0.4}
-                autoIntensity={tier === 'mobile' ? 1.0 : tier === 'low' ? 1.5 : 2.0}
+                autoSpeed={tier === 'mobile' ? 0.3 : tier === 'low' ? 0.3 : 0.4}
+                autoIntensity={tier === 'mobile' ? 1.5 : tier === 'low' ? 1.5 : 2.0}
                 takeoverDuration={0.25}
                 autoResumeDelay={2500}
                 autoRampDuration={0.6}

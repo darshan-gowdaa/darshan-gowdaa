@@ -290,10 +290,6 @@ export default function LiquidEther({
                     if (this.active) this.forceStop();
                     return;
                 }
-                if (this.mouse.isHoverInside) {
-                    if (this.active) this.forceStop();
-                    return;
-                }
                 if (!this.active) {
                     this.active = true;
                     this.current.copy(this.mouse.coords);

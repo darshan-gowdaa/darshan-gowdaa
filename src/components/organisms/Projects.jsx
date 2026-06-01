@@ -1,19 +1,48 @@
 // src/components/organisms/Projects.jsx
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
 import { FaGithub, FaExternalLinkAlt, FaPlay } from 'react-icons/fa';
 import LazyImage from '../atoms/LazyImage';
-import axiomPulseCloneThumbnail from '../../assets/axiom-pulse-clone-thumbnail.avif';
-import petrolBunkThumbnail from '../../assets/petrol-bunk-management-thumbnail.avif';
-import eduWorldThumbnail from '../../assets/eduworld-thumbnail.avif';
-import headlinesHubThumbnail from '../../assets/headlines-hub-thumbnail.avif';
-import loginDashboardThumbnail from '../../assets/login-dashboard-thumbnail.avif';
-import zapierCloneThumbnail from '../../assets/zapier-clone-thumbnail.avif';
-import expenseTrackerThumbnail from '../../assets/expense-tracker-thumbnail.avif';
-import adminPortalBackendThumbnail from '../../assets/admin-portal-backend-thumbnail.avif';
-import wslHadoopThumbnail from '../../assets/wsl-hadoop-installer-thumbnail.avif';
+import { projects } from '../../data/projectsData';
 
+const ActionLink = ({ href, icon: Icon, label, variant, isLiveLink }) => {
+  if (!href) return null;
 
+  if (variant === 'desktop') {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-black hover:scale-105 active:scale-95 cursor-pointer"
+        title={label}
+        aria-label={label}
+      >
+        <Icon size={isLiveLink ? 20 : 18} />
+      </a>
+    );
+  }
+
+  // mobile
+  const isCode = label === 'Code';
+  const displayLabel = isCode ? 'Code' : (isLiveLink ? 'Live' : 'Demo');
+  const iconSize = isCode ? 16 : (isLiveLink ? 14 : 12);
+  
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border border-white/20 transition-all active:scale-95 ${
+        isCode ? 'bg-white/10 text-white backdrop-blur-md active:bg-white/20' : 'bg-white/90 text-black active:bg-white'
+      }`}
+      aria-label={label}
+    >
+      <Icon size={iconSize} />
+      <span>{displayLabel}</span>
+    </a>
+  );
+};
 
 const ProjectCard = ({ index, title, description, tags, image, liveLink, demoVideo, githubLink, isVignette }) => {
   // figure out which link to show
@@ -43,59 +72,15 @@ const ProjectCard = ({ index, title, description, tags, image, liveLink, demoVid
 
           {/* desktop actions */}
           <div className="absolute inset-0 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex items-center justify-center gap-4 bg-black/60 backdrop-blur-[2px]">
-            {githubLink && (
-              <a
-                href={githubLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-black hover:scale-105 active:scale-95 cursor-pointer"
-                title="View Source Code"
-                aria-label={`View source code for ${title}`}
-              >
-                <FaGithub size={20} />
-              </a>
-            )}
-            {actionLink && (
-              <a
-                href={actionLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-black hover:scale-105 active:scale-95 cursor-pointer"
-                title={actionLabel}
-                aria-label={`${actionLabel} for ${title}`}
-              >
-                <ActionIcon size={isLiveLink ? 20 : 18} />
-              </a>
-            )}
+            <ActionLink href={githubLink} icon={FaGithub} label="Code" variant="desktop" />
+            <ActionLink href={actionLink} icon={ActionIcon} label={actionLabel} variant="desktop" isLiveLink={isLiveLink} />
           </div>
 
           {/* mobile actions */}
           {(githubLink || actionLink) && (
             <div className="absolute bottom-0 left-0 right-0 z-20 md:hidden flex items-center justify-center gap-3 p-4 pt-12 bg-gradient-to-t from-black via-black/70 to-transparent">
-              {githubLink && (
-                <a
-                  href={githubLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white text-sm font-medium border border-white/20 backdrop-blur-md transition-all active:scale-95 active:bg-white/20"
-                  aria-label={`View source code for ${title}`}
-                >
-                  <FaGithub size={16} />
-                  <span>Code</span>
-                </a>
-              )}
-              {actionLink && (
-                <a
-                  href={actionLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 text-black text-sm font-medium border border-white/20 transition-all active:scale-95 active:bg-white"
-                  aria-label={`${actionLabel} for ${title}`}
-                >
-                  <ActionIcon size={isLiveLink ? 14 : 12} />
-                  <span>{isLiveLink ? 'Live' : 'Demo'}</span>
-                </a>
-              )}
+              <ActionLink href={githubLink} icon={FaGithub} label="Code" variant="mobile" />
+              <ActionLink href={actionLink} icon={ActionIcon} label={actionLabel} variant="mobile" isLiveLink={isLiveLink} />
             </div>
           )}
         </div>
@@ -104,7 +89,7 @@ const ProjectCard = ({ index, title, description, tags, image, liveLink, demoVid
         <div className="p-6 md:p-8 flex flex-col flex-grow">
           <div className="flex flex-wrap gap-2 mb-4">
             {tags.map((tag, i) => (
-              <span key={i} className="liquid-glass-tag">{tag}</span>
+              <span key={i} className="glass-element text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-full text-gray-300">{tag}</span>
             ))}
           </div>
 
@@ -133,81 +118,6 @@ const Projects = () => {
     const cleanup = animateProjects(containerRef, headerRef);
     return cleanup;
   }, [animateProjects]);
-
-  const projects = useMemo(() => [
-    {
-      title: "Petrol Bunk Management System",
-      description: "A comprehensive MERN-Stack solution for managing petrol bunk operations. Streamlines inventory tracking, sales reporting, and employee management with real-time data visualization.",
-      tags: ["MERN Stack", "Dashboard", "Analytics"],
-      image: petrolBunkThumbnail,
-      githubLink: "https://github.com/darshan-gowdaa/petrol-bunk-management-system",
-      liveLink: "https://petrol-bunk-management-system-alpha.vercel.app/",
-    },
-    {
-      title: "Axiom Pulse Clone",
-      description: "A pixel-perfect, high-performance clone of the Axiom Trade Pulse token discovery interface. Built with Next.js 16, TypeScript, Redux Toolkit, and Tailwind CSS, featuring real-time price simulations, atomic architecture, and a fully responsive design.",
-      tags: ["Next.js 16", "TypeScript", "Redux Toolkit"],
-      image: axiomPulseCloneThumbnail,
-      githubLink: "https://github.com/darshan-gowdaa/axiom-trade-pulse-clone",
-      liveLink: "https://axiom-pulse-clone-gamma.vercel.app",
-    },
-    {
-      title: "Admin Portal Backend",
-      description: "A robust RESTful backend service built with Python and Flask, powering a full-featured admin portal. Implements secure API routing, authentication flows, business logic processing, and acts as the bridge between the React frontend and the database.",
-      tags: ["Python", "Flask", "REST API"],
-      image: adminPortalBackendThumbnail,
-      githubLink: "https://github.com/darshan-gowdaa/admin-portal-backend-py-flask",
-      demoVideo: "https://drive.google.com/file/d/1d-CmdBSWoVJl9tIseu0rKCgbN8Hsqudk/view",
-    },
-    {
-      title: "Headlines Hub",
-      description: "Modern news aggregator leveraging NewsAPI. Features infinite scrolling, category filtering, and a responsive reading experience built with React and Vite.",
-      tags: ["React", "API Integration", "News"],
-      image: headlinesHubThumbnail,
-      liveLink: "https://headlineshub-react.vercel.app/",
-      githubLink: "https://github.com/darshan-gowdaa/headlinesHub-React",
-    },
-    {
-      title: "WSL Hadoop Ecosystem Installer",
-      description: "Automated Hadoop ecosystem installer for WSL Ubuntu (learning environment). Provides an interactive menu to install Hadoop, Spark, Kafka, Pig, Hive and Eclipse IDE.",
-      tags: ["WSL", "Bash", "Hadoop", "Ubuntu"],
-      image: wslHadoopThumbnail,
-      githubLink: "https://github.com/darshan-gowdaa/wsl-hadoop-installer",
-    },
-    {
-      title: "EduWorld-FullStack",
-      description: "Complete education management ecosystem featuring admission portals, course administration, and an integrated AI chatbot for student enquiries.",
-      tags: ["MERN Stack", "AI Chatbot", "Management"],
-      image: eduWorldThumbnail,
-      githubLink: "https://github.com/darshan-gowdaa/eduworld-fullstack",
-      liveLink: "https://eduworld-phi.vercel.app/",
-    },
-    {
-      title: "Login & Dashboard Panel",
-      description: "A pixel-perfect admin dashboard featuring interactive charts, user management tables, and comprehensive authentication flows. Built for scalability and responsiveness.",
-      tags: ["Vite + JSX", "Tailwind CSS", "Recharts"],
-      image: loginDashboardThumbnail,
-      liveLink: "https://darshan-gowdaa.github.io/Login-and-Dashboard-Vite/",
-      githubLink: "https://github.com/darshan-gowdaa/Login-and-Dashboard-Vite",
-    },
-    {
-      title: "Zapier Interface Clone",
-      description: "A meticulous recreation of the Zapier Interface tab, demonstrating advanced search logic, dynamic filtering, and complex state management with TypeScript.",
-      tags: ["React", "TypeScript", "Tailwind CSS"],
-      image: zapierCloneThumbnail,
-      liveLink: "https://darshan-gowdaa.github.io/Zapier-Clone-React/",
-      githubLink: "https://github.com/darshan-gowdaa/Zapier-Clone-React",
-    },
-    {
-      title: "Expense Tracker",
-      description: "A full-stack web application to manage finances. Users can track income/expenses with CRUD capabilities. Built with a responsive LAMP stack architecture.",
-      tags: ["PHP", "MySQL", "JavaScript", "Bootstrap"],
-      image: expenseTrackerThumbnail,
-      githubLink: "https://github.com/darshan-gowdaa/expense-tracker",
-      demoVideo: "https://drive.google.com/file/d/1zOWsi7jQCVbzGqryi4eOY65X6LACZpXT/view?usp=drivesdk",
-      isVignette: true,
-    },
-  ], []);
 
   return (
     <section id="projects" className="py-24 relative overflow-hidden section-lazy">

@@ -48,9 +48,7 @@ input, textarea, [contenteditable] {
   }
 
   /* Tap feedback for glass elements */
-  .liquid-glass-icon:active,
-  .liquid-glass-badge:active,
-  .liquid-glass-tag:active {
+  .glass-element:active {
     background: rgba(255, 255, 255, 0.15) !important;
     border-color: rgba(255, 255, 255, 0.3) !important;
   }
@@ -207,11 +205,7 @@ input[type="submit"], input[type="button"] {
   box-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
 }
 
-.liquid-glass-secondary,
-.liquid-glass-icon,
-.liquid-glass-badge,
-.liquid-glass-tag,
-.glass-btn {
+.glass-element {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #ffffff;
@@ -219,19 +213,10 @@ input[type="submit"], input[type="button"] {
   cursor: pointer;
 }
 
-.liquid-glass-secondary:hover,
-.liquid-glass-icon:hover,
-.liquid-glass-badge:hover,
-.liquid-glass-tag:hover,
-.glass-btn:hover {
+.glass-element:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.4);
   box-shadow: 0 0 25px rgba(255, 255, 255, 0.25);
-}
-
-/* tag styles */
-.liquid-glass-tag {
-  @apply text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-full text-gray-300;
 }
 
 /* keyframe animations */
@@ -319,6 +304,34 @@ input[type="submit"], input[type="button"] {
     0 0 20px rgba(255, 255, 255, 0.3);
 }
 
+.nav-mobile-base {
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s, transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  will-change: width, height;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: layout paint;
+}
+
+.nav-mobile-closed {
+  width: 150px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+}
+
+.nav-mobile-open {
+  width: 234px;
+  height: 265px;
+  background: rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.02);
+}
+
 .nav-mobile-glass {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -360,4 +373,3 @@ input[type="submit"], input[type="button"] {
     transform: translateX(100%);
   }
 }
-
