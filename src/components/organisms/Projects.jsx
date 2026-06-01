@@ -14,6 +14,7 @@ import loginDashboardThumbnail from '../../assets/login-dashboard-thumbnail.avif
 import zapierCloneThumbnail from '../../assets/zapier-clone-thumbnail.avif';
 import expenseTrackerThumbnail from '../../assets/expense-tracker-thumbnail.avif';
 import adminPortalBackendThumbnail from '../../assets/admin-portal-backend-thumbnail.avif';
+import wslHadoopThumbnail from '../../assets/wsl-hadoop-installer-thumbnail.avif';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -154,6 +155,14 @@ const Projects = () => {
       liveLink: "https://axiom-pulse-clone-gamma.vercel.app",
     },
     {
+      title: "Admin Portal Backend",
+      description: "A robust RESTful backend service built with Python and Flask, powering a full-featured admin portal. Implements secure API routing, authentication flows, business logic processing, and acts as the bridge between the React frontend and the database.",
+      tags: ["Python", "Flask", "REST API"],
+      image: adminPortalBackendThumbnail,
+      githubLink: "https://github.com/darshan-gowdaa/admin-portal-backend-py-flask",
+      demoVideo: "https://drive.google.com/file/d/1d-CmdBSWoVJl9tIseu0rKCgbN8Hsqudk/view",
+    },
+    {
       title: "Headlines Hub",
       description: "Modern news aggregator leveraging NewsAPI. Features infinite scrolling, category filtering, and a responsive reading experience built with React and Vite.",
       tags: ["React", "API Integration", "News"],
@@ -162,12 +171,11 @@ const Projects = () => {
       githubLink: "https://github.com/darshan-gowdaa/headlinesHub-React",
     },
     {
-      title: "Admin Portal Backend",
-      description: "A robust RESTful backend service built with Python and Flask, powering a full-featured admin portal. Implements secure API routing, authentication flows, business logic processing, and acts as the bridge between the React frontend and the database.",
-      tags: ["Python", "Flask", "REST API"],
-      image: adminPortalBackendThumbnail,
-      githubLink: "https://github.com/darshan-gowdaa/admin-portal-backend-py-flask",
-      demoVideo: "https://drive.google.com/file/d/1d-CmdBSWoVJl9tIseu0rKCgbN8Hsqudk/view",
+      title: "WSL Hadoop Ecosystem Installer",
+      description: "Automated Hadoop ecosystem installer for WSL Ubuntu (learning environment). Provides an interactive menu to install Hadoop, Spark, Kafka, Pig, Hive and Eclipse IDE.",
+      tags: ["WSL", "Bash", "Hadoop", "Ubuntu"],
+      image: wslHadoopThumbnail,
+      githubLink: "https://github.com/darshan-gowdaa/wsl-hadoop-installer",
     },
     {
       title: "EduWorld-FullStack",
