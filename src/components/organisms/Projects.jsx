@@ -13,6 +13,7 @@ import headlinesHubThumbnail from '../../assets/headlines-hub-thumbnail.avif';
 import loginDashboardThumbnail from '../../assets/login-dashboard-thumbnail.avif';
 import zapierCloneThumbnail from '../../assets/zapier-clone-thumbnail.avif';
 import expenseTrackerThumbnail from '../../assets/expense-tracker-thumbnail.avif';
+import adminPortalBackendThumbnail from '../../assets/admin-portal-backend-thumbnail.avif';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -137,20 +138,20 @@ const Projects = () => {
 
   const projects = useMemo(() => [
     {
-      title: "Axiom Pulse Clone",
-      description: "A pixel-perfect, high-performance clone of the Axiom Trade Pulse token discovery interface. Built with Next.js 16, TypeScript, Redux Toolkit, and Tailwind CSS, featuring real-time price simulations, atomic architecture, and a fully responsive design.",
-      tags: ["Next.js 16", "TypeScript", "Redux Toolkit"],
-      image: axiomPulseCloneThumbnail,
-      githubLink: "https://github.com/darshan-gowdaa/axiom-trade-pulse-clone",
-      liveLink: "https://axiom-pulse-clone-gamma.vercel.app",
-    },
-    {
       title: "Petrol Bunk Management System",
       description: "A comprehensive MERN-Stack solution for managing petrol bunk operations. Streamlines inventory tracking, sales reporting, and employee management with real-time data visualization.",
       tags: ["MERN Stack", "Dashboard", "Analytics"],
       image: petrolBunkThumbnail,
       githubLink: "https://github.com/darshan-gowdaa/petrol-bunk-management-system",
       liveLink: "https://petrol-bunk-management-system-alpha.vercel.app/",
+    },
+    {
+      title: "Axiom Pulse Clone",
+      description: "A pixel-perfect, high-performance clone of the Axiom Trade Pulse token discovery interface. Built with Next.js 16, TypeScript, Redux Toolkit, and Tailwind CSS, featuring real-time price simulations, atomic architecture, and a fully responsive design.",
+      tags: ["Next.js 16", "TypeScript", "Redux Toolkit"],
+      image: axiomPulseCloneThumbnail,
+      githubLink: "https://github.com/darshan-gowdaa/axiom-trade-pulse-clone",
+      liveLink: "https://axiom-pulse-clone-gamma.vercel.app",
     },
     {
       title: "Headlines Hub",
@@ -161,12 +162,20 @@ const Projects = () => {
       githubLink: "https://github.com/darshan-gowdaa/headlinesHub-React",
     },
     {
-      title: "Zapier Interface Clone",
-      description: "A meticulous recreation of the Zapier Interface tab, demonstrating advanced search logic, dynamic filtering, and complex state management with TypeScript.",
-      tags: ["React", "TypeScript", "Tailwind CSS"],
-      image: zapierCloneThumbnail,
-      liveLink: "https://darshan-gowdaa.github.io/Zapier-Clone-React/",
-      githubLink: "https://github.com/darshan-gowdaa/Zapier-Clone-React",
+      title: "Admin Portal Backend",
+      description: "A robust RESTful backend service built with Python and Flask, powering a full-featured admin portal. Implements secure API routing, authentication flows, business logic processing, and acts as the bridge between the React frontend and the database.",
+      tags: ["Python", "Flask", "REST API"],
+      image: adminPortalBackendThumbnail,
+      githubLink: "https://github.com/darshan-gowdaa/admin-portal-backend-py-flask",
+      demoVideo: "https://drive.google.com/file/d/1d-CmdBSWoVJl9tIseu0rKCgbN8Hsqudk/view",
+    },
+    {
+      title: "EduWorld-FullStack",
+      description: "Complete education management ecosystem featuring admission portals, course administration, and an integrated AI chatbot for student enquiries.",
+      tags: ["MERN Stack", "AI Chatbot", "Management"],
+      image: eduWorldThumbnail,
+      githubLink: "https://github.com/darshan-gowdaa/eduworld-fullstack",
+      liveLink: "https://eduworld-phi.vercel.app/",
     },
     {
       title: "Login & Dashboard Panel",
@@ -177,12 +186,12 @@ const Projects = () => {
       githubLink: "https://github.com/darshan-gowdaa/Login-and-Dashboard-Vite",
     },
     {
-      title: "EduWorld-FullStack",
-      description: "Complete education management ecosystem featuring admission portals, course administration, and an integrated AI chatbot for student enquiries.",
-      tags: ["MERN Stack", "AI Chatbot", "Management"],
-      image: eduWorldThumbnail,
-      githubLink: "https://github.com/darshan-gowdaa/eduworld-fullstack",
-      liveLink: "https://eduworld-phi.vercel.app/",
+      title: "Zapier Interface Clone",
+      description: "A meticulous recreation of the Zapier Interface tab, demonstrating advanced search logic, dynamic filtering, and complex state management with TypeScript.",
+      tags: ["React", "TypeScript", "Tailwind CSS"],
+      image: zapierCloneThumbnail,
+      liveLink: "https://darshan-gowdaa.github.io/Zapier-Clone-React/",
+      githubLink: "https://github.com/darshan-gowdaa/Zapier-Clone-React",
     },
     {
       title: "Expense Tracker",
