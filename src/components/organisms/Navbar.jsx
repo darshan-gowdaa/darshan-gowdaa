@@ -175,14 +175,7 @@ const Navbar = ({ show }) => {
     isScrolling.current = true;
     pendingSectionRef.current = sectionId;
 
-    // 1. READ: Calculate target position
-    let targetTop = null;
-    const element = document.getElementById(sectionId.toLowerCase());
-    if (element) {
-      targetTop = element.getBoundingClientRect().top + window.scrollY;
-    }
-
-    // 2. WRITE: Updates state and DOM
+    // 1. WRITE: Close menu and restore overflow first so layout is accurate
     if (document.body.style.overflow === 'hidden') {
       document.body.style.overflow = '';
     }
@@ -194,8 +187,17 @@ const Navbar = ({ show }) => {
     if (forceShowTimeoutRef.current) clearTimeout(forceShowTimeoutRef.current);
     forceShowTimeoutRef.current = setTimeout(() => setForceShowNavbar(false), 2500);
 
-    // 3. ANIMATE
-    if (targetTop !== null) {
+    // 2. DEFER READ + SCROLL: Wait for layout to settle after menu close
+    requestAnimationFrame(() => {
+      const element = document.getElementById(sectionId.toLowerCase());
+      if (!element) {
+        isScrolling.current = false;
+        pendingSectionRef.current = null;
+        return;
+      }
+
+      const targetTop = element.getBoundingClientRect().top + window.scrollY;
+
       window.scrollTo({
         top: targetTop,
         behavior: 'smooth'
@@ -238,10 +240,7 @@ const Navbar = ({ show }) => {
       };
 
       rafId = requestAnimationFrame(ensureTargetVisible);
-    } else {
-      isScrolling.current = false;
-      pendingSectionRef.current = null;
-    }
+    });
   };
 
 

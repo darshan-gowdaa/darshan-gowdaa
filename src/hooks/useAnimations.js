@@ -12,11 +12,10 @@ export const useAnimations = () => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
 
-      tl.fromTo('.hero-badge', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 })
-        .call(() => {
+      tl.call(() => {
           if (onComplete) onComplete();
         })
-        .fromTo('.hero-text-pressure', { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.7 }, '-=0.3')
+        .fromTo('.hero-text-pressure', { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.7 })
         .fromTo('.hero-description', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, '-=0.3')
         .fromTo('.hero-buttons', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, '-=0.3')
         .fromTo(
@@ -395,7 +394,7 @@ export const useAnimations = () => {
         opacity: 0,
         duration: 0.8,
         ease: 'power3.out',
-        scrollTrigger: { trigger: '.contact-header', start: 'top 85%', toggleActions: 'play none none reverse' }
+        scrollTrigger: { trigger: '.contact-header', start: 'top 85%', toggleActions: 'play none none none' }
       });
 
       gsap.from('.contact-left', {
@@ -404,7 +403,7 @@ export const useAnimations = () => {
         duration: 0.7,
         ease: 'power3.out',
         force3D: true,
-        scrollTrigger: { trigger: '.contact-left', start: 'top 75%', toggleActions: 'play none none reverse' }
+        scrollTrigger: { trigger: '.contact-left', start: 'top 75%', toggleActions: 'play none none none' }
       });
 
       gsap.from('.contact-right', {
@@ -413,7 +412,7 @@ export const useAnimations = () => {
         duration: 0.7,
         ease: 'power3.out',
         force3D: true,
-        scrollTrigger: { trigger: '.contact-right', start: 'top 75%', toggleActions: 'play none none reverse' }
+        scrollTrigger: { trigger: '.contact-right', start: 'top 75%', toggleActions: 'play none none none' }
       });
     }, containerRef.current);
 

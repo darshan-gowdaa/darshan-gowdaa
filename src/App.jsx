@@ -90,6 +90,9 @@ function App() {
   return (
     <div className="bg-gradient-to-br from-[#050505] via-[#050505] to-[#050505] text-white min-h-screen overflow-x-hidden relative">
 
+      {/* top edge shadow — gives a clean fade when scrolling */}
+      <div className="fixed top-0 inset-x-0 h-50 z-30 pointer-events-none top-shadow-fade" />
+
       {/* liquid bg - skip on mobile so it doesn't lag */}
       {!isMobile && (
         <Suspense fallback={null}>

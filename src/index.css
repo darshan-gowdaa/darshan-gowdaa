@@ -54,7 +54,11 @@ h1, h2, h3, h4, h5, h6 {
 
 /* cursor overrides */
 .cursor-pointer,
-a, button, [role="button"], [onclick],
+.cursor-pointer *,
+a, a *,
+button, button *,
+[role="button"], [role="button"] *,
+[onclick], [onclick] *,
 input[type="submit"], input[type="button"] {
   cursor: pointer;
 }
@@ -331,3 +335,17 @@ input[type="submit"], input[type="button"] {
   -webkit-text-stroke-width: var(--stroke-width, 2px);
   -webkit-text-stroke-color: var(--stroke-color, #ff0000);
 }
+
+/* fixed top shadow fade — blurs + darkens content at viewport top */
+.top-shadow-fade {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    transparent 100%
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+}

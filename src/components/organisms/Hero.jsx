@@ -111,7 +111,7 @@ const Hero = ({ onComplete }) => {
       {showScrollButton && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-6 z-50 p-3 rounded-full bg-black/20 backdrop-blur-sm border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 hover:border-white/30 transition-all duration-300 transform hover:scale-110 flex items-center justify-center group"
+          className="fixed bottom-8 right-6 z-50 p-3 rounded-full liquid-glass-icon glass-base text-gray-300 hover:text-white transition-all duration-300 flex items-center justify-center group shadow-[0_8px_20px_rgba(0,0,0,0.6)]"
           aria-label="Scroll to top"
         >
           <FaArrowUp className="w-5 h-5 group-hover:-translate-y-1 transition-transform duration-300" />
@@ -151,13 +151,6 @@ const Hero = ({ onComplete }) => {
 
         {/* Content Container */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center h-full gap-4 sm:gap-6 md:gap-8 pt-20 sm:pt-24">
-
-          {/* Badge */}
-          <div className="hero-badge opacity-0">
-            <span className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-sm font-medium tracking-wider text-gray-200 uppercase shadow-lg shadow-purple-500/10">
-              Full-Stack Developer
-            </span>
-          </div>
 
           {/* Main Title - Text Pressure */}
           <div className="hero-text-pressure w-full max-w-5xl opacity-0">
