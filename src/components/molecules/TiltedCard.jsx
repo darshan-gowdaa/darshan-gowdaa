@@ -1,19 +1,6 @@
 // src/components/molecules/TiltedCard.jsx
-import { useRef, useState, useCallback } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
-
-// Mobile detection for performance optimization
-// Mobile detection for performance optimization - Unused
-// const useIsMobile = () => { ... }
-
-// Spring values - desktop uses full config, mobile uses simplified for performance
-const springValues = {
-    damping: 30,
-    stiffness: 100,
-    mass: 2
-};
-
-// const mobileSpringValues = { ... } // Unused
+import { useRef, useState, useCallback, useEffect } from 'react';
+import gsap from 'gsap';
 
 export default function TiltedCard({
     imageSrc,
@@ -31,42 +18,70 @@ export default function TiltedCard({
     displayOverlayContent = false
 }) {
     const ref = useRef(null);
+    const cardRef = useRef(null);
+    const tooltipRef = useRef(null);
     const resetTimeoutRef = useRef(null);
-    const x = useMotionValue(0);
-    const y = useMotionValue(0);
-    const rotateX = useSpring(useMotionValue(0), springValues);
-    const rotateY = useSpring(useMotionValue(0), springValues);
-    const scale = useSpring(1, springValues);
-    const opacity = useSpring(0);
-    const rotateFigcaption = useSpring(0, {
-        stiffness: 350,
-        damping: 30,
-        mass: 1
-    });
 
-    const [lastY, setLastY] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
+    const [lastY, setLastY] = useState(0);
+    const cachedRectRef = useRef(null);
+    
+    // Setup GSAP quickTo for performant animations
+    const gsapContext = useRef(null);
+    const animators = useRef({});
+
+    useEffect(() => {
+        if (!cardRef.current) return;
+        
+        let ctx = gsap.context(() => {
+            // Set initial state
+            gsap.set(cardRef.current, { transformPerspective: 800 });
+            if (tooltipRef.current) {
+                gsap.set(tooltipRef.current, { opacity: 0 });
+            }
+
+            animators.current = {
+                rotateX: gsap.quickTo(cardRef.current, "rotationX", { duration: 0.2, ease: "power2.out" }),
+                rotateY: gsap.quickTo(cardRef.current, "rotationY", { duration: 0.2, ease: "power2.out" }),
+                scale: gsap.quickTo(cardRef.current, "scale", { duration: 0.3, ease: "power2.out" }),
+                tooltipX: tooltipRef.current ? gsap.quickTo(tooltipRef.current, "x", { duration: 0.15, ease: "power2.out" }) : null,
+                tooltipY: tooltipRef.current ? gsap.quickTo(tooltipRef.current, "y", { duration: 0.15, ease: "power2.out" }) : null,
+                tooltipRotate: tooltipRef.current ? gsap.quickTo(tooltipRef.current, "rotation", { duration: 0.2, ease: "power2.out" }) : null,
+                tooltipOpacity: tooltipRef.current ? gsap.quickTo(tooltipRef.current, "opacity", { duration: 0.3, ease: "power2" }) : null
+            };
+        }, ref);
+        
+        gsapContext.current = ctx;
+
+        return () => ctx.revert();
+    }, []);
 
     const handleInteraction = useCallback((clientX, clientY) => {
-        if (!ref.current) return;
+        if (!ref.current || !animators.current.rotateX) return;
 
-        const rect = ref.current.getBoundingClientRect();
+        if (!cachedRectRef.current) {
+            cachedRectRef.current = ref.current.getBoundingClientRect();
+        }
+        const rect = cachedRectRef.current;
         const offsetX = clientX - rect.left - rect.width / 2;
         const offsetY = clientY - rect.top - rect.height / 2;
 
         const rotationX = (offsetY / (rect.height / 2)) * -rotateAmplitude;
         const rotationY = (offsetX / (rect.width / 2)) * rotateAmplitude;
 
-        rotateX.set(rotationX);
-        rotateY.set(rotationY);
+        animators.current.rotateX(rotationX);
+        animators.current.rotateY(rotationY);
 
-        x.set(clientX - rect.left);
-        y.set(clientY - rect.top);
+        if (tooltipRef.current) {
+            animators.current.tooltipX(clientX - rect.left);
+            animators.current.tooltipY(clientY - rect.top);
 
-        const velocityY = offsetY - lastY;
-        rotateFigcaption.set(-velocityY * 0.6);
+            const velocityY = offsetY - lastY;
+            animators.current.tooltipRotate(-velocityY * 0.6);
+        }
+        
         setLastY(offsetY);
-    }, [lastY, rotateAmplitude, rotateX, rotateY, x, y, rotateFigcaption]);
+    }, [lastY, rotateAmplitude]);
 
     function handleMouse(e) {
         handleInteraction(e.clientX, e.clientY);
@@ -77,18 +92,38 @@ export default function TiltedCard({
             clearTimeout(resetTimeoutRef.current);
             resetTimeoutRef.current = null;
         }
-        scale.set(scaleOnHover);
-        opacity.set(1);
         setIsHovered(true);
+        if (ref.current) {
+            cachedRectRef.current = ref.current.getBoundingClientRect();
+        }
+        if (animators.current.scale) animators.current.scale(scaleOnHover);
+        if (animators.current.tooltipOpacity) animators.current.tooltipOpacity(1);
+    }
+
+    function resetCard() {
+        setIsHovered(false);
+        cachedRectRef.current = null;
+        
+        gsap.to(cardRef.current, {
+            rotationX: 0,
+            rotationY: 0,
+            scale: 1,
+            duration: 0.7,
+            ease: "power2.out"
+        });
+        
+        if (tooltipRef.current) {
+            gsap.to(tooltipRef.current, {
+                opacity: 0,
+                rotation: 0,
+                duration: 0.7,
+                ease: "power2.out"
+            });
+        }
     }
 
     function handleMouseLeave() {
-        opacity.set(0);
-        scale.set(1);
-        rotateX.set(0);
-        rotateY.set(0);
-        rotateFigcaption.set(0);
-        setIsHovered(false);
+        resetCard();
     }
 
     // Touch handlers with effect persistence
@@ -97,8 +132,11 @@ export default function TiltedCard({
             clearTimeout(resetTimeoutRef.current);
             resetTimeoutRef.current = null;
         }
-        scale.set(scaleOnHover);
         setIsHovered(true);
+        if (ref.current) {
+            cachedRectRef.current = ref.current.getBoundingClientRect();
+        }
+        if (animators.current.scale) animators.current.scale(scaleOnHover);
 
         if (e.touches.length > 0) {
             const touch = e.touches[0];
@@ -114,15 +152,11 @@ export default function TiltedCard({
     }
 
     function handleTouchEnd() {
-        // Keep the effect visible for 2 seconds after touch ends
-        resetTimeoutRef.current = setTimeout(() => {
-            scale.set(1);
-            rotateX.set(0);
-            rotateY.set(0);
-            rotateFigcaption.set(0);
-            setIsHovered(false);
+        if (resetTimeoutRef.current) {
+            clearTimeout(resetTimeoutRef.current);
             resetTimeoutRef.current = null;
-        }, 2000);
+        }
+        resetCard();
     }
 
     return (
@@ -147,14 +181,12 @@ export default function TiltedCard({
                 </div>
             )}
 
-            <motion.div
+            <div
+                ref={cardRef}
                 className="relative [transform-style:preserve-3d]"
                 style={{
                     width: imageWidth,
-                    height: imageHeight,
-                    rotateX,
-                    rotateY,
-                    scale
+                    height: imageHeight
                 }}
             >
                 {/* Rotating Shadow */}
@@ -166,7 +198,7 @@ export default function TiltedCard({
                     }}
                 />
 
-                <motion.img
+                <img
                     src={imageSrc}
                     alt={altText}
                     className="absolute top-0 left-0 object-cover rounded-full will-change-transform [transform:translateZ(0)]"
@@ -182,24 +214,19 @@ export default function TiltedCard({
                 />
 
                 {displayOverlayContent && overlayContent && (
-                    <motion.div className="absolute top-0 left-0 z-[2] will-change-transform [transform:translateZ(30px)]">
+                    <div className="absolute top-0 left-0 z-[2] will-change-transform [transform:translateZ(30px)]">
                         {overlayContent}
-                    </motion.div>
+                    </div>
                 )}
-            </motion.div>
+            </div>
 
             {showTooltip && (
-                <motion.figcaption
-                    className="pointer-events-none absolute left-0 top-0 rounded-[4px] bg-white px-[10px] py-[4px] text-[10px] text-[#2d2d2d] opacity-0 z-[3] hidden sm:block"
-                    style={{
-                        x,
-                        y,
-                        opacity,
-                        rotate: rotateFigcaption
-                    }}
+                <figcaption
+                    ref={tooltipRef}
+                    className="pointer-events-none absolute left-0 top-0 rounded-[4px] bg-white px-[10px] py-[4px] text-[10px] text-[#2d2d2d] z-[3] hidden sm:block opacity-0"
                 >
                     {captionText}
-                </motion.figcaption>
+                </figcaption>
             )}
         </figure>
     );

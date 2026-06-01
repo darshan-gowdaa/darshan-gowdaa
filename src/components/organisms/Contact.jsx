@@ -8,26 +8,28 @@ import { NeonButton } from '../atoms/NeonButton';
 const InputField = ({ label, name, type = "text", placeholder, value, onChange, isTextarea, required }) => {
   return (
     <div className="mb-6">
-      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-        {label} {required && <span className="text-gray-400">*</span>}
+      <label htmlFor={name} className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+        {label} {required && <span className="text-gray-300">*</span>}
       </label>
       {isTextarea ? (
         <textarea
+          id={name}
           name={name}
           value={value}
           onChange={onChange}
           rows="4"
           placeholder={placeholder}
-          className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all resize-none"
+          className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all resize-none"
         />
       ) : (
         <input
+          id={name}
           type={type}
           name={name}
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
+          className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
         />
       )}
     </div>
@@ -110,7 +112,7 @@ const Contact = () => {
         showToast('success', 'Message sent successfully!');
         setFormData({ name: '', email: '', subject: '', message: '' });
       }, (error) => {
-        console.error(error.text);
+        if (import.meta.env.DEV) console.error(error.text);
         showToast('error', 'Failed to send message. Please try again later.');
       })
       .finally(() => {
@@ -227,3 +229,4 @@ const Contact = () => {
 };
 
 export default Contact;
+

@@ -1,11 +1,8 @@
 // src/components/organisms/Projects.jsx
 import React, { useEffect, useMemo, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAnimations } from '../../hooks/useAnimations';
 import { FaGithub, FaExternalLinkAlt, FaPlay } from 'react-icons/fa';
 import LazyImage from '../atoms/LazyImage';
-
 import axiomPulseCloneThumbnail from '../../assets/axiom-pulse-clone-thumbnail.avif';
 import petrolBunkThumbnail from '../../assets/petrol-bunk-management-thumbnail.avif';
 import eduWorldThumbnail from '../../assets/eduworld-thumbnail.avif';
@@ -16,7 +13,7 @@ import expenseTrackerThumbnail from '../../assets/expense-tracker-thumbnail.avif
 import adminPortalBackendThumbnail from '../../assets/admin-portal-backend-thumbnail.avif';
 import wslHadoopThumbnail from '../../assets/wsl-hadoop-installer-thumbnail.avif';
 
-gsap.registerPlugin(ScrollTrigger);
+
 
 const ProjectCard = ({ index, title, description, tags, image, liveLink, demoVideo, githubLink, isVignette }) => {
   // figure out which link to show

@@ -1,5 +1,5 @@
 // src/components/atoms/TextPressure.jsx
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react';
 
 const dist = (a, b) => {
     const dx = b.x - a.x;
@@ -26,8 +26,7 @@ const debounce = (func, delay) => {
 const TextPressure = ({
     text = 'Compressa',
     fontFamily = 'Compressa VF',
-    // example font only
-    fontUrl = 'https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2',
+
 
     width = true,
     weight = true,
@@ -124,16 +123,40 @@ const TextPressure = ({
         });
     }, [chars.length, minFontSize, scale]);
 
+    useLayoutEffect(() => {
+        setSize();
+    }, [setSize]);
+
     useEffect(() => {
         const debouncedSetSize = debounce(setSize, 100);
-        debouncedSetSize();
         window.addEventListener('resize', debouncedSetSize);
         return () => window.removeEventListener('resize', debouncedSetSize);
     }, [setSize]);
 
     useEffect(() => {
         let rafId;
+        let isVisible = true;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                isVisible = entry.isIntersecting;
+                if (isVisible) {
+                    animate();
+                } else if (rafId) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+            },
+            { threshold: 0 }
+        );
+
+        if (containerRef.current) {
+            observer.observe(containerRef.current);
+        }
+
         const animate = () => {
+            if (!isVisible) return;
+
             mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) / 15;
             mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / 15;
 
@@ -168,29 +191,14 @@ const TextPressure = ({
             rafId = requestAnimationFrame(animate);
         };
 
-        animate();
-        return () => cancelAnimationFrame(rafId);
+        return () => {
+            if (rafId) cancelAnimationFrame(rafId);
+            observer.disconnect();
+        };
     }, [width, weight, italic, alpha]);
-
-    const styleElement = useMemo(() => {
-        return (
-            <style>{`
-        @font-face {
-          font-family: '${fontFamily}';
-          src: url('${fontUrl}');
-          font-style: normal;
-          font-display: swap;
-        }
-        .stroke span {
-          color: ${textColor};
-        }
-      `}</style>
-        );
-    }, [fontFamily, fontUrl, textColor]);
 
     return (
         <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-transparent">
-            {styleElement}
             <h1
                 ref={titleRef}
                 className={`text-pressure-title ${className} ${flex ? 'flex justify-between' : ''

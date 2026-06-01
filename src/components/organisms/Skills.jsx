@@ -1,6 +1,7 @@
 // src/components/organisms/Skills.jsx
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import {
   FaHtml5, FaReact, FaNodeJs, FaDatabase,
   FaGitAlt, FaAws, FaBootstrap, FaChartLine
@@ -10,18 +11,6 @@ import {
   SiPython, SiExpress, SiDocker, SiNextdotjs, SiVercel, SiPostgresql
 } from 'react-icons/si';
 import LogoLoop from '../molecules/LogoLoop';
-
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const check = () => setIsMobile(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
-    check();
-    const mq = window.matchMedia('(hover: none) and (pointer: coarse)');
-    mq.addEventListener('change', check);
-    return () => mq.removeEventListener('change', check);
-  }, []);
-  return isMobile;
-};
 
 const Skills = () => {
   const containerRef = useRef(null);

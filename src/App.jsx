@@ -5,9 +5,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import Navbar from './components/organisms/Navbar';
 import Hero from './components/organisms/Hero';
-
-// lazy load background effect too since its heavy
-const LiquidEther = React.lazy(() => import('./components/atoms/LiquidEther'));
+import SectionSkeleton from './components/skeletons/SectionSkeleton';
 
 // lazy load components
 const About = React.lazy(() => import('./components/organisms/About'));
@@ -17,107 +15,50 @@ const Projects = React.lazy(() => import('./components/organisms/Projects'));
 const Certifications = React.lazy(() => import('./components/organisms/Certifications'));
 const Contact = React.lazy(() => import('./components/organisms/Contact'));
 
-// global constants
-const MOBILE_MEDIA_QUERY = '(hover: none) and (pointer: coarse)';
+// register GSAP plugin once at the module level
+gsap.registerPlugin(ScrollTrigger);
+
+// helps with perf during fast scrolling
+ScrollTrigger.config({ limitCallbacks: true });
+
+// No longer using spinner fallback
+
+// refresh scrolltrigger after layout settles
 const SCROLL_REFRESH_DELAY = 500;
 
-// config for liquid effect
-const getLiquidConfig = (isMobile) => ({
-  colors: ['#FFFFFF', '#C0C0C0', '#808080'],
-  mouseForce: isMobile ? 15 : 30,
-  cursorSize: isMobile ? 80 : 120,
-  isViscous: false,
-  viscous: 10,
-  iterationsViscous: isMobile ? 10 : 20,
-  iterationsPoisson: isMobile ? 10 : 20,
-  resolution: isMobile ? 0.25 : 0.5,
-  isBounce: false,
-  autoDemo: false,
-  autoSpeed: 0,
-  autoIntensity: 0
-});
+function App() {
+  const [isHeroComplete, setIsHeroComplete] = useState(false);
+  const handleHeroComplete = useCallback(() => setIsHeroComplete(true), []);
 
-// loading spinner
-const LoadingFallback = memo(() => (
-  <div className="w-full py-20 flex flex-col items-center justify-center gap-4">
-    <div className="w-12 h-12 border-2 border-white/10 border-t-white/50 rounded-full animate-spin" />
-    <span className="text-gray-500 text-xs font-medium tracking-widest uppercase animate-pulse">
-      Loading Experience
-    </span>
-  </div>
-));
-
-LoadingFallback.displayName = 'LoadingFallback';
-
-// mobile detection hook
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
-
+  // refresh scrolltrigger after initial layout
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.matchMedia(MOBILE_MEDIA_QUERY).matches);
-    checkMobile();
-
-    const mq = window.matchMedia(MOBILE_MEDIA_QUERY);
-    mq.addEventListener('change', checkMobile);
-    return () => mq.removeEventListener('change', checkMobile);
-  }, []);
-
-  return isMobile;
-};
-
-// scrolltrigger setup
-const useScrollTrigger = () => {
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger); // register gsap plugin
-
-    // helps with perf during fast scrolling I think
-    ScrollTrigger.config({
-      limitCallbacks: true, // skip callbacks during fast scrolling
-    });
-
-    // refresh scrolltrigger after layout settles
     const timer = setTimeout(() => ScrollTrigger.refresh(), SCROLL_REFRESH_DELAY);
     return () => clearTimeout(timer);
   }, []);
-};
-
-function App() {
-  const isMobile = useIsMobile(); // detect mobile
-  useScrollTrigger(); // init scrolltrigger
-  const [isHeroComplete, setIsHeroComplete] = useState(false); // hero animation done
-  const handleHeroComplete = useCallback(() => setIsHeroComplete(true), []);
 
   return (
     <div className="bg-gradient-to-br from-[#050505] via-[#050505] to-[#050505] text-white min-h-screen overflow-x-hidden relative">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-white focus:text-black">
+        Skip to content
+      </a>
 
       {/* top edge shadow — gives a clean fade when scrolling */}
-      <div className="fixed top-0 inset-x-0 h-42 z-30 pointer-events-none top-shadow-fade" />
-
-      {/* liquid bg - skip on mobile so it doesn't lag */}
-      {!isMobile && (
-        <Suspense fallback={null}>
-          <div className="fixed inset-0 h-screen w-full opacity-30 pointer-events-none z-[1] mix-blend-screen">
-            <div className="absolute inset-0">
-              <LiquidEther {...getLiquidConfig(false)} />
-            </div>
-          </div>
-        </Suspense>
-      )}
+      <div className="fixed top-0 inset-x-0 h-50 z-30 pointer-events-none top-shadow-fade" />
 
       {/* navbar */}
       <Navbar show={isHeroComplete} />
 
       {/* main content */}
-      <main className="relative">
+      <main id="main-content" className="relative">
         <Hero onComplete={handleHeroComplete} />
 
         {/* lazy loaded sections — separate suspense boundaries for independent hydration */}
-        <React.Suspense fallback={<LoadingFallback />}><About /></React.Suspense>
-        <React.Suspense fallback={<LoadingFallback />}><Skills /></React.Suspense>
-        <React.Suspense fallback={<LoadingFallback />}><Experience /></React.Suspense>
-        <React.Suspense fallback={<LoadingFallback />}><Projects /></React.Suspense>
-        <React.Suspense fallback={<LoadingFallback />}><Certifications /></React.Suspense>
-        <React.Suspense fallback={<LoadingFallback />}><Contact /></React.Suspense>
+        <React.Suspense fallback={<SectionSkeleton />}><About /></React.Suspense>
+        <React.Suspense fallback={<SectionSkeleton />}><Skills /></React.Suspense>
+        <React.Suspense fallback={<SectionSkeleton />}><Experience /></React.Suspense>
+        <React.Suspense fallback={<SectionSkeleton />}><Projects /></React.Suspense>
+        <React.Suspense fallback={<SectionSkeleton />}><Certifications /></React.Suspense>
+        <React.Suspense fallback={<SectionSkeleton />}><Contact /></React.Suspense>
       </main>
 
       {/* analytics */}

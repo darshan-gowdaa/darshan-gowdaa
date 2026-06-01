@@ -3,25 +3,20 @@
     "installCommand": "npm install",
     "buildCommand": "npm run build",
     "outputDirectory": "dist",
+    "headers": [
+        {
+            "source": "/assets/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000, immutable"
+                }
+            ]
+        }
+    ],
     "rewrites": [
         {
-            "source": "/robots.txt",
-            "destination": "/robots.txt"
-        },
-        {
-            "source": "/sitemap.xml",
-            "destination": "/sitemap.xml"
-        },
-        {
-            "source": "/favicon.avif",
-            "destination": "/favicon.avif"
-        },
-        {
-            "source": "/og-image.avif",
-            "destination": "/og-image.avif"
-        },
-        {
-            "source": "/((?!assets|robots|sitemap|favicon|og-image).*)",
+            "source": "/(.*)",
             "destination": "/"
         }
     ]

@@ -1,25 +1,6 @@
 // src/components/molecules/LogoLoop.jsx
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
-
-// Mobile detection hook for performance optimizations
-const useIsMobile = () => {
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(
-                window.matchMedia('(hover: none) and (pointer: coarse)').matches
-            );
-        };
-        checkMobile();
-        window.matchMedia('(hover: none) and (pointer: coarse)').addEventListener('change', checkMobile);
-        return () => {
-            window.matchMedia('(hover: none) and (pointer: coarse)').removeEventListener('change', checkMobile);
-        };
-    }, []);
-
-    return isMobile;
-};
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 const ANIMATION_CONFIG = {
     SMOOTH_TAU: 0.1, // Reduced for snappier response

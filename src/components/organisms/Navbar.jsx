@@ -61,8 +61,6 @@ const Navbar = ({ show }) => {
 
   // track active section
   useEffect(() => {
-    let rafId = null;
-
     const getSections = () => links
       .map((link) => ({
         name: link,
@@ -103,6 +101,7 @@ const Navbar = ({ show }) => {
       }
     };
 
+    let rafId = null;
     const onScroll = () => {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(updateActiveFromScroll);
@@ -162,10 +161,10 @@ const Navbar = ({ show }) => {
     if (!mobileMenuOpen) return;
 
     document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside, { passive: true });
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside, { passive: true });
     };
   }, [mobileMenuOpen]);
 
@@ -299,7 +298,7 @@ const Navbar = ({ show }) => {
           <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-30" />
           </div>
-          <div ref={bubbleRef} className="nav-bubble-desktop" style={{ top: 0, left: 0, width: 0, height: 0, willChange: 'transform, width, height', transition: 'none' }} />
+          <div ref={bubbleRef} className="nav-bubble-desktop" style={{ top: 0, left: 0, width: 0, height: 0, transition: 'none' }} />
           <div className="flex items-center p-1 relative z-10">{renderLinks(linkRefs)}</div>
         </nav>
       </div>
@@ -309,12 +308,12 @@ const Navbar = ({ show }) => {
         <div ref={mobileNavRef} className={`pointer-events-auto rounded-3xl overflow-hidden nav-mobile-glass ${!mobileMenuOpen && isHeadingVisible && !forceShowNavbar ? '-translate-y-[200%] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`} style={mobileStyles}>
           <GradientBorder />
           <GlassOverlay />
-          <div className={`relative w-full h-[40px] flex items-center justify-center cursor-pointer ${mobileMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ transition: 'opacity 0.25s ease-out' }} onClick={toggleMobileMenu}>
+          <button aria-label="Toggle navigation menu" aria-expanded={mobileMenuOpen} className={`relative w-full h-[40px] flex items-center justify-center cursor-pointer ${mobileMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ transition: 'opacity 0.25s ease-out', background: 'none', border: 'none' }} onClick={toggleMobileMenu}>
             <span className="text-white text-sm font-medium tracking-wider uppercase drop-shadow-md px-6">{activeSection}</span>
-          </div>
+          </button>
           <div className={`absolute inset-0 w-full h-full ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} style={{ transition: mobileMenuOpen ? 'opacity 0.35s ease-out 0.15s' : 'opacity 0.2s ease-in' }}>
             <div ref={mobileScrollContainerRef} className="w-full h-full flex flex-col items-center justify-start pt-2 pb-4 space-y-1 relative">
-              <div ref={mobileBubbleRef} className="nav-mobile-bubble" style={{ height: '0px', top: '0px', width: '220px', left: '50%', transform: 'translateX(-50%)', opacity: mobileMenuOpen ? 1 : 0, willChange: 'transform, height', transition: 'none' }} />
+              <div ref={mobileBubbleRef} className="nav-mobile-bubble" style={{ height: '0px', top: '0px', width: '220px', left: '50%', transform: 'translateX(-50%)', opacity: mobileMenuOpen ? 1 : 0, transition: 'none' }} />
               {renderLinks(mobileLinkRefs, true)}
             </div>
           </div>

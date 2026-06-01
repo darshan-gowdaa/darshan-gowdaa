@@ -4,9 +4,11 @@ import { FaGithub, FaLinkedin, FaEnvelope, FaArrowUp, FaArrowRight } from 'react
 import { useAnimations } from '../../hooks/useAnimations';
 import { NeonButton } from '../atoms/NeonButton';
 
-// lazy load these - they're too big for the initial bundle
+import TextPressure from '../atoms/TextPressure';
+
+// lazy load heavy 3D background
 const LiquidEther = React.lazy(() => import('../atoms/LiquidEther'));
-const TextPressure = React.lazy(() => import('../atoms/TextPressure'));
+
 
 // Performance configuration for LiquidEther
 const LIQUID_CONFIG = {
@@ -88,9 +90,9 @@ const Hero = ({ onComplete }) => {
   }, []);
 
   const socialLinks = useMemo(() => [
-    { href: "https://github.com/darshan-gowdaa", Icon: FaGithub, external: true },
-    { href: "https://www.linkedin.com/in/Darshan-Gowda-G-S", Icon: FaLinkedin, external: true },
-    { href: "mailto:darshangowdaa223@gmail.com", Icon: FaEnvelope, external: false }
+    { href: "https://github.com/darshan-gowdaa", Icon: FaGithub, external: true, label: "GitHub" },
+    { href: "https://www.linkedin.com/in/Darshan-Gowda-G-S", Icon: FaLinkedin, external: true, label: "LinkedIn" },
+    { href: "mailto:darshangowdaa223@gmail.com", Icon: FaEnvelope, external: false, label: "Email" }
   ], []);
 
   const scrollToTop = useCallback(() => {
@@ -121,7 +123,7 @@ const Hero = ({ onComplete }) => {
       <section
         id="home"
         ref={containerRef}
-        className="relative h-screen w-full overflow-hidden flex flex-col items-center justify-start bg-black"
+        className="relative h-[100svh] w-full overflow-hidden flex flex-col items-center justify-start bg-black"
       >
         {/* Liquid Background */}
         <div className="absolute inset-0 z-0">
@@ -155,10 +157,7 @@ const Hero = ({ onComplete }) => {
           {/* Main Title - Text Pressure */}
           <div className="hero-text-pressure w-full max-w-5xl opacity-0">
             <div className="relative w-full h-[80px] sm:h-[120px] md:h-[140px] flex items-center justify-center">
-              <React.Suspense fallback={
-                <span className="text-4xl sm:text-6xl md:text-7xl font-bold text-white tracking-tight">DARSHAN GOWDA G S</span>
-              }>
-                <TextPressure
+              <TextPressure
                 text="DARSHAN GOWDA G S"
                 flex={true}
                 alpha={false}
@@ -170,7 +169,6 @@ const Hero = ({ onComplete }) => {
                 strokeColor="#ff0000"
                 minFontSize={24}
               />
-              </React.Suspense>
             </div>
           </div>
 
@@ -208,16 +206,18 @@ const Hero = ({ onComplete }) => {
 
           {/* Social Links */}
           <div className="hero-socials flex items-center gap-6 mt-2 sm:mt-4">
-            {socialLinks.map(({ href, Icon, external }, i) => (
+            {socialLinks.map(({ href, Icon, external, label }, i) => (
               <a
                 key={i}
                 href={href}
                 target={external ? "_blank" : undefined}
                 rel={external ? "noopener noreferrer" : undefined}
-                className="p-3 text-gray-400 hover:text-white transition-all duration-300 hover:scale-110 transform"
-                aria-label={Icon.name.replace('Fa', '')}
+                className="p-3 group block"
+                aria-label={label}
               >
-                <Icon className="w-6 h-6 sm:w-7 sm:h-7" />
+                <div className="text-gray-400 group-hover:text-white transition-all duration-300 group-hover:scale-110 transform">
+                  <Icon className="w-6 h-6 sm:w-7 sm:h-7" />
+                </div>
               </a>
             ))}
           </div>

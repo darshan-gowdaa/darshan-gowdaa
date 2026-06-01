@@ -1,9 +1,3 @@
-import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-// merges tailwind classes
-export function cn(...inputs) {
-    return twMerge(clsx(inputs));
-}
 // formats number as currency
 export function formatCurrency(amount, currency = "USD", options) {
     return new Intl.NumberFormat("en-US", {

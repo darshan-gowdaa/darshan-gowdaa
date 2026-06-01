@@ -3,33 +3,30 @@ import { useCallback } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger);
 
 export const useAnimations = () => {
   const animateHero = useCallback((containerRef, onComplete) => {
     if (!containerRef?.current) return () => {};
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
       tl.call(() => {
           if (onComplete) onComplete();
         })
-        .fromTo('.hero-text-pressure', { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.7 })
-        .fromTo('.hero-description', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, '-=0.3')
-        .fromTo('.hero-buttons', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, '-=0.3')
+        .fromTo('.hero-text-pressure', { opacity: 0, scale: 0.98 }, { opacity: 1, scale: 1, duration: 1.2 })
+        .fromTo('.hero-description', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, '-=0.8')
+        .fromTo('.hero-buttons', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, '-=0.8')
         .fromTo(
           '.hero-socials a',
-          { y: 15, opacity: 0, scale: 0.8 },
+          { y: 30, opacity: 0 },
           {
             y: 0,
             opacity: 1,
-            scale: 1,
-            duration: 0.4,
-            stagger: 0.08,
-            ease: 'back.out(1.5)'
+            duration: 1,
+            stagger: 0.05
           },
-          '-=0.2'
+          '-=0.8'
         );
     }, containerRef.current);
 

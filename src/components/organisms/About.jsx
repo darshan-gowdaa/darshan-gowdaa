@@ -1,20 +1,9 @@
 // src/components/organisms/About.jsx
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
 import profileImage from '../../assets/profile-picture.avif';
 import TiltedCard from '../molecules/TiltedCard';
-
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const check = () => setIsMobile(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
-    check();
-    const mq = window.matchMedia('(hover: none) and (pointer: coarse)');
-    mq.addEventListener('change', check);
-    return () => mq.removeEventListener('change', check);
-  }, []);
-  return isMobile;
-};
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 const About = () => {
   const sectionRef = useRef(null);

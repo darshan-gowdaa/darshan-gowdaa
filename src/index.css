@@ -1,3 +1,12 @@
+@font-face {
+  font-family: 'Compressa VF';
+  src: url('https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2');
+  font-style: normal;
+  font-display: swap;
+}
+.stroke span {
+  color: #FFFFFF;
+}
 @import "tailwindcss";
 
 @theme {
@@ -321,9 +330,7 @@ input[type="submit"], input[type="button"] {
 
 /* was using content-visibility: auto here but it breaks gsap scrolltrigger
    because the browser skips layout for off-screen elements and returns wrong positions */
-.section-lazy {
-  /* will-change: transform removed to save GPU memory; GSAP force3D will promote as needed during animation */
-}
+.section-lazy { contain: content; }
 
 .text-pressure-title.stroke span::after {
   content: attr(data-char);
@@ -340,12 +347,17 @@ input[type="submit"], input[type="button"] {
 .top-shadow-fade {
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.75) 0%,
-    rgba(0, 0, 0, 0.4) 50%,
+    rgba(5, 5, 5, 0.95) 0%,
+    rgba(5, 5, 5, 0.7) 50%,
     transparent 100%
   );
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
-}
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
