@@ -1,9 +1,4 @@
-@font-face {
-  font-family: 'Compressa VF';
-  src: url('https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2');
-  font-style: normal;
-  font-display: swap;
-}
+
 .stroke span {
   color: #FFFFFF;
 }
@@ -166,6 +161,7 @@ input[type="submit"], input[type="button"] {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
   transform: skewX(-20deg);
   transition: left 0.8s, transition-duration 0.6s;
+  will-change: left;
 }
 
 .glass-heading:hover::before {
@@ -343,7 +339,7 @@ input[type="submit"], input[type="button"] {
 
 /* was using content-visibility: auto here but it breaks gsap scrolltrigger
    because the browser skips layout for off-screen elements and returns wrong positions */
-.section-lazy { contain: content; }
+.section-lazy { contain: layout style paint; }
 
 .text-pressure-title.stroke span::after {
   content: attr(data-char);
@@ -368,8 +364,3 @@ input[type="submit"], input[type="button"] {
   -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
 }
 
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
-}

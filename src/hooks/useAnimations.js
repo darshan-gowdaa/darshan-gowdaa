@@ -14,9 +14,9 @@ export const useAnimations = () => {
       tl.call(() => {
           if (onComplete) onComplete();
         })
-        .fromTo('.hero-text-pressure', { opacity: 0, scale: 0.98 }, { opacity: 1, scale: 1, duration: 1.2 })
-        .fromTo('.hero-description', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, '-=0.8')
-        .fromTo('.hero-buttons', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, '-=0.8')
+        .fromTo('.hero-text-pressure', { opacity: 0, scale: 0.98 }, { opacity: 1, scale: 1, duration: 1.2, force3D: true })
+        .fromTo('.hero-description', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, force3D: true }, '-=0.8')
+        .fromTo('.hero-buttons', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, force3D: true }, '-=0.8')
         .fromTo(
           '.hero-socials a',
           { y: 30, opacity: 0 },
@@ -24,7 +24,8 @@ export const useAnimations = () => {
             y: 0,
             opacity: 1,
             duration: 1,
-            stagger: 0.05
+            stagger: 0.05,
+            force3D: true
           },
           '-=0.8'
         );
@@ -149,7 +150,8 @@ export const useAnimations = () => {
         opacity: 0,
         duration: 0.8,
         ease: 'power3.out',
-        scrollTrigger: { trigger: '.about-header', start: 'top 85%', toggleActions: 'play none none reverse' }
+        scrollTrigger: { trigger: '.about-header', start: 'top 85%', toggleActions: 'play none none reverse' },
+        force3D: true
       });
 
       gsap.from('.about-left', {
@@ -184,7 +186,8 @@ export const useAnimations = () => {
         opacity: 0,
         duration: 0.8,
         ease: 'power3.out',
-        scrollTrigger: { trigger: '.skills-header', start: 'top 85%', toggleActions: 'play none none reverse' }
+        scrollTrigger: { trigger: '.skills-header', start: 'top 85%', toggleActions: 'play none none reverse' },
+        force3D: true
       });
 
       gsap.from('.skills-loop', {
@@ -209,7 +212,8 @@ export const useAnimations = () => {
         opacity: 0,
         duration: 0.8,
         ease: 'power3.out',
-        scrollTrigger: { trigger: '.exp-header', start: 'top 85%', toggleActions: 'play none none reverse' }
+        scrollTrigger: { trigger: '.exp-header', start: 'top 85%', toggleActions: 'play none none reverse' },
+        force3D: true
       });
 
       gsap.fromTo(

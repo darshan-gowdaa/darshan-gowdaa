@@ -1,5 +1,5 @@
 // src/components/organisms/Skills.jsx
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, memo } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import LogoLoop from '../molecules/LogoLoop';
@@ -77,4 +77,4 @@ const Skills = () => {
   );
 };
 
-export default Skills;
+export default memo(Skills);

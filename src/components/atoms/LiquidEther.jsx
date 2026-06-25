@@ -1,6 +1,7 @@
 // src/components/atoms/LiquidEther.jsx
+// Raw WebGL fluid simulation — no Three.js dependency
+// Simulation math is identical to the Three.js version; only the GPU API layer changed.
 import { useEffect, useRef } from 'react';
-import { AdditiveBlending, BufferAttribute, BufferGeometry, Camera, ClampToEdgeWrapping, Clock, Color, DataTexture, FloatType, HalfFloatType, LinearFilter, LineSegments, Mesh, PlaneGeometry, RawShaderMaterial, RGBAFormat, Scene, Vector2, Vector4, WebGLRenderer, WebGLRenderTarget } from 'three';
 
 export default function LiquidEther({
     mouseForce = 20,
@@ -25,8 +26,8 @@ export default function LiquidEther({
 }) {
     const mountRef = useRef(null);
     const webglRef = useRef(null);
-    const resizeObserverRef = useRef(null);
     const rafRef = useRef(null);
+    const resizeObserverRef = useRef(null);
     const intersectionObserverRef = useRef(null);
     const isVisibleRef = useRef(true);
     const resizeRafRef = useRef(null);
@@ -34,1127 +35,357 @@ export default function LiquidEther({
     useEffect(() => {
         if (!mountRef.current) return;
 
-        function makePaletteTexture(stops) {
-            let arr;
-            if (Array.isArray(stops) && stops.length > 0) {
-                if (stops.length === 1) {
-                    arr = [stops[0], stops[0]];
-                } else {
-                    arr = stops;
-                }
-            } else {
-                arr = ['#ffffff', '#ffffff'];
-            }
+        // ── helpers ──────────────────────────────────────────────────────
+        function hexToRGB(hex) {
+            hex = hex.replace('#', '');
+            if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+            return [
+                parseInt(hex.substring(0,2), 16) / 255,
+                parseInt(hex.substring(2,4), 16) / 255,
+                parseInt(hex.substring(4,6), 16) / 255,
+            ];
+        }
+
+        function makePaletteData(stops) {
+            let arr = (Array.isArray(stops) && stops.length > 0)
+                ? (stops.length === 1 ? [stops[0], stops[0]] : stops)
+                : ['#ffffff', '#ffffff'];
             const w = arr.length;
             const data = new Uint8Array(w * 4);
             for (let i = 0; i < w; i++) {
-                const c = new Color(arr[i]);
-                data[i * 4 + 0] = Math.round(c.r * 255);
-                data[i * 4 + 1] = Math.round(c.g * 255);
-                data[i * 4 + 2] = Math.round(c.b * 255);
-                data[i * 4 + 3] = 255;
+                const [r, g, b] = hexToRGB(arr[i]);
+                data[i*4+0] = Math.round(r * 255);
+                data[i*4+1] = Math.round(g * 255);
+                data[i*4+2] = Math.round(b * 255);
+                data[i*4+3] = 255;
             }
-            const tex = new DataTexture(data, w, 1, RGBAFormat);
-            tex.magFilter = LinearFilter;
-            tex.minFilter = LinearFilter;
-            tex.wrapS = ClampToEdgeWrapping;
-            tex.wrapT = ClampToEdgeWrapping;
-            tex.generateMipmaps = false;
-            tex.needsUpdate = true;
-            return tex;
+            return { data, width: w };
         }
 
-        const paletteTex = makePaletteTexture(colors);
-        const bgVec4 = new Vector4(0, 0, 0, 0); // always transparent
-
-        class CommonClass {
-            constructor() {
-                this.width = 0;
-                this.height = 0;
-                this.aspect = 1;
-                this.pixelRatio = 1;
-                this.isMobile = false;
-                this.breakpoint = 768;
-                this.fboWidth = null;
-                this.fboHeight = null;
-                this.time = 0;
-                this.delta = 0;
-                this.container = null;
-                this.renderer = null;
-                this.clock = null;
+        // ── GL helpers ───────────────────────────────────────────────────
+        function createShader(gl, type, source) {
+            const s = gl.createShader(type);
+            gl.shaderSource(s, source);
+            gl.compileShader(s);
+            if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+                console.error('Shader compile error:', gl.getShaderInfoLog(s));
+                gl.deleteShader(s);
+                return null;
             }
-            init(container) {
-                this.container = container;
-                this.pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-                this.resize();
-                this.renderer = new WebGLRenderer({ antialias: true, alpha: true });
-                this.renderer.autoClear = false;
-                this.renderer.setClearColor(new Color(0x000000), 0);
-                this.renderer.setPixelRatio(this.pixelRatio);
-                this.renderer.setSize(this.width, this.height);
-                this.renderer.domElement.style.width = '100%';
-                this.renderer.domElement.style.height = '100%';
-                this.renderer.domElement.style.display = 'block';
-                this.clock = new Clock();
-                this.clock.start();
-            }
-            resize() {
-                if (!this.container) return;
-                const rect = this.container.getBoundingClientRect();
-                this.width = Math.max(1, Math.floor(rect.width));
-                this.height = Math.max(1, Math.floor(rect.height));
-                this.aspect = this.width / this.height;
-                if (this.renderer) this.renderer.setSize(this.width, this.height, false);
-            }
-            update() {
-                this.delta = this.clock.getDelta();
-                this.time += this.delta;
-            }
-        }
-        const Common = new CommonClass();
-
-        class MouseClass {
-            constructor() {
-                this.mouseMoved = false;
-                this.coords = new Vector2();
-                this.coords_old = new Vector2();
-                this.diff = new Vector2();
-                this.timer = null;
-                this.container = null;
-                this.docTarget = null;
-                this.listenerTarget = null;
-                this.isHoverInside = false;
-                this.hasUserControl = false;
-                this.isAutoActive = false;
-                this.autoIntensity = 2.0;
-                this.takeoverActive = false;
-                this.takeoverStartTime = 0;
-                this.takeoverDuration = 0.25;
-                this.takeoverFrom = new Vector2();
-                this.takeoverTo = new Vector2();
-                this.onInteract = null;
-                this._onMouseMove = this.onDocumentMouseMove.bind(this);
-                this._onTouchStart = this.onDocumentTouchStart.bind(this);
-                this._onTouchMove = this.onDocumentTouchMove.bind(this);
-                this._onTouchEnd = this.onTouchEnd.bind(this);
-                this._onDocumentLeave = this.onDocumentLeave.bind(this);
-            }
-            init(container) {
-                this.container = container;
-                this.docTarget = container.ownerDocument || null;
-                const defaultView =
-                    (this.docTarget && this.docTarget.defaultView) || (typeof window !== 'undefined' ? window : null);
-                if (!defaultView) return;
-                this.listenerTarget = defaultView;
-                this.listenerTarget.addEventListener('mousemove', this._onMouseMove);
-                this.listenerTarget.addEventListener('touchstart', this._onTouchStart, { passive: true });
-                this.listenerTarget.addEventListener('touchmove', this._onTouchMove, { passive: true });
-                this.listenerTarget.addEventListener('touchend', this._onTouchEnd);
-                if (this.docTarget) {
-                    this.docTarget.addEventListener('mouseleave', this._onDocumentLeave);
-                }
-            }
-            dispose() {
-                if (this.listenerTarget) {
-                    this.listenerTarget.removeEventListener('mousemove', this._onMouseMove);
-                    this.listenerTarget.removeEventListener('touchstart', this._onTouchStart);
-                    this.listenerTarget.removeEventListener('touchmove', this._onTouchMove);
-                    this.listenerTarget.removeEventListener('touchend', this._onTouchEnd);
-                }
-                if (this.docTarget) {
-                    this.docTarget.removeEventListener('mouseleave', this._onDocumentLeave);
-                }
-                this.listenerTarget = null;
-                this.docTarget = null;
-                this.container = null;
-            }
-            isPointInside(clientX, clientY) {
-                if (!this.container) return false;
-                const rect = this.container.getBoundingClientRect();
-                if (rect.width === 0 || rect.height === 0) return false;
-                return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
-            }
-            updateHoverState(clientX, clientY) {
-                this.isHoverInside = this.isPointInside(clientX, clientY);
-                return this.isHoverInside;
-            }
-            setCoords(x, y) {
-                if (!this.container) return;
-                if (this.timer) window.clearTimeout(this.timer);
-                const rect = this.container.getBoundingClientRect();
-                if (rect.width === 0 || rect.height === 0) return;
-                const nx = (x - rect.left) / rect.width;
-                const ny = (y - rect.top) / rect.height;
-                this.coords.set(nx * 2 - 1, -(ny * 2 - 1));
-                this.mouseMoved = true;
-                this.timer = window.setTimeout(() => {
-                    this.mouseMoved = false;
-                }, 100);
-            }
-            setNormalized(nx, ny) {
-                this.coords.set(nx, ny);
-                this.mouseMoved = true;
-            }
-            onDocumentMouseMove(event) {
-                if (!this.updateHoverState(event.clientX, event.clientY)) return;
-                if (this.onInteract) this.onInteract();
-                if (this.isAutoActive && !this.hasUserControl && !this.takeoverActive) {
-                    if (!this.container) return;
-                    const rect = this.container.getBoundingClientRect();
-                    if (rect.width === 0 || rect.height === 0) return;
-                    const nx = (event.clientX - rect.left) / rect.width;
-                    const ny = (event.clientY - rect.top) / rect.height;
-                    this.takeoverFrom.copy(this.coords);
-                    this.takeoverTo.set(nx * 2 - 1, -(ny * 2 - 1));
-                    this.takeoverStartTime = performance.now();
-                    this.takeoverActive = true;
-                    this.hasUserControl = true;
-                    this.isAutoActive = false;
-                    return;
-                }
-                this.setCoords(event.clientX, event.clientY);
-                this.hasUserControl = true;
-            }
-            onDocumentTouchStart(event) {
-                if (event.touches.length !== 1) return;
-                const t = event.touches[0];
-                if (!this.updateHoverState(t.clientX, t.clientY)) return;
-                if (this.onInteract) this.onInteract();
-                this.setCoords(t.clientX, t.clientY);
-                this.hasUserControl = true;
-            }
-            onDocumentTouchMove(event) {
-                if (event.touches.length !== 1) return;
-                const t = event.touches[0];
-                if (!this.updateHoverState(t.clientX, t.clientY)) return;
-                if (this.onInteract) this.onInteract();
-                this.setCoords(t.clientX, t.clientY);
-            }
-            onTouchEnd() {
-                this.isHoverInside = false;
-            }
-            onDocumentLeave() {
-                this.isHoverInside = false;
-            }
-            update() {
-                if (this.takeoverActive) {
-                    const t = (performance.now() - this.takeoverStartTime) / (this.takeoverDuration * 1000);
-                    if (t >= 1) {
-                        this.takeoverActive = false;
-                        this.coords.copy(this.takeoverTo);
-                        this.coords_old.copy(this.coords);
-                        this.diff.set(0, 0);
-                    } else {
-                        const k = t * t * (3 - 2 * t);
-                        this.coords.copy(this.takeoverFrom).lerp(this.takeoverTo, k);
-                    }
-                }
-                this.diff.subVectors(this.coords, this.coords_old);
-                this.coords_old.copy(this.coords);
-                if (this.coords_old.x === 0 && this.coords_old.y === 0) this.diff.set(0, 0);
-                if (this.isAutoActive && !this.takeoverActive) this.diff.multiplyScalar(this.autoIntensity);
-            }
-        }
-        const Mouse = new MouseClass();
-
-        class AutoDriver {
-            constructor(mouse, manager, opts) {
-                this.mouse = mouse;
-                this.manager = manager;
-                this.enabled = opts.enabled;
-                this.speed = opts.speed; // normalized units/sec
-                this.resumeDelay = opts.resumeDelay || 3000; // ms
-                this.rampDurationMs = (opts.rampDuration || 0) * 1000;
-                this.active = false;
-                this.current = new Vector2(0, 0);
-                this.target = new Vector2();
-                this.lastTime = performance.now();
-                this.activationTime = 0;
-                this.margin = 0.2;
-                this._tmpDir = new Vector2(); // reuse temp vector to avoid per-frame alloc
-                this.pickNewTarget();
-            }
-            pickNewTarget() {
-                const r = Math.random;
-                this.target.set((r() * 2 - 1) * (1 - this.margin), (r() * 2 - 1) * (1 - this.margin));
-            }
-            forceStop() {
-                this.active = false;
-                this.mouse.isAutoActive = false;
-            }
-            update() {
-                if (!this.enabled) return;
-                const now = performance.now();
-                const idle = now - this.manager.lastUserInteraction;
-                if (idle < this.resumeDelay) {
-                    if (this.active) this.forceStop();
-                    return;
-                }
-                if (!this.active) {
-                    this.active = true;
-                    this.current.copy(this.mouse.coords);
-                    this.lastTime = now;
-                    this.activationTime = now;
-                }
-                if (!this.active) return;
-                this.mouse.isAutoActive = true;
-                let dtSec = (now - this.lastTime) / 1000;
-                this.lastTime = now;
-                if (dtSec > 0.2) dtSec = 0.016;
-                const dir = this._tmpDir.subVectors(this.target, this.current);
-                const dist = dir.length();
-                if (dist < 0.01) {
-                    this.pickNewTarget();
-                    return;
-                }
-                dir.normalize();
-                let ramp = 1;
-                if (this.rampDurationMs > 0) {
-                    const t = Math.min(1, (now - this.activationTime) / this.rampDurationMs);
-                    ramp = t * t * (3 - 2 * t);
-                }
-                const step = this.speed * dtSec * ramp;
-                const move = Math.min(step, dist);
-                this.current.addScaledVector(dir, move);
-                this.mouse.setNormalized(this.current.x, this.current.y);
-            }
+            return s;
         }
 
-        const face_vert = `
-  attribute vec3 position;
-  uniform vec2 px;
-  uniform vec2 boundarySpace;
-  varying vec2 uv;
-  precision highp float;
-  void main(){
-  vec3 pos = position;
-  vec2 scale = 1.0 - boundarySpace * 2.0;
-  pos.xy = pos.xy * scale;
-  uv = vec2(0.5)+(pos.xy)*0.5;
-  gl_Position = vec4(pos, 1.0);
-}
-`;
-        const line_vert = `
-  attribute vec3 position;
-  uniform vec2 px;
-  precision highp float;
-  varying vec2 uv;
-  void main(){
-  vec3 pos = position;
-  uv = 0.5 + pos.xy * 0.5;
-  vec2 n = sign(pos.xy);
-  pos.xy = abs(pos.xy) - px * 1.0;
-  pos.xy *= n;
-  gl_Position = vec4(pos, 1.0);
-}
-`;
-        const mouse_vert = `
-    precision highp float;
-    attribute vec3 position;
-    attribute vec2 uv;
-    uniform vec2 center;
-    uniform vec2 scale;
-    uniform vec2 px;
-    varying vec2 vUv;
-    void main(){
-    vec2 pos = position.xy * scale * 2.0 * px + center;
-    vUv = uv;
-    gl_Position = vec4(pos, 0.0, 1.0);
-}
-`;
-        const advection_frag = `
-    precision highp float;
-    uniform sampler2D velocity;
-    uniform float dt;
-    uniform bool isBFECC;
-    uniform vec2 fboSize;
-    uniform vec2 px;
-    varying vec2 uv;
-    void main(){
-    vec2 ratio = max(fboSize.x, fboSize.y) / fboSize;
-    if(isBFECC == false){
-        vec2 vel = texture2D(velocity, uv).xy;
-        vec2 uv2 = uv - vel * dt * ratio;
-        vec2 newVel = texture2D(velocity, uv2).xy;
-        gl_FragColor = vec4(newVel, 0.0, 0.0);
-    } else {
-        vec2 spot_new = uv;
-        vec2 vel_old = texture2D(velocity, uv).xy;
-        vec2 spot_old = spot_new - vel_old * dt * ratio;
-        vec2 vel_new1 = texture2D(velocity, spot_old).xy;
-        vec2 spot_new2 = spot_old + vel_new1 * dt * ratio;
-        vec2 error = spot_new2 - spot_new;
-        vec2 spot_new3 = spot_new - error / 2.0;
-        vec2 vel_2 = texture2D(velocity, spot_new3).xy;
-        vec2 spot_old2 = spot_new3 - vel_2 * dt * ratio;
-        vec2 newVel2 = texture2D(velocity, spot_old2).xy; 
-        gl_FragColor = vec4(newVel2, 0.0, 0.0);
-    }
-}
-`;
-        const color_frag = `
-    precision highp float;
-    uniform sampler2D velocity;
-    uniform sampler2D palette;
-    uniform vec4 bgColor;
-    varying vec2 uv;
-    void main(){
-    vec2 vel = texture2D(velocity, uv).xy;
-    float lenv = clamp(length(vel), 0.0, 1.0);
-    vec3 c = texture2D(palette, vec2(lenv, 0.5)).rgb;
-    vec3 outRGB = mix(bgColor.rgb, c, lenv);
-    float outA = mix(bgColor.a, 1.0, lenv);
-    gl_FragColor = vec4(outRGB, outA);
-}
-`;
-        const divergence_frag = `
-    precision highp float;
-    uniform sampler2D velocity;
-    uniform float dt;
-    uniform vec2 px;
-    varying vec2 uv;
-    void main(){
-    float x0 = texture2D(velocity, uv-vec2(px.x, 0.0)).x;
-    float x1 = texture2D(velocity, uv+vec2(px.x, 0.0)).x;
-    float y0 = texture2D(velocity, uv-vec2(0.0, px.y)).y;
-    float y1 = texture2D(velocity, uv+vec2(0.0, px.y)).y;
-    float divergence = (x1 - x0 + y1 - y0) / 2.0;
-    gl_FragColor = vec4(divergence / dt);
-}
-`;
-        const externalForce_frag = `
-    precision highp float;
-    uniform vec2 force;
-    uniform vec2 center;
-    uniform vec2 scale;
-    uniform vec2 px;
-    varying vec2 vUv;
-    void main(){
-    vec2 circle = (vUv - 0.5) * 2.0;
-    float d = 1.0 - min(length(circle), 1.0);
-    d *= d;
-    gl_FragColor = vec4(force * d, 0.0, 1.0);
-}
-`;
-        const poisson_frag = `
-    precision highp float;
-    uniform sampler2D pressure;
-    uniform sampler2D divergence;
-    uniform vec2 px;
-    varying vec2 uv;
-    void main(){
-    float p0 = texture2D(pressure, uv + vec2(px.x * 2.0, 0.0)).r;
-    float p1 = texture2D(pressure, uv - vec2(px.x * 2.0, 0.0)).r;
-    float p2 = texture2D(pressure, uv + vec2(0.0, px.y * 2.0)).r;
-    float p3 = texture2D(pressure, uv - vec2(0.0, px.y * 2.0)).r;
-    float div = texture2D(divergence, uv).r;
-    float newP = (p0 + p1 + p2 + p3) / 4.0 - div;
-    gl_FragColor = vec4(newP);
-}
-`;
-        const pressure_frag = `
-    precision highp float;
-    uniform sampler2D pressure;
-    uniform sampler2D velocity;
-    uniform vec2 px;
-    uniform float dt;
-    varying vec2 uv;
-    void main(){
-    float step = 1.0;
-    float p0 = texture2D(pressure, uv + vec2(px.x * step, 0.0)).r;
-    float p1 = texture2D(pressure, uv - vec2(px.x * step, 0.0)).r;
-    float p2 = texture2D(pressure, uv + vec2(0.0, px.y * step)).r;
-    float p3 = texture2D(pressure, uv - vec2(0.0, px.y * step)).r;
-    vec2 v = texture2D(velocity, uv).xy;
-    vec2 gradP = vec2(p0 - p1, p2 - p3) * 0.5;
-    v = v - gradP * dt;
-    gl_FragColor = vec4(v, 0.0, 1.0);
-}
-`;
-        const viscous_frag = `
-    precision highp float;
-    uniform sampler2D velocity;
-    uniform sampler2D velocity_new;
-    uniform float v;
-    uniform vec2 px;
-    uniform float dt;
-    varying vec2 uv;
-    void main(){
-    vec2 old = texture2D(velocity, uv).xy;
-    vec2 new0 = texture2D(velocity_new, uv + vec2(px.x * 2.0, 0.0)).xy;
-    vec2 new1 = texture2D(velocity_new, uv - vec2(px.x * 2.0, 0.0)).xy;
-    vec2 new2 = texture2D(velocity_new, uv + vec2(0.0, px.y * 2.0)).xy;
-    vec2 new3 = texture2D(velocity_new, uv - vec2(0.0, px.y * 2.0)).xy;
-    vec2 newv = 4.0 * old + v * dt * (new0 + new1 + new2 + new3);
-    newv /= 4.0 * (1.0 + v * dt);
-    gl_FragColor = vec4(newv, 0.0, 0.0);
-}
-`;
-
-        class ShaderPass {
-            constructor(props) {
-                this.props = props || {};
-                this.uniforms = this.props.material?.uniforms;
-                this.scene = null;
-                this.camera = null;
-                this.material = null;
-                this.geometry = null;
-                this.plane = null;
+        function createProgram(gl, vsSrc, fsSrc) {
+            const vs = createShader(gl, gl.VERTEX_SHADER, vsSrc);
+            const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSrc);
+            if (!vs || !fs) return null;
+            const prog = gl.createProgram();
+            gl.attachShader(prog, vs);
+            gl.attachShader(prog, fs);
+            gl.linkProgram(prog);
+            if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+                console.error('Program link error:', gl.getProgramInfoLog(prog));
+                return null;
             }
-            init() {
-                this.scene = new Scene();
-                this.camera = new Camera();
-                if (this.uniforms) {
-                    this.material = new RawShaderMaterial(this.props.material);
-                    this.geometry = new PlaneGeometry(2.0, 2.0);
-                    this.plane = new Mesh(this.geometry, this.material);
-                    this.scene.add(this.plane);
-                }
-            }
-            update() {
-                Common.renderer.setRenderTarget(this.props.output || null);
-                Common.renderer.render(this.scene, this.camera);
-                Common.renderer.setRenderTarget(null);
-            }
+            // Shaders can be deleted after linking
+            gl.deleteShader(vs);
+            gl.deleteShader(fs);
+            return prog;
         }
 
-        class Advection extends ShaderPass {
-            constructor(simProps) {
-                super({
-                    material: {
-                        vertexShader: face_vert,
-                        fragmentShader: advection_frag,
-                        uniforms: {
-                            boundarySpace: { value: simProps.cellScale },
-                            px: { value: simProps.cellScale },
-                            fboSize: { value: simProps.fboSize },
-                            velocity: { value: simProps.src.texture },
-                            dt: { value: simProps.dt },
-                            isBFECC: { value: true }
-                        }
-                    },
-                    output: simProps.dst
-                });
-                this.uniforms = this.props.material.uniforms;
-                this.init();
-            }
-            init() {
-                super.init();
-                this.createBoundary();
-            }
-            createBoundary() {
-                const boundaryG = new BufferGeometry();
-                const vertices_boundary = new Float32Array([
-                    -1, -1, 0, -1, 1, 0, -1, 1, 0, 1, 1, 0, 1, 1, 0, 1, -1, 0, 1, -1, 0, -1, -1, 0
-                ]);
-                boundaryG.setAttribute('position', new BufferAttribute(vertices_boundary, 3));
-                const boundaryM = new RawShaderMaterial({
-                    vertexShader: line_vert,
-                    fragmentShader: advection_frag,
-                    uniforms: this.uniforms
-                });
-                this.line = new LineSegments(boundaryG, boundaryM);
-                this.scene.add(this.line);
-            }
-            update({ dt, isBounce, BFECC }) {
-                this.uniforms.dt.value = dt;
-                this.line.visible = isBounce;
-                this.uniforms.isBFECC.value = BFECC;
-                super.update();
-            }
+        function createFBO(gl, w, h) {
+            const tex = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+            // Use HALF_FLOAT if available (better perf on mobile), else FLOAT
+            const halfFloatExt = gl.getExtension('OES_texture_half_float');
+            const useHalfFloat = !!halfFloatExt;
+            const floatType = useHalfFloat ? halfFloatExt.HALF_FLOAT_OES : gl.FLOAT;
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, floatType, null);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+            const fb = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            return { texture: tex, framebuffer: fb, width: w, height: h };
         }
 
-        class ExternalForce extends ShaderPass {
-            constructor(simProps) {
-                super({ output: simProps.dst });
-                this.init(simProps);
-            }
-            init(simProps) {
-                super.init();
-                const mouseG = new PlaneGeometry(1, 1);
-                const mouseM = new RawShaderMaterial({
-                    vertexShader: mouse_vert,
-                    fragmentShader: externalForce_frag,
-                    blending: AdditiveBlending,
-                    depthWrite: false,
-                    uniforms: {
-                        px: { value: simProps.cellScale },
-                        force: { value: new Vector2(0.0, 0.0) },
-                        center: { value: new Vector2(0.0, 0.0) },
-                        scale: { value: new Vector2(simProps.cursor_size, simProps.cursor_size) }
-                    }
-                });
-                this.mouse = new Mesh(mouseG, mouseM);
-                this.scene.add(this.mouse);
-            }
-            update(props) {
-                const forceX = (Mouse.diff.x / 2) * props.mouse_force;
-                const forceY = (Mouse.diff.y / 2) * props.mouse_force;
-                const cursorSizeX = props.cursor_size * props.cellScale.x;
-                const cursorSizeY = props.cursor_size * props.cellScale.y;
-                const centerX = Math.min(
-                    Math.max(Mouse.coords.x, -1 + cursorSizeX + props.cellScale.x * 2),
-                    1 - cursorSizeX - props.cellScale.x * 2
-                );
-                const centerY = Math.min(
-                    Math.max(Mouse.coords.y, -1 + cursorSizeY + props.cellScale.y * 2),
-                    1 - cursorSizeY - props.cellScale.y * 2
-                );
-                const uniforms = this.mouse.material.uniforms;
-                uniforms.force.value.set(forceX, forceY);
-                uniforms.center.value.set(centerX, centerY);
-                uniforms.scale.value.set(props.cursor_size, props.cursor_size);
-                super.update();
-            }
+        function resizeFBO(gl, fbo, w, h) {
+            const halfFloatExt = gl.getExtension('OES_texture_half_float');
+            const useHalfFloat = !!halfFloatExt;
+            const floatType = useHalfFloat ? halfFloatExt.HALF_FLOAT_OES : gl.FLOAT;
+            gl.bindTexture(gl.TEXTURE_2D, fbo.texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, floatType, null);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            fbo.width = w;
+            fbo.height = h;
         }
 
-        class Viscous extends ShaderPass {
-            constructor(simProps) {
-                super({
-                    material: {
-                        vertexShader: face_vert,
-                        fragmentShader: viscous_frag,
-                        uniforms: {
-                            boundarySpace: { value: simProps.boundarySpace },
-                            velocity: { value: simProps.src.texture },
-                            velocity_new: { value: simProps.dst_.texture },
-                            v: { value: simProps.viscous },
-                            px: { value: simProps.cellScale },
-                            dt: { value: simProps.dt }
-                        }
-                    },
-                    output: simProps.dst,
-                    output0: simProps.dst_,
-                    output1: simProps.dst
-                });
-                this.init();
+        // ── shaders ──────────────────────────────────────────────────────
+        const QUAD_VS = `
+            attribute vec2 a_position;
+            varying vec2 uv;
+            void main() {
+                uv = a_position * 0.5 + 0.5;
+                gl_Position = vec4(a_position, 0.0, 1.0);
             }
-            update({ viscous, iterations, dt }) {
-                let fbo_in, fbo_out;
-                this.uniforms.v.value = viscous;
-                for (let i = 0; i < iterations; i++) {
-                    if (i % 2 === 0) {
-                        fbo_in = this.props.output0;
-                        fbo_out = this.props.output1;
-                    } else {
-                        fbo_in = this.props.output1;
-                        fbo_out = this.props.output0;
-                    }
-                    this.uniforms.velocity_new.value = fbo_in.texture;
-                    this.props.output = fbo_out;
-                    this.uniforms.dt.value = dt;
-                    super.update();
-                }
-                return fbo_out;
-            }
-        }
+        `;
 
-        class Divergence extends ShaderPass {
-            constructor(simProps) {
-                super({
-                    material: {
-                        vertexShader: face_vert,
-                        fragmentShader: divergence_frag,
-                        uniforms: {
-                            boundarySpace: { value: simProps.boundarySpace },
-                            velocity: { value: simProps.src.texture },
-                            px: { value: simProps.cellScale },
-                            dt: { value: simProps.dt }
-                        }
-                    },
-                    output: simProps.dst
-                });
-                this.init();
+        const ADVECTION_VS = `
+            attribute vec2 a_position;
+            uniform vec2 u_boundarySpace;
+            varying vec2 uv;
+            void main() {
+                vec2 scale = 1.0 - u_boundarySpace * 2.0;
+                vec2 pos = a_position * scale;
+                uv = pos * 0.5 + 0.5;
+                gl_Position = vec4(pos, 0.0, 1.0);
             }
-            update({ vel }) {
-                this.uniforms.velocity.value = vel.texture;
-                super.update();
-            }
-        }
+        `;
 
-        class Poisson extends ShaderPass {
-            constructor(simProps) {
-                super({
-                    material: {
-                        vertexShader: face_vert,
-                        fragmentShader: poisson_frag,
-                        uniforms: {
-                            boundarySpace: { value: simProps.boundarySpace },
-                            pressure: { value: simProps.dst_.texture },
-                            divergence: { value: simProps.src.texture },
-                            px: { value: simProps.cellScale }
-                        }
-                    },
-                    output: simProps.dst,
-                    output0: simProps.dst_,
-                    output1: simProps.dst
-                });
-                this.init();
-            }
-            update({ iterations }) {
-                let p_in, p_out;
-                for (let i = 0; i < iterations; i++) {
-                    if (i % 2 === 0) {
-                        p_in = this.props.output0;
-                        p_out = this.props.output1;
-                    } else {
-                        p_in = this.props.output1;
-                        p_out = this.props.output0;
-                    }
-                    this.uniforms.pressure.value = p_in.texture;
-                    this.props.output = p_out;
-                    super.update();
-                }
-                return p_out;
-            }
-        }
-
-        class Pressure extends ShaderPass {
-            constructor(simProps) {
-                super({
-                    material: {
-                        vertexShader: face_vert,
-                        fragmentShader: pressure_frag,
-                        uniforms: {
-                            boundarySpace: { value: simProps.boundarySpace },
-                            pressure: { value: simProps.src_p.texture },
-                            velocity: { value: simProps.src_v.texture },
-                            px: { value: simProps.cellScale },
-                            dt: { value: simProps.dt }
-                        }
-                    },
-                    output: simProps.dst
-                });
-                this.init();
-            }
-            update({ vel, pressure }) {
-                this.uniforms.velocity.value = vel.texture;
-                this.uniforms.pressure.value = pressure.texture;
-                super.update();
-            }
-        }
-
-        class Simulation {
-            constructor(options) {
-                this.options = {
-                    iterations_poisson: 32,
-                    iterations_viscous: 32,
-                    mouse_force: 20,
-                    resolution: 0.5,
-                    cursor_size: 100,
-                    viscous: 30,
-                    isBounce: false,
-                    dt: 0.014,
-                    isViscous: false,
-                    BFECC: true,
-                    ...options
-                };
-                this.fbos = {
-                    vel_0: null,
-                    vel_1: null,
-                    vel_viscous0: null,
-                    vel_viscous1: null,
-                    div: null,
-                    pressure_0: null,
-                    pressure_1: null
-                };
-                this.fboSize = new Vector2();
-                this.cellScale = new Vector2();
-                this.boundarySpace = new Vector2();
-                this.init();
-            }
-            init() {
-                this.calcSize();
-                this.createAllFBO();
-                this.createShaderPass();
-            }
-            getFloatType() {
-                const isIOS = /(iPad|iPhone|iPod)/i.test(navigator.userAgent);
-                return isIOS ? HalfFloatType : FloatType;
-            }
-            createAllFBO() {
-                const type = this.getFloatType();
-                const opts = {
-                    type,
-                    depthBuffer: false,
-                    stencilBuffer: false,
-                    minFilter: LinearFilter,
-                    magFilter: LinearFilter,
-                    wrapS: ClampToEdgeWrapping,
-                    wrapT: ClampToEdgeWrapping
-                };
-                for (let key in this.fbos) {
-                    this.fbos[key] = new WebGLRenderTarget(this.fboSize.x, this.fboSize.y, opts);
-                }
-            }
-            createShaderPass() {
-                this.advection = new Advection({
-                    cellScale: this.cellScale,
-                    fboSize: this.fboSize,
-                    dt: this.options.dt,
-                    src: this.fbos.vel_0,
-                    dst: this.fbos.vel_1
-                });
-                this.externalForce = new ExternalForce({
-                    cellScale: this.cellScale,
-                    cursor_size: this.options.cursor_size,
-                    dst: this.fbos.vel_1
-                });
-                this.viscous = new Viscous({
-                    cellScale: this.cellScale,
-                    boundarySpace: this.boundarySpace,
-                    viscous: this.options.viscous,
-                    src: this.fbos.vel_1,
-                    dst: this.fbos.vel_viscous1,
-                    dst_: this.fbos.vel_viscous0,
-                    dt: this.options.dt
-                });
-                this.divergence = new Divergence({
-                    cellScale: this.cellScale,
-                    boundarySpace: this.boundarySpace,
-                    src: this.fbos.vel_viscous0,
-                    dst: this.fbos.div,
-                    dt: this.options.dt
-                });
-                this.poisson = new Poisson({
-                    cellScale: this.cellScale,
-                    boundarySpace: this.boundarySpace,
-                    src: this.fbos.div,
-                    dst: this.fbos.pressure_1,
-                    dst_: this.fbos.pressure_0
-                });
-                this.pressure = new Pressure({
-                    cellScale: this.cellScale,
-                    boundarySpace: this.boundarySpace,
-                    src_p: this.fbos.pressure_0,
-                    src_v: this.fbos.vel_viscous0,
-                    dst: this.fbos.vel_0,
-                    dt: this.options.dt
-                });
-            }
-            calcSize() {
-                const width = Math.max(1, Math.round(this.options.resolution * Common.width));
-                const height = Math.max(1, Math.round(this.options.resolution * Common.height));
-                const px_x = 1.0 / width;
-                const px_y = 1.0 / height;
-                this.cellScale.set(px_x, px_y);
-                this.fboSize.set(width, height);
-            }
-            resize() {
-                this.calcSize();
-                for (let key in this.fbos) {
-                    this.fbos[key].setSize(this.fboSize.x, this.fboSize.y);
-                }
-            }
-            update() {
-                if (this.options.isBounce) {
-                    this.boundarySpace.set(0, 0);
+        const ADVECTION_FS = `
+            precision highp float;
+            uniform sampler2D u_velocity;
+            uniform float u_dt;
+            uniform bool u_isBFECC;
+            uniform vec2 u_fboSize;
+            varying vec2 uv;
+            void main() {
+                vec2 ratio = max(u_fboSize.x, u_fboSize.y) / u_fboSize;
+                if (!u_isBFECC) {
+                    vec2 vel = texture2D(u_velocity, uv).xy;
+                    vec2 uv2 = uv - vel * u_dt * ratio;
+                    gl_FragColor = vec4(texture2D(u_velocity, uv2).xy, 0.0, 0.0);
                 } else {
-                    this.boundarySpace.copy(this.cellScale);
-                }
-                this.advection.update({
-                    dt: this.options.dt,
-                    isBounce: this.options.isBounce,
-                    BFECC: this.options.BFECC
-                });
-                this.externalForce.update({
-                    cursor_size: this.options.cursor_size,
-                    mouse_force: this.options.mouse_force,
-                    cellScale: this.cellScale
-                });
-                let vel = this.fbos.vel_1;
-                if (this.options.isViscous) {
-                    vel = this.viscous.update({
-                        viscous: this.options.viscous,
-                        iterations: this.options.iterations_viscous,
-                        dt: this.options.dt
-                    });
-                }
-                this.divergence.update({ vel });
-                const pressure = this.poisson.update({
-                    iterations: this.options.iterations_poisson
-                });
-                this.pressure.update({ vel, pressure });
-            }
-        }
-
-        class Output {
-            constructor() {
-                this.init();
-            }
-            init() {
-                this.simulation = new Simulation();
-                this.scene = new Scene();
-                this.camera = new Camera();
-                this.output = new Mesh(
-                    new PlaneGeometry(2, 2),
-                    new RawShaderMaterial({
-                        vertexShader: face_vert,
-                        fragmentShader: color_frag,
-                        transparent: true,
-                        depthWrite: false,
-                        uniforms: {
-                            velocity: { value: this.simulation.fbos.vel_0.texture },
-                            boundarySpace: { value: new Vector2() },
-                            palette: { value: paletteTex },
-                            bgColor: { value: bgVec4 }
-                        }
-                    })
-                );
-                this.scene.add(this.output);
-            }
-            addScene(mesh) {
-                this.scene.add(mesh);
-            }
-            resize() {
-                this.simulation.resize();
-            }
-            render() {
-                Common.renderer.setRenderTarget(null);
-                Common.renderer.render(this.scene, this.camera);
-            }
-            update() {
-                this.simulation.update();
-                this.render();
-            }
-        }
-
-        class WebGLManager {
-            constructor(props) {
-                this.props = props;
-                Common.init(props.$wrapper);
-                Mouse.init(props.$wrapper);
-                Mouse.autoIntensity = props.autoIntensity;
-                Mouse.takeoverDuration = props.takeoverDuration;
-                this.lastUserInteraction = performance.now();
-                Mouse.onInteract = () => {
-                    this.lastUserInteraction = performance.now();
-                    if (this.autoDriver) this.autoDriver.forceStop();
-                };
-                this.autoDriver = new AutoDriver(Mouse, this, {
-                    enabled: props.autoDemo,
-                    speed: props.autoSpeed,
-                    resumeDelay: props.autoResumeDelay,
-                    rampDuration: props.autoRampDuration
-                });
-                this.init();
-                this._loop = this.loop.bind(this);
-                this._resize = this.resize.bind(this);
-                window.addEventListener('resize', this._resize);
-                this._onVisibility = () => {
-                    const hidden = document.hidden;
-                    if (hidden) {
-                        this.pause();
-                    } else if (isVisibleRef.current) {
-                        this.start();
-                    }
-                };
-                document.addEventListener('visibilitychange', this._onVisibility);
-                this.running = false;
-            }
-            init() {
-                this.props.$wrapper.prepend(Common.renderer.domElement);
-                this.output = new Output();
-            }
-            resize() {
-                Common.resize();
-                this.output.resize();
-            }
-            render() {
-                if (this.autoDriver) this.autoDriver.update();
-                Mouse.update();
-                Common.update();
-                this.output.update();
-            }
-            loop() {
-                if (!this.running) return; // safety
-                this.render();
-                rafRef.current = requestAnimationFrame(this._loop);
-            }
-            start() {
-                if (this.running) return;
-                this.running = true;
-                this._loop();
-            }
-            pause() {
-                this.running = false;
-                if (rafRef.current) {
-                    cancelAnimationFrame(rafRef.current);
-                    rafRef.current = null;
+                    vec2 spot_new = uv;
+                    vec2 vel_old = texture2D(u_velocity, uv).xy;
+                    vec2 spot_old = spot_new - vel_old * u_dt * ratio;
+                    vec2 vel_new1 = texture2D(u_velocity, spot_old).xy;
+                    vec2 spot_new2 = spot_old + vel_new1 * u_dt * ratio;
+                    vec2 error = spot_new2 - spot_new;
+                    vec2 spot_new3 = spot_new - error / 2.0;
+                    vec2 vel_2 = texture2D(u_velocity, spot_new3).xy;
+                    vec2 spot_old2 = spot_new3 - vel_2 * u_dt * ratio;
+                    gl_FragColor = vec4(texture2D(u_velocity, spot_old2).xy, 0.0, 0.0);
                 }
             }
-            dispose() {
-                try {
-                    window.removeEventListener('resize', this._resize);
-                    document.removeEventListener('visibilitychange', this._onVisibility);
-                    Mouse.dispose();
+        `;
 
-                    if (this.output && this.output.scene) {
-                        this.output.scene.traverse((child) => {
-                            if (child.geometry) child.geometry.dispose();
-                            if (child.material) {
-                                if (Array.isArray(child.material)) {
-                                    child.material.forEach(m => m.dispose());
-                                } else {
-                                    child.material.dispose();
-                                }
-                            }
-                        });
-                    }
-
-                    if (this.output && this.output.simulation) {
-                        const sim = this.output.simulation;
-                        for (let key in sim.fbos) {
-                            if (sim.fbos[key]) sim.fbos[key].dispose();
-                        }
-                        
-                        // traverse through all shader passes internally
-                        const passes = [sim.advection, sim.externalForce, sim.viscous, sim.divergence, sim.poisson, sim.pressure];
-                        passes.forEach(pass => {
-                            if (pass && pass.scene) {
-                                pass.scene.traverse((child) => {
-                                    if (child.geometry) child.geometry.dispose();
-                                    if (child.material) {
-                                        if (Array.isArray(child.material)) {
-                                            child.material.forEach(m => m.dispose());
-                                        } else {
-                                            child.material.dispose();
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                    }
-                    if (paletteTex) paletteTex.dispose();
-
-                    if (Common.renderer) {
-                        const canvas = Common.renderer.domElement;
-                        if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);
-                        Common.renderer.dispose();
-                    }
-                } catch {
-                    void 0;
-                }
+        const EXTERNAL_FORCE_VS = `
+            attribute vec2 a_position;
+            attribute vec2 a_uv;
+            uniform vec2 u_center;
+            uniform vec2 u_scale;
+            uniform vec2 u_px;
+            varying vec2 vUv;
+            void main() {
+                vec2 pos = a_position * u_scale * 2.0 * u_px + u_center;
+                vUv = a_uv;
+                gl_Position = vec4(pos, 0.0, 1.0);
             }
-        }
+        `;
 
+        const EXTERNAL_FORCE_FS = `
+            precision highp float;
+            uniform vec2 u_force;
+            varying vec2 vUv;
+            void main() {
+                vec2 circle = (vUv - 0.5) * 2.0;
+                float d = 1.0 - min(length(circle), 1.0);
+                d *= d;
+                gl_FragColor = vec4(u_force * d, 0.0, 1.0);
+            }
+        `;
+
+        const DIVERGENCE_FS = `
+            precision highp float;
+            uniform sampler2D u_velocity;
+            uniform float u_dt;
+            uniform vec2 u_px;
+            varying vec2 uv;
+            void main() {
+                float x0 = texture2D(u_velocity, uv - vec2(u_px.x, 0.0)).x;
+                float x1 = texture2D(u_velocity, uv + vec2(u_px.x, 0.0)).x;
+                float y0 = texture2D(u_velocity, uv - vec2(0.0, u_px.y)).y;
+                float y1 = texture2D(u_velocity, uv + vec2(0.0, u_px.y)).y;
+                float div = (x1 - x0 + y1 - y0) / 2.0;
+                gl_FragColor = vec4(div / u_dt);
+            }
+        `;
+
+        const POISSON_FS = `
+            precision highp float;
+            uniform sampler2D u_pressure;
+            uniform sampler2D u_divergence;
+            uniform vec2 u_px;
+            varying vec2 uv;
+            void main() {
+                float p0 = texture2D(u_pressure, uv + vec2(u_px.x * 2.0, 0.0)).r;
+                float p1 = texture2D(u_pressure, uv - vec2(u_px.x * 2.0, 0.0)).r;
+                float p2 = texture2D(u_pressure, uv + vec2(0.0, u_px.y * 2.0)).r;
+                float p3 = texture2D(u_pressure, uv - vec2(0.0, u_px.y * 2.0)).r;
+                float div = texture2D(u_divergence, uv).r;
+                gl_FragColor = vec4((p0 + p1 + p2 + p3) / 4.0 - div);
+            }
+        `;
+
+        const PRESSURE_FS = `
+            precision highp float;
+            uniform sampler2D u_pressure;
+            uniform sampler2D u_velocity;
+            uniform vec2 u_px;
+            uniform float u_dt;
+            varying vec2 uv;
+            void main() {
+                float p0 = texture2D(u_pressure, uv + vec2(u_px.x, 0.0)).r;
+                float p1 = texture2D(u_pressure, uv - vec2(u_px.x, 0.0)).r;
+                float p2 = texture2D(u_pressure, uv + vec2(0.0, u_px.y)).r;
+                float p3 = texture2D(u_pressure, uv - vec2(0.0, u_px.y)).r;
+                vec2 v = texture2D(u_velocity, uv).xy;
+                vec2 gradP = vec2(p0 - p1, p2 - p3) * 0.5;
+                gl_FragColor = vec4(v - gradP * u_dt, 0.0, 1.0);
+            }
+        `;
+
+        const VISCOUS_FS = `
+            precision highp float;
+            uniform sampler2D u_velocity;
+            uniform sampler2D u_velocity_new;
+            uniform float u_v;
+            uniform vec2 u_px;
+            uniform float u_dt;
+            varying vec2 uv;
+            void main() {
+                vec2 old = texture2D(u_velocity, uv).xy;
+                vec2 n0 = texture2D(u_velocity_new, uv + vec2(u_px.x * 2.0, 0.0)).xy;
+                vec2 n1 = texture2D(u_velocity_new, uv - vec2(u_px.x * 2.0, 0.0)).xy;
+                vec2 n2 = texture2D(u_velocity_new, uv + vec2(0.0, u_px.y * 2.0)).xy;
+                vec2 n3 = texture2D(u_velocity_new, uv - vec2(0.0, u_px.y * 2.0)).xy;
+                vec2 newv = 4.0 * old + u_v * u_dt * (n0 + n1 + n2 + n3);
+                newv /= 4.0 * (1.0 + u_v * u_dt);
+                gl_FragColor = vec4(newv, 0.0, 0.0);
+            }
+        `;
+
+        const COLOR_FS = `
+            precision highp float;
+            uniform sampler2D u_velocity;
+            uniform sampler2D u_palette;
+            uniform vec4 u_bgColor;
+            varying vec2 uv;
+            void main() {
+                vec2 vel = texture2D(u_velocity, uv).xy;
+                float lenv = clamp(length(vel), 0.0, 1.0);
+                vec3 c = texture2D(u_palette, vec2(lenv, 0.5)).rgb;
+                vec3 outRGB = mix(u_bgColor.rgb, c, lenv);
+                float outA = mix(u_bgColor.a, 1.0, lenv);
+                gl_FragColor = vec4(outRGB, outA);
+            }
+        `;
+
+        // boundary lines vertex shader (for bounce mode)
+        const BOUNDARY_VS = `
+            attribute vec2 a_position;
+            uniform vec2 u_px;
+            varying vec2 uv;
+            void main() {
+                vec2 pos = a_position;
+                uv = pos * 0.5 + 0.5;
+                vec2 n = sign(pos);
+                pos = abs(pos) - u_px;
+                pos *= n;
+                gl_Position = vec4(pos, 0.0, 1.0);
+            }
+        `;
+
+        // ── Canvas & GL Init ──────────────────────────────────────────────
         const container = mountRef.current;
         container.style.position = container.style.position || 'relative';
         container.style.overflow = container.style.overflow || 'hidden';
 
-        const webgl = new WebGLManager({
-            $wrapper: container,
-            autoDemo,
-            autoSpeed,
-            autoIntensity,
-            takeoverDuration,
-            autoResumeDelay,
-            autoRampDuration
-        });
-        webglRef.current = webgl;
+        const canvas = document.createElement('canvas');
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.display = 'block';
+        canvas.style.position = 'absolute';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        container.prepend(canvas);
 
-        const applyOptionsFromProps = () => {
-            if (!webglRef.current) return;
-            const sim = webglRef.current.output?.simulation;
-            if (!sim) return;
-            const prevRes = sim.options.resolution;
-            Object.assign(sim.options, {
-                mouse_force: mouseForce,
-                cursor_size: cursorSize,
-                isViscous,
-                viscous,
-                iterations_viscous: iterationsViscous,
-                iterations_poisson: iterationsPoisson,
-                dt,
-                BFECC,
-                resolution,
-                isBounce
-            });
-            if (resolution !== prevRes) {
-                sim.resize();
-            }
-        };
-        applyOptionsFromProps();
+        const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false, antialias: false })
+            || canvas.getContext('experimental-webgl', { alpha: true, premultipliedAlpha: false, antialias: false });
 
-        webgl.start();
+        if (!gl) {
+            console.error('WebGL not supported');
+            return;
+        }
 
-        // IntersectionObserver to pause rendering when not visible
-        const io = new IntersectionObserver(
-            entries => {
-                const entry = entries[0];
-                const isVisible = entry.isIntersecting && entry.intersectionRatio > 0;
-                isVisibleRef.current = isVisible;
-                if (!webglRef.current) return;
-                if (isVisible && !document.hidden) {
-                    webglRef.current.start();
-                } else {
-                    webglRef.current.pause();
-                }
-            },
-            { threshold: [0, 0.01, 0.1] }
-        );
-        io.observe(container);
-        intersectionObserverRef.current = io;
+        // Required extensions
+        gl.getExtension('OES_texture_float');
+        gl.getExtension('OES_texture_half_float');
+        gl.getExtension('OES_texture_float_linear');
+        gl.getExtension('OES_texture_half_float_linear');
 
-        const ro = new ResizeObserver(() => {
-            if (!webglRef.current) return;
-            if (resizeRafRef.current) cancelAnimationFrame(resizeRafRef.current);
-            resizeRafRef.current = requestAnimationFrame(() => {
-                if (!webglRef.current) return;
-                webglRef.current.resize();
-            });
-        });
-        ro.observe(container);
-        resizeObserverRef.current = ro;
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
-        return () => {
-            if (rafRef.current) cancelAnimationFrame(rafRef.current);
-            if (resizeObserverRef.current) {
-                try {
-                    resizeObserverRef.current.disconnect();
-                } catch {
-                    void 0;
-                }
-            }
-            if (intersectionObserverRef.current) {
-                try {
-                    intersectionObserverRef.current.disconnect();
-                } catch {
-                    void 0;
-                }
-            }
-            if (webglRef.current) {
-                webglRef.current.dispose();
-            }
-            webglRef.current = null;
-        };
-    }, [
-        BFECC,
-        cursorSize,
-        dt,
-        isBounce,
-        isViscous,
-        iterationsPoisson,
-        iterationsViscous,
-        mouseForce,
-        resolution,
-        viscous,
-        colors,
-        autoDemo,
-        autoSpeed,
-        autoIntensity,
-        takeoverDuration,
-        autoResumeDelay,
-        autoRampDuration
-    ]);
+        // ── Fullscreen Quad Geometry ──────────────────────────────────────
+        const quadVerts = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+        const quadBuf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+        gl.bufferData(gl.ARRAY_BUFFER, quadVerts, gl.STATIC_DRAW);
 
-    useEffect(() => {
-        const webgl = webglRef.current;
-        if (!webgl) return;
-        const sim = webgl.output?.simulation;
-        if (!sim) return;
-        const prevRes = sim.options.resolution;
-        Object.assign(sim.options, {
+        // Mouse plane (1x1 with UVs)
+        const mousePlanePos = new Float32Array([-0.5,-0.5, 0.5,-0.5, -0.5,0.5, 0.5,0.5]);
+        const mousePlaneUV = new Float32Array([0,0, 1,0, 0,1, 1,1]);
+        const mousePosBuf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, mousePosBuf);
+        gl.bufferData(gl.ARRAY_BUFFER, mousePlanePos, gl.STATIC_DRAW);
+        const mouseUVBuf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, mouseUVBuf);
+        gl.bufferData(gl.ARRAY_BUFFER, mousePlaneUV, gl.STATIC_DRAW);
+
+        // Boundary lines
+        const boundaryVerts = new Float32Array([
+            -1,-1, -1,1, -1,1, 1,1, 1,1, 1,-1, 1,-1, -1,-1
+        ]);
+        const boundaryBuf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, boundaryBuf);
+        gl.bufferData(gl.ARRAY_BUFFER, boundaryVerts, gl.STATIC_DRAW);
+
+        // ── Create Programs ──────────────────────────────────────────────
+        const progAdvection = createProgram(gl, ADVECTION_VS, ADVECTION_FS);
+        const progBoundary = createProgram(gl, BOUNDARY_VS, ADVECTION_FS);
+        const progExternalForce = createProgram(gl, EXTERNAL_FORCE_VS, EXTERNAL_FORCE_FS);
+        const progDivergence = createProgram(gl, ADVECTION_VS, DIVERGENCE_FS);
+        const progPoisson = createProgram(gl, ADVECTION_VS, POISSON_FS);
+        const progPressure = createProgram(gl, ADVECTION_VS, PRESSURE_FS);
+        const progViscous = createProgram(gl, ADVECTION_VS, VISCOUS_FS);
+        const progColor = createProgram(gl, QUAD_VS, COLOR_FS);
+
+        // ── Palette Texture ──────────────────────────────────────────────
+        const palData = makePaletteData(colors);
+        const palTex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, palTex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, palData.width, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, palData.data);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        // ── State ────────────────────────────────────────────────────────
+        let canvasW = 1, canvasH = 1;
+        let simW = 1, simH = 1;
+        let cellScaleX = 1, cellScaleY = 1;
+
+        // FBOs
+        let vel0, vel1, velVisc0, velVisc1, divFbo, pres0, pres1;
+
+        // Simulation options (mutable)
+        const simOpts = {
             mouse_force: mouseForce,
             cursor_size: cursorSize,
             isViscous,
@@ -1164,38 +395,549 @@ export default function LiquidEther({
             dt,
             BFECC,
             resolution,
-            isBounce
-        });
-        if (webgl.autoDriver) {
-            webgl.autoDriver.enabled = autoDemo;
-            webgl.autoDriver.speed = autoSpeed;
-            webgl.autoDriver.resumeDelay = autoResumeDelay;
-            webgl.autoDriver.rampDurationMs = autoRampDuration * 1000;
-            if (webgl.autoDriver.mouse) {
-                webgl.autoDriver.mouse.autoIntensity = autoIntensity;
-                webgl.autoDriver.mouse.takeoverDuration = takeoverDuration;
+            isBounce,
+        };
+
+        // Mouse state
+        const mouse = {
+            coords: [0, 0],
+            coordsOld: [0, 0],
+            diff: [0, 0],
+            mouseMoved: false,
+            isHoverInside: false,
+            hasUserControl: false,
+            isAutoActive: false,
+            autoIntensity: autoIntensity,
+            takeoverActive: false,
+            takeoverStartTime: 0,
+            takeoverDuration: takeoverDuration,
+            takeoverFrom: [0, 0],
+            takeoverTo: [0, 0],
+            timer: null,
+        };
+
+        // Auto driver state
+        const auto = {
+            enabled: autoDemo,
+            speed: autoSpeed,
+            resumeDelay: autoResumeDelay,
+            rampDurationMs: autoRampDuration * 1000,
+            active: false,
+            current: [0, 0],
+            target: [0, 0],
+            lastTime: performance.now(),
+            activationTime: 0,
+            margin: 0.2,
+        };
+        pickNewAutoTarget();
+
+        let lastUserInteraction = performance.now();
+        let lastClockTime = performance.now();
+        let running = false;
+
+        // ── Sizing ───────────────────────────────────────────────────────
+        function calcSize() {
+            const rect = container.getBoundingClientRect();
+            canvasW = Math.max(1, Math.floor(rect.width));
+            canvasH = Math.max(1, Math.floor(rect.height));
+            canvas.width = Math.floor(canvasW * pixelRatio);
+            canvas.height = Math.floor(canvasH * pixelRatio);
+            simW = Math.max(1, Math.round(simOpts.resolution * canvasW));
+            simH = Math.max(1, Math.round(simOpts.resolution * canvasH));
+            cellScaleX = 1.0 / simW;
+            cellScaleY = 1.0 / simH;
+        }
+
+        function createFBOs() {
+            vel0 = createFBO(gl, simW, simH);
+            vel1 = createFBO(gl, simW, simH);
+            velVisc0 = createFBO(gl, simW, simH);
+            velVisc1 = createFBO(gl, simW, simH);
+            divFbo = createFBO(gl, simW, simH);
+            pres0 = createFBO(gl, simW, simH);
+            pres1 = createFBO(gl, simW, simH);
+        }
+
+        function resizeFBOs() {
+            [vel0, vel1, velVisc0, velVisc1, divFbo, pres0, pres1].forEach(fbo => resizeFBO(gl, fbo, simW, simH));
+        }
+
+        function resize() {
+            const oldRes = simOpts.resolution;
+            calcSize();
+            const newSimW = Math.max(1, Math.round(simOpts.resolution * canvasW));
+            const newSimH = Math.max(1, Math.round(simOpts.resolution * canvasH));
+            if (newSimW !== simW || newSimH !== simH || !vel0) {
+                simW = newSimW;
+                simH = newSimH;
+                cellScaleX = 1.0 / simW;
+                cellScaleY = 1.0 / simH;
+                if (vel0) resizeFBOs();
             }
         }
-        if (resolution !== prevRes) {
-            sim.resize();
+
+        // ── Mouse Event Handlers ─────────────────────────────────────────
+        function isPointInside(cx, cy) {
+            const rect = container.getBoundingClientRect();
+            return cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom;
         }
+
+        function setCoords(x, y) {
+            const rect = container.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+            const nx = (x - rect.left) / rect.width;
+            const ny = (y - rect.top) / rect.height;
+            mouse.coords[0] = nx * 2 - 1;
+            mouse.coords[1] = -(ny * 2 - 1);
+            mouse.mouseMoved = true;
+            if (mouse.timer) clearTimeout(mouse.timer);
+            mouse.timer = setTimeout(() => { mouse.mouseMoved = false; }, 100);
+        }
+
+        function setNormalized(nx, ny) {
+            mouse.coords[0] = nx;
+            mouse.coords[1] = ny;
+            mouse.mouseMoved = true;
+        }
+
+        function onInteract() {
+            lastUserInteraction = performance.now();
+            if (auto.active) {
+                auto.active = false;
+                mouse.isAutoActive = false;
+            }
+        }
+
+        function onMouseMove(event) {
+            if (!isPointInside(event.clientX, event.clientY)) {
+                mouse.isHoverInside = false;
+                return;
+            }
+            mouse.isHoverInside = true;
+            onInteract();
+            if (mouse.isAutoActive && !mouse.hasUserControl && !mouse.takeoverActive) {
+                const rect = container.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) return;
+                const nx = (event.clientX - rect.left) / rect.width;
+                const ny = (event.clientY - rect.top) / rect.height;
+                mouse.takeoverFrom[0] = mouse.coords[0];
+                mouse.takeoverFrom[1] = mouse.coords[1];
+                mouse.takeoverTo[0] = nx * 2 - 1;
+                mouse.takeoverTo[1] = -(ny * 2 - 1);
+                mouse.takeoverStartTime = performance.now();
+                mouse.takeoverActive = true;
+                mouse.hasUserControl = true;
+                mouse.isAutoActive = false;
+                return;
+            }
+            setCoords(event.clientX, event.clientY);
+            mouse.hasUserControl = true;
+        }
+
+        function onTouchStart(event) {
+            if (event.touches.length !== 1) return;
+            const t = event.touches[0];
+            if (!isPointInside(t.clientX, t.clientY)) return;
+            mouse.isHoverInside = true;
+            onInteract();
+            setCoords(t.clientX, t.clientY);
+            mouse.hasUserControl = true;
+        }
+
+        function onTouchMove(event) {
+            if (event.touches.length !== 1) return;
+            const t = event.touches[0];
+            if (!isPointInside(t.clientX, t.clientY)) return;
+            onInteract();
+            setCoords(t.clientX, t.clientY);
+        }
+
+        function onTouchEnd() { mouse.isHoverInside = false; }
+        function onDocLeave() { mouse.isHoverInside = false; }
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('touchstart', onTouchStart, { passive: true });
+        window.addEventListener('touchmove', onTouchMove, { passive: true });
+        window.addEventListener('touchend', onTouchEnd);
+        document.addEventListener('mouseleave', onDocLeave);
+
+        function updateMouse() {
+            if (mouse.takeoverActive) {
+                const t = (performance.now() - mouse.takeoverStartTime) / (mouse.takeoverDuration * 1000);
+                if (t >= 1) {
+                    mouse.takeoverActive = false;
+                    mouse.coords[0] = mouse.takeoverTo[0];
+                    mouse.coords[1] = mouse.takeoverTo[1];
+                    mouse.coordsOld[0] = mouse.coords[0];
+                    mouse.coordsOld[1] = mouse.coords[1];
+                    mouse.diff[0] = 0; mouse.diff[1] = 0;
+                } else {
+                    const k = t * t * (3 - 2 * t);
+                    mouse.coords[0] = mouse.takeoverFrom[0] + (mouse.takeoverTo[0] - mouse.takeoverFrom[0]) * k;
+                    mouse.coords[1] = mouse.takeoverFrom[1] + (mouse.takeoverTo[1] - mouse.takeoverFrom[1]) * k;
+                }
+            }
+            mouse.diff[0] = mouse.coords[0] - mouse.coordsOld[0];
+            mouse.diff[1] = mouse.coords[1] - mouse.coordsOld[1];
+            mouse.coordsOld[0] = mouse.coords[0];
+            mouse.coordsOld[1] = mouse.coords[1];
+            if (mouse.coordsOld[0] === 0 && mouse.coordsOld[1] === 0) { mouse.diff[0] = 0; mouse.diff[1] = 0; }
+            if (mouse.isAutoActive && !mouse.takeoverActive) {
+                mouse.diff[0] *= mouse.autoIntensity;
+                mouse.diff[1] *= mouse.autoIntensity;
+            }
+        }
+
+        // ── Auto Driver ──────────────────────────────────────────────────
+        function pickNewAutoTarget() {
+            auto.target[0] = (Math.random() * 2 - 1) * (1 - auto.margin);
+            auto.target[1] = (Math.random() * 2 - 1) * (1 - auto.margin);
+        }
+
+        function updateAutoDriver() {
+            if (!auto.enabled) return;
+            const now = performance.now();
+            const idle = now - lastUserInteraction;
+            if (idle < auto.resumeDelay) {
+                if (auto.active) { auto.active = false; mouse.isAutoActive = false; }
+                return;
+            }
+            if (!auto.active) {
+                auto.active = true;
+                auto.current[0] = mouse.coords[0];
+                auto.current[1] = mouse.coords[1];
+                auto.lastTime = now;
+                auto.activationTime = now;
+            }
+            mouse.isAutoActive = true;
+            let dtSec = (now - auto.lastTime) / 1000;
+            auto.lastTime = now;
+            if (dtSec > 0.2) dtSec = 0.016;
+            const dx = auto.target[0] - auto.current[0];
+            const dy = auto.target[1] - auto.current[1];
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 0.01) { pickNewAutoTarget(); return; }
+            const nx = dx / dist, ny = dy / dist;
+            let ramp = 1;
+            if (auto.rampDurationMs > 0) {
+                const t = Math.min(1, (now - auto.activationTime) / auto.rampDurationMs);
+                ramp = t * t * (3 - 2 * t);
+            }
+            const step = auto.speed * dtSec * ramp;
+            const move = Math.min(step, dist);
+            auto.current[0] += nx * move;
+            auto.current[1] += ny * move;
+            setNormalized(auto.current[0], auto.current[1]);
+        }
+
+        // ── Render Helpers ───────────────────────────────────────────────
+        function bindQuad(prog) {
+            const loc = gl.getAttribLocation(prog, 'a_position');
+            gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+            gl.enableVertexAttribArray(loc);
+            gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+        }
+
+        function drawQuad() {
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+
+        function renderToFBO(fbo) {
+            if (fbo) {
+                gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.framebuffer);
+                gl.viewport(0, 0, fbo.width, fbo.height);
+            } else {
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+                gl.viewport(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function setTex(prog, name, tex, unit) {
+            gl.activeTexture(gl.TEXTURE0 + unit);
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+            gl.uniform1i(gl.getUniformLocation(prog, name), unit);
+        }
+
+        // ── Simulation Step ──────────────────────────────────────────────
+        function simulate() {
+            const bSpace = simOpts.isBounce ? 0 : 1;
+            const bsX = bSpace * cellScaleX;
+            const bsY = bSpace * cellScaleY;
+
+            // 1. Advection
+            gl.useProgram(progAdvection);
+            bindQuad(progAdvection);
+            gl.uniform2f(gl.getUniformLocation(progAdvection, 'u_boundarySpace'), bsX, bsY);
+            gl.uniform2f(gl.getUniformLocation(progAdvection, 'u_px'), cellScaleX, cellScaleY);
+            gl.uniform2f(gl.getUniformLocation(progAdvection, 'u_fboSize'), simW, simH);
+            gl.uniform1f(gl.getUniformLocation(progAdvection, 'u_dt'), simOpts.dt);
+            gl.uniform1i(gl.getUniformLocation(progAdvection, 'u_isBFECC'), simOpts.BFECC ? 1 : 0);
+            setTex(progAdvection, 'u_velocity', vel0.texture, 0);
+            renderToFBO(vel1);
+            drawQuad();
+
+            // Boundary lines (if bounce)
+            if (simOpts.isBounce) {
+                gl.useProgram(progBoundary);
+                const bLoc = gl.getAttribLocation(progBoundary, 'a_position');
+                gl.bindBuffer(gl.ARRAY_BUFFER, boundaryBuf);
+                gl.enableVertexAttribArray(bLoc);
+                gl.vertexAttribPointer(bLoc, 2, gl.FLOAT, false, 0, 0);
+                gl.uniform2f(gl.getUniformLocation(progBoundary, 'u_px'), cellScaleX, cellScaleY);
+                gl.uniform2f(gl.getUniformLocation(progBoundary, 'u_boundarySpace'), bsX, bsY);
+                gl.uniform2f(gl.getUniformLocation(progBoundary, 'u_fboSize'), simW, simH);
+                gl.uniform1f(gl.getUniformLocation(progBoundary, 'u_dt'), simOpts.dt);
+                gl.uniform1i(gl.getUniformLocation(progBoundary, 'u_isBFECC'), simOpts.BFECC ? 1 : 0);
+                setTex(progBoundary, 'u_velocity', vel0.texture, 0);
+                // Still rendering to vel1
+                gl.drawArrays(gl.LINES, 0, 8);
+            }
+
+            // 2. External Force (mouse)
+            gl.useProgram(progExternalForce);
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.ONE, gl.ONE);
+
+            const posLoc = gl.getAttribLocation(progExternalForce, 'a_position');
+            const uvLoc = gl.getAttribLocation(progExternalForce, 'a_uv');
+            gl.bindBuffer(gl.ARRAY_BUFFER, mousePosBuf);
+            gl.enableVertexAttribArray(posLoc);
+            gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, mouseUVBuf);
+            gl.enableVertexAttribArray(uvLoc);
+            gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, 0, 0);
+
+            const forceX = (mouse.diff[0] / 2) * simOpts.mouse_force;
+            const forceY = (mouse.diff[1] / 2) * simOpts.mouse_force;
+            const csx = simOpts.cursor_size * cellScaleX;
+            const csy = simOpts.cursor_size * cellScaleY;
+            const centerX = Math.min(Math.max(mouse.coords[0], -1 + csx + cellScaleX*2), 1 - csx - cellScaleX*2);
+            const centerY = Math.min(Math.max(mouse.coords[1], -1 + csy + cellScaleY*2), 1 - csy - cellScaleY*2);
+
+            gl.uniform2f(gl.getUniformLocation(progExternalForce, 'u_force'), forceX, forceY);
+            gl.uniform2f(gl.getUniformLocation(progExternalForce, 'u_center'), centerX, centerY);
+            gl.uniform2f(gl.getUniformLocation(progExternalForce, 'u_scale'), simOpts.cursor_size, simOpts.cursor_size);
+            gl.uniform2f(gl.getUniformLocation(progExternalForce, 'u_px'), cellScaleX, cellScaleY);
+
+            renderToFBO(vel1);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            gl.disable(gl.BLEND);
+
+            // 3. Viscous diffusion (if enabled)
+            let velResult = vel1;
+            if (simOpts.isViscous) {
+                gl.useProgram(progViscous);
+                bindQuad(progViscous);
+                gl.uniform2f(gl.getUniformLocation(progViscous, 'u_boundarySpace'), bsX, bsY);
+                gl.uniform2f(gl.getUniformLocation(progViscous, 'u_px'), cellScaleX, cellScaleY);
+                gl.uniform1f(gl.getUniformLocation(progViscous, 'u_v'), simOpts.viscous);
+                gl.uniform1f(gl.getUniformLocation(progViscous, 'u_dt'), simOpts.dt);
+                setTex(progViscous, 'u_velocity', vel1.texture, 0);
+
+                let fboIn, fboOut;
+                for (let i = 0; i < simOpts.iterations_viscous; i++) {
+                    fboIn = i % 2 === 0 ? velVisc0 : velVisc1;
+                    fboOut = i % 2 === 0 ? velVisc1 : velVisc0;
+                    setTex(progViscous, 'u_velocity_new', fboIn.texture, 1);
+                    renderToFBO(fboOut);
+                    drawQuad();
+                }
+                velResult = fboOut;
+            }
+
+            // 4. Divergence
+            gl.useProgram(progDivergence);
+            bindQuad(progDivergence);
+            gl.uniform2f(gl.getUniformLocation(progDivergence, 'u_boundarySpace'), bsX, bsY);
+            gl.uniform2f(gl.getUniformLocation(progDivergence, 'u_px'), cellScaleX, cellScaleY);
+            gl.uniform1f(gl.getUniformLocation(progDivergence, 'u_dt'), simOpts.dt);
+            setTex(progDivergence, 'u_velocity', velResult.texture, 0);
+            renderToFBO(divFbo);
+            drawQuad();
+
+            // 5. Poisson (pressure solve)
+            gl.useProgram(progPoisson);
+            bindQuad(progPoisson);
+            gl.uniform2f(gl.getUniformLocation(progPoisson, 'u_boundarySpace'), bsX, bsY);
+            gl.uniform2f(gl.getUniformLocation(progPoisson, 'u_px'), cellScaleX, cellScaleY);
+            setTex(progPoisson, 'u_divergence', divFbo.texture, 1);
+
+            let presResult;
+            for (let i = 0; i < simOpts.iterations_poisson; i++) {
+                const pIn = i % 2 === 0 ? pres0 : pres1;
+                const pOut = i % 2 === 0 ? pres1 : pres0;
+                setTex(progPoisson, 'u_pressure', pIn.texture, 0);
+                renderToFBO(pOut);
+                drawQuad();
+                presResult = pOut;
+            }
+
+            // 6. Pressure gradient subtraction
+            gl.useProgram(progPressure);
+            bindQuad(progPressure);
+            gl.uniform2f(gl.getUniformLocation(progPressure, 'u_boundarySpace'), bsX, bsY);
+            gl.uniform2f(gl.getUniformLocation(progPressure, 'u_px'), cellScaleX, cellScaleY);
+            gl.uniform1f(gl.getUniformLocation(progPressure, 'u_dt'), simOpts.dt);
+            setTex(progPressure, 'u_velocity', velResult.texture, 0);
+            setTex(progPressure, 'u_pressure', presResult.texture, 1);
+            renderToFBO(vel0);
+            drawQuad();
+        }
+
+        // ── Color Output ─────────────────────────────────────────────────
+        function renderOutput() {
+            gl.useProgram(progColor);
+            bindQuad(progColor);
+            setTex(progColor, 'u_velocity', vel0.texture, 0);
+            setTex(progColor, 'u_palette', palTex, 1);
+            gl.uniform4f(gl.getUniformLocation(progColor, 'u_bgColor'), 0, 0, 0, 0);
+            renderToFBO(null);
+            drawQuad();
+        }
+
+        // ── Init & Loop ──────────────────────────────────────────────────
+        calcSize();
+        createFBOs();
+
+        function loop() {
+            if (!running) return;
+            updateAutoDriver();
+            updateMouse();
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            simulate();
+            renderOutput();
+            rafRef.current = requestAnimationFrame(loop);
+        }
+
+        function start() {
+            if (running) return;
+            running = true;
+            lastClockTime = performance.now();
+            loop();
+        }
+
+        function pause() {
+            running = false;
+            if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+        }
+
+        function doResize() {
+            const oldW = simW, oldH = simH;
+            calcSize();
+            simW = Math.max(1, Math.round(simOpts.resolution * canvasW));
+            simH = Math.max(1, Math.round(simOpts.resolution * canvasH));
+            cellScaleX = 1.0 / simW;
+            cellScaleY = 1.0 / simH;
+            if (simW !== oldW || simH !== oldH) resizeFBOs();
+        }
+
+        // Store manager for external updates
+        const manager = {
+            start, pause, doResize,
+            simOpts, mouse, auto,
+            dispose() {
+                pause();
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('touchstart', onTouchStart);
+                window.removeEventListener('touchmove', onTouchMove);
+                window.removeEventListener('touchend', onTouchEnd);
+                document.removeEventListener('mouseleave', onDocLeave);
+                document.removeEventListener('visibilitychange', onVisibility);
+
+                // Dispose FBOs
+                [vel0, vel1, velVisc0, velVisc1, divFbo, pres0, pres1].forEach(fbo => {
+                    if (fbo) {
+                        gl.deleteTexture(fbo.texture);
+                        gl.deleteFramebuffer(fbo.framebuffer);
+                    }
+                });
+                // Dispose programs
+                [progAdvection, progBoundary, progExternalForce, progDivergence,
+                 progPoisson, progPressure, progViscous, progColor].forEach(p => { if (p) gl.deleteProgram(p); });
+                // Dispose buffers
+                [quadBuf, mousePosBuf, mouseUVBuf, boundaryBuf].forEach(b => { if (b) gl.deleteBuffer(b); });
+                gl.deleteTexture(palTex);
+                // Remove canvas
+                if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+                // Lose context
+                const ext = gl.getExtension('WEBGL_lose_context');
+                if (ext) ext.loseContext();
+            }
+        };
+        webglRef.current = manager;
+
+        // Visibility change
+        function onVisibility() {
+            if (document.hidden) pause();
+            else if (isVisibleRef.current) start();
+        }
+        document.addEventListener('visibilitychange', onVisibility);
+
+        // IntersectionObserver
+        const io = new IntersectionObserver(entries => {
+            const e = entries[0];
+            const vis = e.isIntersecting && e.intersectionRatio > 0;
+            isVisibleRef.current = vis;
+            if (vis && !document.hidden) start(); else pause();
+        }, { threshold: [0, 0.01, 0.1] });
+        io.observe(container);
+        intersectionObserverRef.current = io;
+
+        // ResizeObserver
+        const ro = new ResizeObserver(() => {
+            if (resizeRafRef.current) cancelAnimationFrame(resizeRafRef.current);
+            resizeRafRef.current = requestAnimationFrame(() => {
+                if (!webglRef.current) return;
+                doResize();
+            });
+        });
+        ro.observe(container);
+        resizeObserverRef.current = ro;
+
+        start();
+
+        // ── Cleanup ──────────────────────────────────────────────────────
+        return () => {
+            if (rafRef.current) cancelAnimationFrame(rafRef.current);
+            if (resizeRafRef.current) cancelAnimationFrame(resizeRafRef.current);
+            try { resizeObserverRef.current?.disconnect(); } catch { void 0; }
+            try { intersectionObserverRef.current?.disconnect(); } catch { void 0; }
+            if (webglRef.current) webglRef.current.dispose();
+            webglRef.current = null;
+        };
     }, [
-        mouseForce,
-        cursorSize,
-        isViscous,
-        viscous,
-        iterationsViscous,
-        iterationsPoisson,
-        dt,
-        BFECC,
-        resolution,
-        isBounce,
-        autoDemo,
-        autoSpeed,
-        autoIntensity,
-        takeoverDuration,
-        autoResumeDelay,
-        autoRampDuration
+        BFECC, cursorSize, dt, isBounce, isViscous, iterationsPoisson,
+        iterationsViscous, mouseForce, resolution, viscous, colors,
+        autoDemo, autoSpeed, autoIntensity, takeoverDuration,
+        autoResumeDelay, autoRampDuration
+    ]);
+
+    // Prop updates without full remount
+    useEffect(() => {
+        const mgr = webglRef.current;
+        if (!mgr) return;
+        const prevRes = mgr.simOpts.resolution;
+        Object.assign(mgr.simOpts, {
+            mouse_force: mouseForce,
+            cursor_size: cursorSize,
+            isViscous, viscous,
+            iterations_viscous: iterationsViscous,
+            iterations_poisson: iterationsPoisson,
+            dt, BFECC, resolution, isBounce,
+        });
+        mgr.auto.enabled = autoDemo;
+        mgr.auto.speed = autoSpeed;
+        mgr.auto.resumeDelay = autoResumeDelay;
+        mgr.auto.rampDurationMs = autoRampDuration * 1000;
+        mgr.mouse.autoIntensity = autoIntensity;
+        mgr.mouse.takeoverDuration = takeoverDuration;
+        if (resolution !== prevRes) mgr.doResize();
+    }, [
+        mouseForce, cursorSize, isViscous, viscous, iterationsViscous,
+        iterationsPoisson, dt, BFECC, resolution, isBounce,
+        autoDemo, autoSpeed, autoIntensity, takeoverDuration,
+        autoResumeDelay, autoRampDuration
     ]);
 
     return (

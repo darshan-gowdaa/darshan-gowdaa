@@ -1,18 +1,19 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
 import { timelineItems } from '../../data/experienceData';
 
 
-const TimelineMarker = ({ icon: Icon }) => (
+const TimelineMarker = memo(({ icon: Icon }) => (
   <div className="flex flex-col items-center">
     <div className="timeline-marker w-12 h-12 md:w-16 md:h-16 rounded-full bg-black border border-white/20 flex items-center justify-center z-20 relative shadow-[0_0_20px_rgba(255,255,255,0.15)] opacity-0 scale-0">
       <span className="text-white text-lg md:text-2xl"><Icon /></span>
     </div>
   </div>
-);
+));
+TimelineMarker.displayName = 'TimelineMarker';
 
 
-const TimelineContent = ({ title, organization, period, description, certificateLink }) => (
+const TimelineContent = memo(({ title, organization, period, description, certificateLink }) => (
   <div className="timeline-content glass-panel relative p-6 md:p-8 rounded-3xl overflow-hidden group opacity-0 translate-y-[30px] border border-white/10 hover:border-white/20 transition-colors duration-300">
     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
     <div className="flex flex-col gap-4 relative z-10">
@@ -41,7 +42,8 @@ const TimelineContent = ({ title, organization, period, description, certificate
       </p>
     </div>
   </div>
-);
+));
+TimelineContent.displayName = 'TimelineContent';
 
 
 const TimelineItem = ({ item, index }) => {
@@ -99,4 +101,4 @@ const Experience = () => {
 };
 
 
-export default Experience;
+export default memo(Experience);

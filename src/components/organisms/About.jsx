@@ -1,5 +1,5 @@
 // src/components/organisms/About.jsx
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, memo } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
 import profileImage from '../../assets/profile-picture.avif';
 import TiltedCard from '../molecules/TiltedCard';
@@ -86,4 +86,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default memo(About);

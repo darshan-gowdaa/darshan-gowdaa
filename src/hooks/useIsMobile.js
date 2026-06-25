@@ -8,7 +8,10 @@ const MOBILE_MEDIA_QUERY = '(hover: none) and (pointer: coarse)';
  * Uses pointer media query — reliable across modern browsers.
  */
 export const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia(MOBILE_MEDIA_QUERY).matches;
+  });
 
   useEffect(() => {
     const mq = window.matchMedia(MOBILE_MEDIA_QUERY);

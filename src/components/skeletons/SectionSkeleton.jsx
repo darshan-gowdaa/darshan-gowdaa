@@ -2,7 +2,7 @@ import React from 'react';
 
 const SectionSkeleton = ({ title = true }) => {
   return (
-    <section className="w-full min-h-[80vh] py-20 px-4 md:px-8 lg:px-16 flex flex-col items-start justify-start max-w-7xl mx-auto opacity-50 relative overflow-hidden">
+    <section className="w-full min-h-[200px] py-20 px-4 md:px-8 lg:px-16 flex flex-col items-start justify-start max-w-7xl mx-auto opacity-50 relative overflow-hidden">
       
       {/* Optional Title Skeleton */}
       {title && (

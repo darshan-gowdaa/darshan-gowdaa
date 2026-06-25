@@ -1,5 +1,5 @@
 // src/components/organisms/Projects.jsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
 import { FaGithub, FaExternalLinkAlt, FaPlay } from 'react-icons/fa';
 import LazyImage from '../atoms/LazyImage';
@@ -142,4 +142,4 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default memo(Projects);

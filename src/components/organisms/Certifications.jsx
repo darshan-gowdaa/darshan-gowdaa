@@ -1,5 +1,5 @@
 // src/components/organisms/Certifications.jsx
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { useAnimations } from '../../hooks/useAnimations';
 import { SiInfosys } from 'react-icons/si';
 import { FaAws } from 'react-icons/fa';
@@ -91,4 +91,4 @@ const Certifications = () => {
   );
 };
 
-export default Certifications;
+export default memo(Certifications);

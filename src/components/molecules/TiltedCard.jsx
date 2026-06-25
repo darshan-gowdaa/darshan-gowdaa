@@ -191,7 +191,7 @@ export default function TiltedCard({
             >
                 {/* Rotating Shadow */}
                 <div
-                    className="absolute inset-0 rounded-full blur-2xl opacity-70 transition-all duration-300 -z-10"
+                    className="absolute inset-0 rounded-full blur-2xl opacity-70 transition-all duration-300 -z-10 will-change-transform"
                     style={{
                         background: 'conic-gradient(from 0deg, transparent, white, transparent 30%)',
                         animation: `spin-slow ${isHovered ? '1s' : '4s'} linear infinite`,

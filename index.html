@@ -26,6 +26,12 @@
   <link rel="apple-touch-icon" href="/favicon.avif" />
 
 
+  <!-- Critical inline CSS — prevents white flash before stylesheets load -->
+  <style>
+    body { margin: 0; padding: 0; background: #050505; color: #fff; }
+    #root { min-height: 100vh; }
+  </style>
+
   <!-- Theme Color -->
   <meta name="theme-color" content="#050505" />
   <meta name="msapplication-TileColor" content="#050505" />
@@ -64,9 +70,9 @@
   <!-- preload fonts -->
   <link rel="preload" as="style"
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&display=swap" />
-  <!-- font for the big name animation on hero -->
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2" />
+  <!-- preload the variable font used by TextPressure hero -->
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" />
 
   <!-- dns prefetch for external links -->
   <link rel="dns-prefetch" href="https://github.com" />
@@ -78,9 +84,14 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&display=swap"
     media="print" onload="this.media='all'" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap"
+    media="print" onload="this.media='all'" />
   <noscript>
     <link rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" />
   </noscript>
 
   <!-- JSON-LD Structured Data for Person -->
