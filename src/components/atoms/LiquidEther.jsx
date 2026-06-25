@@ -35,6 +35,13 @@ export default function LiquidEther({
     useEffect(() => {
         if (!mountRef.current) return;
 
+        let rIC = null;
+        let tID = null;
+        let isCancelled = false;
+
+        const initWebGL = () => {
+            if (isCancelled || !mountRef.current) return;
+
         // ── helpers ──────────────────────────────────────────────────────
         function hexToRGB(hex) {
             hex = hex.replace('#', '');
@@ -895,10 +902,20 @@ export default function LiquidEther({
         ro.observe(container);
         resizeObserverRef.current = ro;
 
-        start();
+        }; // end of initWebGL
+
+        // Defer WebGL init so we don't block the main thread during hydration/FCP
+        if ('requestIdleCallback' in window) {
+            rIC = requestIdleCallback(initWebGL, { timeout: 1000 });
+        } else {
+            tID = setTimeout(initWebGL, 100);
+        }
 
         // ── Cleanup ──────────────────────────────────────────────────────
         return () => {
+            isCancelled = true;
+            if (rIC) cancelIdleCallback(rIC);
+            if (tID) clearTimeout(tID);
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
             if (resizeRafRef.current) cancelAnimationFrame(resizeRafRef.current);
             try { resizeObserverRef.current?.disconnect(); } catch { void 0; }
@@ -907,6 +924,7 @@ export default function LiquidEther({
             webglRef.current = null;
         };
     }, [
+
         BFECC, cursorSize, dt, isBounce, isViscous, iterationsPoisson,
         iterationsViscous, mouseForce, resolution, viscous, colors,
         autoDemo, autoSpeed, autoIntensity, takeoverDuration,

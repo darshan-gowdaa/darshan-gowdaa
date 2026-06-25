@@ -155,17 +155,17 @@ input[type="submit"], input[type="button"] {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 60%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-  transform: skewX(-20deg);
-  transition: left 0.8s, transition-duration 0.6s;
-  will-change: left;
+  transform: skewX(-20deg) translateX(-200%);
+  transition: transform 0.8s, transition-duration 0.6s;
+  will-change: transform;
 }
 
 .glass-heading:hover::before {
-  left: 160%;
+  transform: skewX(-20deg) translateX(300%);
 }
 
 /* card styles */
@@ -244,11 +244,11 @@ input[type="submit"], input[type="button"] {
 
 @keyframes shimmer {
   0% {
-    background-position: -200% 0;
+    transform: translateX(-100%);
   }
 
   100% {
-    background-position: 200% 0;
+    transform: translateX(100%);
   }
 }
 
