@@ -155,7 +155,7 @@ const Hero = ({ onComplete }) => {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center h-full gap-4 sm:gap-6 md:gap-8 pt-20 sm:pt-24">
 
           {/* Main Title - Text Pressure */}
-          <div className="hero-text-pressure w-full max-w-5xl opacity-0">
+          <div className="hero-text-pressure w-full max-w-5xl">
             <div className="relative w-full h-[80px] sm:h-[120px] md:h-[140px] flex items-center justify-center">
               <TextPressure
                 text="DARSHAN GOWDA G S"
