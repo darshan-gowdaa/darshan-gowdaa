@@ -1,7 +1,7 @@
 // src/components/organisms/Contact.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useAnimations } from '../../hooks/useAnimations';
+import { motion, AnimatePresence } from 'motion/react';
 import { FaMapMarkerAlt, FaEnvelope, FaGithub, FaLinkedin, FaPaperPlane, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import emailjs from '@emailjs/browser';
 import { NeonButton } from '../atoms/NeonButton';
@@ -38,20 +38,27 @@ const InputField = ({ label, name, type = "text", placeholder, value, onChange, 
 };
 
 const ToastMessage = React.forwardRef(({ toast }, ref) => {
-  if (!toast) return null;
   return createPortal(
     <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4 pointer-events-none">
-      <div
-        ref={ref}
-        className={`pointer-events-auto flex items-center gap-3 p-4 rounded-xl border backdrop-blur-xl shadow-2xl ${
-          toast.type === 'success' 
-            ? 'bg-green-500/10 border-green-500/20 text-green-400' 
-            : 'bg-red-500/10 border-red-500/20 text-red-400'
-        }`}
-      >
-        {toast.type === 'success' ? <FaCheckCircle size={20} /> : <FaExclamationCircle size={20} />}
-        <span className="font-medium text-sm">{toast.message}</span>
-      </div>
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ y: -20, opacity: 0, scale: 0.9 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: -20, opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
+            ref={ref}
+            className={`pointer-events-auto flex items-center gap-3 p-4 rounded-xl border backdrop-blur-xl shadow-2xl ${
+              toast.type === 'success' 
+                ? 'bg-green-500/10 border-green-500/20 text-green-400' 
+                : 'bg-red-500/10 border-red-500/20 text-red-400'
+            }`}
+          >
+            {toast.type === 'success' ? <FaCheckCircle size={20} /> : <FaExclamationCircle size={20} />}
+            <span className="font-medium text-sm">{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>,
     document.body
   );
@@ -68,24 +75,12 @@ const Contact = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const { animateContactSection, animateToastEnter, animateToastExit } = useAnimations();
-
   const showToast = (type, message) => {
     setToast({ type, message });
     setTimeout(() => {
-      animateToastExit(toastRef, () => setToast(null));
+      setToast(null);
     }, 5000);
   };
-
-  useEffect(() => {
-    const cleanup = animateContactSection(containerRef);
-    return cleanup;
-  }, [animateContactSection]);
-
-  useEffect(() => {
-    if (!toast) return;
-    animateToastEnter(toastRef);
-  }, [toast, animateToastEnter]);
 
   const validateForm = () => {
     if (!formData.name.trim()) return "Name is required";
@@ -156,14 +151,26 @@ const Contact = () => {
       <ToastMessage toast={toast} ref={toastRef} />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div className="contact-header text-center mb-16">
+        <motion.div 
+          initial={{ y: 40, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true, amount: 0.8 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="contact-header text-center mb-16"
+        >
           <h2 className="glass-heading text-4xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">
             Contact Me
           </h2>
-        </div>
+        </motion.div>
 
         <div className="contact-content grid md:grid-cols-2 gap-10 md:gap-24 items-start">
-          <div className="contact-left">
+          <motion.div 
+            initial={{ x: -80, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="contact-left"
+          >
             <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 font-heading">Let's collaborate</h3>
             <p className="text-gray-400 leading-relaxed mb-12 text-base md:text-lg">
               I'm currently looking for new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!
@@ -204,9 +211,15 @@ const Contact = () => {
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="contact-right bg-white/5 border border-white/15 rounded-3xl p-6 md:p-10 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.06)]">
+          <motion.div 
+            initial={{ x: 80, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="contact-right bg-white/5 border border-white/15 rounded-3xl p-6 md:p-10 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.06)]"
+          >
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField label="Name" name="name" value={formData.name} onChange={handleChange} required />
@@ -228,7 +241,7 @@ const Contact = () => {
                 )}
               </NeonButton>
             </form>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

@@ -1,53 +1,29 @@
-import React, { useState, useEffect, memo, Suspense, useCallback } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import Navbar from './components/organisms/Navbar';
 import Hero from './components/organisms/Hero';
-import SectionSkeleton from './components/skeletons/SectionSkeleton';
+import About from './components/organisms/About';
+import Skills from './components/organisms/Skills';
+import Experience from './components/organisms/Experience';
+import Projects from './components/organisms/Projects';
+import Certifications from './components/organisms/Certifications';
+import Contact from './components/organisms/Contact';
 import Lenis from 'lenis';
-
-// lazy load components
-const About = React.lazy(() => import('./components/organisms/About'));
-const Skills = React.lazy(() => import('./components/organisms/Skills'));
-const Experience = React.lazy(() => import('./components/organisms/Experience'));
-const Projects = React.lazy(() => import('./components/organisms/Projects'));
-const Certifications = React.lazy(() => import('./components/organisms/Certifications'));
-const Contact = React.lazy(() => import('./components/organisms/Contact'));
-
-// register GSAP plugin once at the module level
-gsap.registerPlugin(ScrollTrigger);
-
-// helps with perf during fast scrolling
-ScrollTrigger.config({ limitCallbacks: true });
-
-// No longer using spinner fallback
-
-// refresh scrolltrigger after layout settles
-const SCROLL_REFRESH_DELAY = 500;
 
 function App() {
   const [isHeroComplete, setIsHeroComplete] = useState(false);
   const handleHeroComplete = useCallback(() => setIsHeroComplete(true), []);
 
-  // refresh scrolltrigger after initial layout
-  useEffect(() => {
-    const timer = setTimeout(() => ScrollTrigger.refresh(), SCROLL_REFRESH_DELAY);
-    return () => clearTimeout(timer);
-  }, []);
-
   // initialize smooth scrolling with lenis
   useEffect(() => {
     const lenis = new Lenis();
 
-    lenis.on('scroll', ScrollTrigger.update);
-
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
-    });
-
-    gsap.ticker.lagSmoothing(0);
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
 
     return () => {
       lenis.destroy();
@@ -69,14 +45,12 @@ function App() {
       {/* main content */}
       <main id="main-content" className="relative">
         <Hero onComplete={handleHeroComplete} />
-
-        {/* lazy loaded sections — separate suspense boundaries for independent hydration */}
-        <React.Suspense fallback={<SectionSkeleton />}><About /></React.Suspense>
-        <React.Suspense fallback={<SectionSkeleton />}><Skills /></React.Suspense>
-        <React.Suspense fallback={<SectionSkeleton />}><Experience /></React.Suspense>
-        <React.Suspense fallback={<SectionSkeleton />}><Projects /></React.Suspense>
-        <React.Suspense fallback={<SectionSkeleton />}><Certifications /></React.Suspense>
-        <React.Suspense fallback={<SectionSkeleton />}><Contact /></React.Suspense>
+        <About />
+        <Skills />
+        <Experience />
+        <Projects />
+        <Certifications />
+        <Contact />
       </main>
 
       {/* analytics */}

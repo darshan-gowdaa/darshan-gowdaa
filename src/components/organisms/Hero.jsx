@@ -1,7 +1,7 @@
 // src/components/organisms/Hero.jsx
 import React, { memo, useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { FaGithub, FaLinkedin, FaEnvelope, FaArrowUp, FaArrowRight } from 'react-icons/fa';
-import { useAnimations } from '../../hooks/useAnimations';
+import { motion } from 'motion/react';
 import { NeonButton } from '../atoms/NeonButton';
 import TextPressure from '../atoms/TextPressure';
 import LightRays from '../atoms/LightRays';
@@ -26,11 +26,13 @@ const Hero = ({ onComplete }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const { animateHero } = useAnimations();
   useEffect(() => {
-    const cleanup = animateHero(containerRef, onComplete);
-    return cleanup;
-  }, [animateHero, onComplete]);
+    // Notify app that hero is complete — fires right as social icons land
+    const timer = setTimeout(() => {
+      if (onComplete) onComplete();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
 
   return (
     <>
@@ -52,19 +54,20 @@ const Hero = ({ onComplete }) => {
         style={{ contain: 'layout paint' }}
       >
         {/* LightRays Background */}
-        <div className="absolute inset-0 z-0" style={{ contain: 'strict' }}>
+        <div className="absolute inset-0 z-0">
           <LightRays
             raysOrigin="top-center"
             raysColor="#ffffff"
-            raysSpeed={3}
-            lightSpread={1.5}
-            rayLength={2.8}
+            raysSpeed={1}
+            lightSpread={0.5}
+            rayLength={3}
             followMouse={true}
-            mouseInfluence={0.3}
-            noiseAmount={0.2}
-            distortion={0.1}
-            fadeDistance={1.5}
-            saturation={1.6}
+            mouseInfluence={0.1}
+            noiseAmount={0}
+            distortion={0}
+            fadeDistance={1}
+            saturation={1}
+            pulsating={false}
           />
         </div>
 
@@ -72,7 +75,12 @@ const Hero = ({ onComplete }) => {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center h-full gap-4 sm:gap-6 md:gap-8 pt-20 sm:pt-24">
 
           {/* Main Title - Text Pressure */}
-          <div className="hero-text-pressure w-full max-w-5xl">
+          <motion.div 
+            initial={{ scale: 0.98, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            className="w-full max-w-5xl"
+          >
             <div className="relative w-full h-[80px] sm:h-[120px] md:h-[140px] flex items-center justify-center">
               <TextPressure
                 text="DARSHAN GOWDA G S"
@@ -87,16 +95,26 @@ const Hero = ({ onComplete }) => {
                 minFontSize={24}
               />
             </div>
-          </div>
+          </motion.div>
 
           {/* Description */}
-          <p className="hero-description text-center text-gray-300 text-base sm:text-lg md:text-xl max-w-2xl leading-relaxed font-light opacity-0 px-4">
+          <motion.p 
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+            className="text-center text-gray-300 text-base sm:text-lg md:text-xl max-w-2xl leading-relaxed font-light px-4"
+          >
             Software developer &amp; data analytics student crafting responsive web, mobile, and desktop apps.
             Detailed-oriented team player who lives for clean code and next-gen tech.
-          </p>
+          </motion.p>
 
           {/* Buttons */}
-          <div className="hero-buttons flex flex-col sm:flex-row items-center gap-4 w-auto opacity-0">
+          <motion.div 
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+            className="flex flex-col sm:flex-row items-center gap-4 w-auto"
+          >
             <NeonButton
               href="#projects"
               variant="solid"
@@ -119,13 +137,16 @@ const Hero = ({ onComplete }) => {
             >
               Contact Me
             </NeonButton>
-          </div>
+          </motion.div>
 
           {/* Social Links */}
-          <div className="hero-socials flex items-center gap-6 mt-2 sm:mt-4">
+          <div className="flex items-center gap-6 mt-2 sm:mt-4">
             {socialLinks.map(({ href, Icon, external, label }, i) => (
-              <a
+              <motion.a
                 key={i}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 22, delay: 0.3 + i * 0.06 }}
                 href={href}
                 target={external ? "_blank" : undefined}
                 rel={external ? "noopener noreferrer" : undefined}
@@ -135,7 +156,7 @@ const Hero = ({ onComplete }) => {
                 <div className="text-gray-400 group-hover:text-white transition-all duration-300 group-hover:scale-110 transform">
                   <Icon className="w-6 h-6 sm:w-7 sm:h-7" />
                 </div>
-              </a>
+              </motion.a>
             ))}
           </div>
 

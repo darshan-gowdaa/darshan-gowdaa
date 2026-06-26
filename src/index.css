@@ -107,20 +107,23 @@ input[type="submit"], input[type="button"] {
   -webkit-backdrop-filter: blur(10px);
 }
 
-/* reduce blur a bit on mobile, seemed laggy */
+/* reduce blur a bit on mobile, seemed laggy — kill ALL backdrop filters */
 @media (hover: none) and (pointer: coarse) {
-  .glass-base,
-  .backdrop-blur-sm,
-  .backdrop-blur-md,
-  .liquid-glass-card-enhanced,
-  .glass-panel,
-  .hero-badge span {
+  * {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
-  
+
   .glass-base {
     background: rgba(0, 0, 0, 0.6);
+  }
+
+  .nav-mobile-closed {
+    background: rgba(10, 10, 10, 0.85) !important;
+  }
+
+  .nav-mobile-open {
+    background: rgba(10, 10, 10, 0.9) !important;
   }
 }
 
@@ -362,5 +365,10 @@ input[type="submit"], input[type="button"] {
   );
   mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+}
+
+.project-card {
+  /* NO will-change here — promoting every card to its own GPU layer crushes scroll */
+  contain: layout style;
 }
 

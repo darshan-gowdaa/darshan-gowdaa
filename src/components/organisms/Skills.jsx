@@ -1,6 +1,6 @@
 // src/components/organisms/Skills.jsx
 import { useRef, useEffect, memo } from 'react';
-import { useAnimations } from '../../hooks/useAnimations';
+import { motion } from 'motion/react';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import LogoLoop from '../molecules/LogoLoop';
 import { allSkills } from '../../data/skillsData';
@@ -9,11 +9,15 @@ const Skills = () => {
   const containerRef = useRef(null);
   const isMobile = useIsMobile();
 
-  const { animateSkills } = useAnimations();
-  useEffect(() => {
-    const cleanup = animateSkills(containerRef);
-    return cleanup;
-  }, [animateSkills]);
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  };
+
+  const fadeInRight = {
+    hidden: { opacity: 0, x: 50 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: "easeOut", delay: 0.2 } }
+  };
 
   const renderSkillItem = (item, key) => (
     <a
@@ -50,20 +54,33 @@ const Skills = () => {
   return (
     <section id="skills" className="py-24 relative overflow-hidden section-lazy" ref={containerRef}>
       <div className="max-w-7xl mx-auto mb-16 relative z-10 px-6">
-        <div className="skills-header text-center">
+        <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeInUp}
+          className="text-center"
+        >
           <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">
             Skills
           </h2>
-        </div>
+        </motion.div>
       </div>
 
-      <div className="skills-loop w-full relative">
+      <motion.div 
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={fadeInRight}
+        className="w-full relative"
+      >
         <div className="absolute left-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
 
         <LogoLoop
           logos={allSkills}
-          speed={isMobile ? 80 : 100}
+          speed={isMobile ? 140 : 180}
+          hoverSpeed={isMobile ? 80 : 100}
           direction="left"
           logoHeight={isMobile ? 100 : 140}
           gap={isMobile ? 24 : 40}
@@ -72,7 +89,7 @@ const Skills = () => {
           scaleOnHover={false}
           fadeOut={false}
         />
-      </div>
+      </motion.div>
     </section>
   );
 };

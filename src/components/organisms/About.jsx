@@ -1,6 +1,6 @@
 // src/components/organisms/About.jsx
 import { useRef, useEffect, memo } from 'react';
-import { useAnimations } from '../../hooks/useAnimations';
+import { motion } from 'motion/react';
 import profileImage from '../../assets/profile-picture.avif';
 import TiltedCard from '../molecules/TiltedCard';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -9,25 +9,46 @@ const About = () => {
   const sectionRef = useRef(null);
   const isMobile = useIsMobile();
 
-  const { animateAbout } = useAnimations();
-  useEffect(() => {
-    const cleanup = animateAbout(sectionRef);
-    return cleanup;
-  }, [animateAbout]);
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  };
+
+  const fadeInLeft = {
+    hidden: { opacity: 0, x: -50 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  };
+
+  const fadeInRight = {
+    hidden: { opacity: 0, x: 50 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  };
 
   return (
     <section id="about" className="py-24 px-4 sm:px-8 relative overflow-hidden section-lazy" ref={sectionRef}>
       <div className="max-w-[1600px] w-full mx-auto">
 
-        <div className="about-header text-center mb-16">
+        <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeInUp}
+          className="text-center mb-16"
+        >
           <h2 className="glass-heading text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-white">
             About <span className="text-gray-400">Me</span>
           </h2>
-        </div>
+        </motion.div>
 
         <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-center">
 
-          <div className="about-left lg:col-span-1 flex justify-center items-center w-full mb-20 lg:mb-0">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={fadeInLeft}
+            className="lg:col-span-1 flex justify-center items-center w-full mb-20 lg:mb-0"
+          >
             <div className="w-full max-w-[220px] sm:max-w-[350px] lg:max-w-none h-[220px] sm:h-[380px] lg:h-[500px] flex items-center justify-center relative mx-auto">
               <div className="absolute inset-0 border border-white/5 rounded-full scale-110 opacity-20 animate-spin-slow pointer-events-none" />
               <TiltedCard
@@ -39,15 +60,21 @@ const About = () => {
                 imageHeight={isMobile ? "280px" : "400px"}
                 imageWidth={isMobile ? "280px" : "400px"}
                 rotateAmplitude={30}
-                scaleOnHover={1.0}
+                scaleOnHover={1.15}
                 showMobileWarning={false}
                 showTooltip={false}
                 displayOverlayContent={false}
               />
             </div>
-          </div>
+          </motion.div>
 
-          <div className="about-right lg:col-span-2 space-y-6 w-full max-w-2xl mx-auto lg:max-w-none">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={fadeInRight}
+            className="lg:col-span-2 space-y-6 w-full max-w-2xl mx-auto lg:max-w-none"
+          >
             <div className="relative backdrop-blur-2xl bg-white/5 border border-white/15 shadow-[0_0_20px_rgba(255,255,255,0.06),0_25px_50px_-12px_rgba(0,0,0,0.25)] rounded-[2rem] p-8 sm:p-10 overflow-hidden group hover:border-white/20 transition-colors duration-500">
 
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-30 pointer-events-none" />
@@ -79,7 +106,7 @@ const About = () => {
 
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

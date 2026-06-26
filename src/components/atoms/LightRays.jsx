@@ -34,16 +34,16 @@ const getAnchorAndDir = (origin, w, h) => {
 const LightRays = ({
   raysOrigin = 'top-center',
   raysColor = DEFAULT_COLOR,
-  raysSpeed = 1,
-  lightSpread = 1,
+  raysSpeed = 2,
+  lightSpread = 2,
   rayLength = 2,
   pulsating = false,
-  fadeDistance = 1.0,
-  saturation = 1.0,
+  fadeDistance = 0.1,
+  saturation = 1.5,
   followMouse = true,
-  mouseInfluence = 0.1,
-  noiseAmount = 0.0,
-  distortion = 0.0,
+  mouseInfluence = 0.9,
+  noiseAmount = 0.9,
+  distortion = 0.9,
   className = ''
 }) => {
   const containerRef = useRef(null);
@@ -184,7 +184,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
                rayStrength(rayPos, finalRayDir, coord, 22.3991, 18.0234,
                            1.1 * raysSpeed);
 
-  fragColor = rays1 * 0.5 + rays2 * 0.4;
+  fragColor = rays1 * 0.8 + rays2 * 0.7;
 
   if (noiseAmount > 0.0) {
     float n = noise(coord * 0.01 + iTime * 0.1);
@@ -192,8 +192,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   }
 
   float brightness = 1.0 - (coord.y / iResolution.y);
-  fragColor.x *= 0.1 + brightness * 0.8;
-  fragColor.y *= 0.3 + brightness * 0.6;
+  fragColor.x *= 0.1 + brightness * 0.9;
+  fragColor.y *= 0.3 + brightness * 0.7;
   fragColor.z *= 0.5 + brightness * 0.5;
 
   if (saturation != 1.0) {

@@ -1,20 +1,32 @@
-import { useEffect, useRef, memo } from 'react';
-import { useAnimations } from '../../hooks/useAnimations';
+import { useRef, memo } from 'react';
+import { motion, useScroll, useTransform } from 'motion/react';
 import { timelineItems } from '../../data/experienceData';
 
 
 const TimelineMarker = memo(({ icon: Icon }) => (
   <div className="flex flex-col items-center">
-    <div className="timeline-marker w-12 h-12 md:w-16 md:h-16 rounded-full bg-black border border-white/20 flex items-center justify-center z-20 relative shadow-[0_0_20px_rgba(255,255,255,0.15)] opacity-0 scale-0">
+    <motion.div 
+      initial={{ scale: 0, opacity: 0 }}
+      whileInView={{ scale: 1, opacity: 1 }}
+      viewport={{ once: true, amount: 0.8 }}
+      transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
+      className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-black border border-white/20 flex items-center justify-center z-20 relative shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+    >
       <span className="text-white text-lg md:text-2xl"><Icon /></span>
-    </div>
+    </motion.div>
   </div>
 ));
 TimelineMarker.displayName = 'TimelineMarker';
 
 
-const TimelineContent = memo(({ title, organization, period, description, certificateLink }) => (
-  <div className="timeline-content glass-panel relative p-6 md:p-8 rounded-3xl overflow-hidden group opacity-0 translate-y-[30px] border border-white/10 hover:border-white/20 transition-colors duration-300">
+const TimelineContent = memo(({ title, organization, period, description, certificateLink, isEven }) => (
+  <motion.div 
+    initial={{ opacity: 0, x: isEven ? -30 : 30 }}
+    whileInView={{ opacity: 1, x: 0 }}
+    viewport={{ once: true, amount: 0.5 }}
+    transition={{ duration: 0.7, ease: "easeOut" }}
+    className="glass-panel relative p-6 md:p-8 rounded-3xl overflow-hidden group border border-white/10 hover:border-white/20 transition-colors duration-300"
+  >
     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
     <div className="flex flex-col gap-4 relative z-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
@@ -41,7 +53,7 @@ const TimelineContent = memo(({ title, organization, period, description, certif
         {description}
       </p>
     </div>
-  </div>
+  </motion.div>
 ));
 TimelineContent.displayName = 'TimelineContent';
 
@@ -55,7 +67,7 @@ const TimelineItem = ({ item, index }) => {
         <TimelineMarker icon={item.icon} />
       </div>
       <div className={`pl-14 md:pl-0 w-full md:w-1/2 ${isEven ? 'md:pr-16 md:text-right' : 'md:pl-16 md:text-left'}`}>
-        <TimelineContent {...item} />
+        <TimelineContent {...item} isEven={isEven} />
       </div>
     </div>
   );
@@ -64,26 +76,36 @@ const TimelineItem = ({ item, index }) => {
 
 const Experience = () => {
   const sectionRef = useRef(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start center", "end center"]
+  });
 
-  const { animateExperience } = useAnimations();
-  useEffect(() => {
-    const cleanup = animateExperience(sectionRef);
-    return cleanup;
-  }, [animateExperience]);
+  const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
     <section id="experience" className="py-24 relative overflow-hidden section-lazy" ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-6 relative z-10">
 
-        <div className="exp-header text-center mb-16">
+        <motion.div 
+          initial={{ y: 40, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true, amount: 0.8 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-center mb-16"
+        >
           <h2 className="glass-heading text-5xl md:text-7xl font-bold font-heading mb-6 tracking-tight text-white">
             Experience
           </h2>
-        </div>
+        </motion.div>
 
         {/* Vertical spine line */}
         <div className="absolute left-6 md:left-1/2 top-[200px] bottom-24 w-px bg-white/5 md:-translate-x-1/2" />
-        <div className="timeline-spine absolute left-6 md:left-1/2 top-[200px] bottom-24 w-px bg-gradient-to-b from-white via-white/50 to-transparent md:-translate-x-1/2 origin-top" />
+        <motion.div 
+          style={{ scaleY }}
+          className="absolute left-6 md:left-1/2 top-[200px] bottom-24 w-px bg-gradient-to-b from-white via-white/50 to-transparent md:-translate-x-1/2 origin-top" 
+        />
 
         <div className="space-y-12">
           {timelineItems.map((item, index) => (

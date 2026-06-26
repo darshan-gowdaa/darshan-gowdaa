@@ -1,13 +1,19 @@
 // src/components/organisms/Certifications.jsx
-import { useEffect, useRef, memo } from 'react';
-import { useAnimations } from '../../hooks/useAnimations';
+import { memo } from 'react';
+import { motion } from 'motion/react';
 import { SiInfosys } from 'react-icons/si';
 import { FaAws } from 'react-icons/fa';
 import { NeonButton } from '../atoms/NeonButton';
 
-const CertificationCard = ({ title, issuer, description, link, icon }) => {
+const CertificationCard = ({ title, issuer, description, link, icon, index }) => {
   return (
-    <div className="cert-card group relative h-full opacity-0">
+    <motion.div 
+      initial={{ opacity: 0, x: index % 2 === 0 ? -80 : 80 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.7, ease: "easeOut", delay: index * 0.1 }}
+      className="cert-card group relative h-full"
+    >
       <div className="h-full p-6 md:p-8 rounded-3xl bg-white/5 border border-white/15 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] flex flex-col">
 
         <div className="flex items-start justify-between gap-4 mb-6">
@@ -40,18 +46,11 @@ const CertificationCard = ({ title, issuer, description, link, icon }) => {
           </NeonButton>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
 const Certifications = () => {
-  const sectionRef = useRef(null);
-
-  const { animateCertifications } = useAnimations();
-  useEffect(() => {
-    const cleanup = animateCertifications(sectionRef);
-    return cleanup;
-  }, [animateCertifications]);
 
   const certifications = [
     {
@@ -71,18 +70,24 @@ const Certifications = () => {
   ];
 
   return (
-    <section id="certifications" className="py-24 relative overflow-hidden section-lazy" ref={sectionRef}>
+    <section id="certifications" className="py-24 relative overflow-hidden section-lazy">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
 
-        <div className="cert-header flex flex-col items-center text-center mb-16">
+        <motion.div 
+          initial={{ y: 40, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true, amount: 0.8 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="cert-header flex flex-col items-center text-center mb-16"
+        >
           <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">
             Certifications
           </h2>
-        </div>
+        </motion.div>
 
         <div className="cert-grid grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
           {certifications.map((cert, index) => (
-            <CertificationCard key={index} {...cert} />
+            <CertificationCard key={index} index={index} {...cert} />
           ))}
         </div>
 

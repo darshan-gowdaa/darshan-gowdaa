@@ -1,6 +1,6 @@
 // src/components/organisms/Navbar.jsx
-import React, { memo, useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useAnimations } from '../../hooks/useAnimations';
+import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 
 // site sections
 const links = ['Home', 'About', 'Skills', 'Experience', 'Projects', 'Certifications', 'Contact'];
@@ -13,14 +13,12 @@ const GradientBorder = ({ className = "" }) => (
   </>
 );
 
-
 // glass overlay
 const GlassOverlay = () => (
   <div className="absolute inset-0 pointer-events-none">
     <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-30" />
   </div>
 );
-
 
 const Navbar = ({ show }) => {
   // menu state
@@ -29,35 +27,13 @@ const Navbar = ({ show }) => {
   const [isHeadingVisible, setIsHeadingVisible] = useState(false);
   const [forceShowNavbar, setForceShowNavbar] = useState(false);
 
-  // animation refs
-  const navRef = useRef(null);
-  const bubbleRef = useRef(null);
-  const linkRefs = useRef({});
   const mobileNavRef = useRef(null);
-  const mobileBubbleRef = useRef(null);
-  const mobileLinkRefs = useRef({});
-  const mobileScrollContainerRef = useRef(null);
   const isScrolling = useRef(false);
   const pendingSectionRef = useRef(null);
-  const isFirstRender = useRef(true);
-  const isBubbleInitialized = useRef(false);
   const forceShowTimeoutRef = useRef(null);
-
 
   // update page title
   useEffect(() => { document.title = `${activeSection} | Darshan Gowda G S`; }, [activeSection]);
-
-
-  // shared animation helper
-  const { animateNavbar } = useAnimations();
-  useEffect(() => {
-    const cleanup = animateNavbar({
-      navRef, bubbleRef, linkRefs, activeSection, mobileMenuOpen, isFirstRender, isBubbleInitialized,
-      mobileNavRef, mobileBubbleRef, mobileLinkRefs, show
-    });
-    return cleanup;
-  }, [activeSection, mobileMenuOpen, show, animateNavbar]);
-
 
   // track active section
   useEffect(() => {
@@ -121,13 +97,11 @@ const Navbar = ({ show }) => {
     };
   }, []);
 
-
   // prevent scroll when menu open
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
-
 
   // auto hide mobile nav
   useEffect(() => {
@@ -168,13 +142,11 @@ const Navbar = ({ show }) => {
     };
   }, [mobileMenuOpen]);
 
-
   // scroll to section
   const scrollToSection = (sectionId) => {
     isScrolling.current = true;
     pendingSectionRef.current = sectionId;
 
-    // 1. WRITE: Close menu and restore overflow first so layout is accurate
     if (document.body.style.overflow === 'hidden') {
       document.body.style.overflow = '';
     }
@@ -186,7 +158,6 @@ const Navbar = ({ show }) => {
     if (forceShowTimeoutRef.current) clearTimeout(forceShowTimeoutRef.current);
     forceShowTimeoutRef.current = setTimeout(() => setForceShowNavbar(false), 2500);
 
-    // 2. DEFER READ + SCROLL: Wait for layout to settle after menu close
     requestAnimationFrame(() => {
       const element = document.getElementById(sectionId.toLowerCase());
       if (!element) {
@@ -202,7 +173,6 @@ const Navbar = ({ show }) => {
         behavior: 'smooth'
       });
 
-      // Keep the clicked nav active until destination is actually visible.
       const anchorY = window.innerHeight * 0.35;
       const lockStart = performance.now();
       const maxLockMs = 2200;
@@ -229,7 +199,6 @@ const Navbar = ({ show }) => {
           return;
         }
 
-        // If smooth scroll takes too long (or user interrupts), release lock gracefully.
         if (performance.now() - lockStart > maxLockMs) {
           finishScrollLock();
           return;
@@ -242,19 +211,14 @@ const Navbar = ({ show }) => {
     });
   };
 
-
   const toggleMobileMenu = useCallback(() => setMobileMenuOpen(prev => !prev), []);
 
-
-
-  // render nav links
-  const renderLinks = (refs, isMobile = false) => {
+  const renderLinks = (isMobile = false) => {
     return links.map((link) => {
       const isActive = activeSection === link;
       return (
         <button
           key={link}
-          ref={el => refs.current[link] = el}
           onClick={(e) => { isMobile && e.stopPropagation(); scrollToSection(link); }}
           className={isMobile
             ? "relative w-full py-1 text-base font-medium uppercase tracking-wider transition-colors duration-300 shrink-0 drop-shadow-md text-white"
@@ -262,10 +226,19 @@ const Navbar = ({ show }) => {
           }
           style={isMobile ? { textShadow: '0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(255,255,255,0.3)' } : {}}
         >
+          {isActive && (
+            <motion.div
+              layoutId={isMobile ? "mobile-bubble" : "desktop-bubble"}
+              className={isMobile ? "nav-mobile-bubble absolute inset-0" : "nav-bubble-desktop absolute inset-0"}
+              initial={false}
+              transition={{ type: "spring", stiffness: 380, damping: 28, mass: 0.6 }}
+              style={isMobile ? { width: '80%', left: '10%', height: '100%' } : {}}
+            />
+          )}
           <span className="relative z-10">{link}</span>
           {!isActive && !isMobile && (
             <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
-              <div className="absolute inset-0 bg-white/5 opacity-0 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-white/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             </div>
           )}
         </button>
@@ -273,41 +246,58 @@ const Navbar = ({ show }) => {
     });
   };
 
-
   return (
     <>
       {/* desktop nav */}
-      <div className="hidden md:flex fixed top-6 inset-x-0 justify-center z-50 pointer-events-none">
-        <nav ref={navRef} className="pointer-events-auto rounded-full px-3 py-1.5 duration-300 group overflow-hidden nav-glass-group" style={{ width: 'fit-content', opacity: 0 }}>
-          <GradientBorder className="transition-all duration-500 ease-in-out via-white/50" />
-          <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-30" />
-          </div>
-          <div ref={bubbleRef} className="nav-bubble-desktop" style={{ top: 0, left: 0, width: 0, height: 0, transition: 'none' }} />
-          <div className="flex items-center p-1 relative z-10">{renderLinks(linkRefs)}</div>
-        </nav>
-      </div>
+      <AnimatePresence>
+        {show && (
+          <motion.div 
+            initial={{ y: -80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -80, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 22, mass: 0.7 }}
+            className="hidden md:flex fixed top-6 inset-x-0 justify-center z-50 pointer-events-none"
+          >
+            <nav className="pointer-events-auto rounded-full px-3 py-1.5 duration-300 group overflow-hidden nav-glass-group" style={{ width: 'fit-content' }}>
+              <GradientBorder className="transition-all duration-500 ease-in-out via-white/50" />
+              <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-30" />
+              </div>
+              <div className="flex items-center p-1 relative z-10">{renderLinks()}</div>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* mobile nav */}
-      <div className="md:hidden fixed top-6 inset-x-0 flex justify-center z-50 pointer-events-none">
-        <div ref={mobileNavRef} className={`pointer-events-auto rounded-3xl overflow-hidden nav-mobile-glass nav-mobile-base ${mobileMenuOpen ? 'nav-mobile-open' : 'nav-mobile-closed'} ${!mobileMenuOpen && isHeadingVisible && !forceShowNavbar ? '-translate-y-[200%] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
-          <GradientBorder />
-          <GlassOverlay />
-          <button aria-label="Toggle navigation menu" aria-expanded={mobileMenuOpen} className={`relative w-full h-[40px] flex items-center justify-center cursor-pointer ${mobileMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ transition: 'opacity 0.25s ease-out', background: 'none', border: 'none' }} onClick={toggleMobileMenu}>
-            <span className="text-white text-sm font-medium tracking-wider uppercase drop-shadow-md px-6">{activeSection}</span>
-          </button>
-          <div className={`absolute inset-0 w-full h-full ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} style={{ transition: mobileMenuOpen ? 'opacity 0.35s ease-out 0.15s' : 'opacity 0.2s ease-in' }}>
-            <div ref={mobileScrollContainerRef} className="w-full h-full flex flex-col items-center justify-start pt-2 pb-4 space-y-1 relative">
-              <div ref={mobileBubbleRef} className="nav-mobile-bubble" style={{ height: '0px', top: '0px', width: '220px', left: '50%', transform: 'translateX(-50%)', opacity: mobileMenuOpen ? 1 : 0, transition: 'none' }} />
-              {renderLinks(mobileLinkRefs, true)}
+      <AnimatePresence>
+        {show && (
+          <motion.div 
+            initial={{ y: -80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -80, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 22, mass: 0.7 }}
+            className="md:hidden fixed top-6 inset-x-0 flex justify-center z-50 pointer-events-none"
+          >
+            <div ref={mobileNavRef} className={`pointer-events-auto rounded-3xl overflow-hidden nav-mobile-glass nav-mobile-base ${mobileMenuOpen ? 'nav-mobile-open' : 'nav-mobile-closed'} ${!mobileMenuOpen && isHeadingVisible && !forceShowNavbar ? '-translate-y-[200%] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+              <GradientBorder />
+              <GlassOverlay />
+              <button aria-label="Toggle navigation menu" aria-expanded={mobileMenuOpen} className={`relative w-full h-[40px] flex items-center justify-center cursor-pointer ${mobileMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ transition: 'opacity 0.25s ease-out', background: 'none', border: 'none' }} onClick={toggleMobileMenu}>
+                <span className="text-white text-sm font-medium tracking-wider uppercase drop-shadow-md px-6">{activeSection}</span>
+              </button>
+              <div className={`absolute inset-0 w-full h-full ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} style={{ transition: mobileMenuOpen ? 'opacity 0.35s ease-out 0.15s' : 'opacity 0.2s ease-in' }}>
+                <div className="w-full h-full flex flex-col items-center justify-start pt-2 pb-4 space-y-1 relative">
+                  {renderLinks(true)}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        {mobileMenuOpen && <div className="fixed inset-0 z-40 transparent" onClick={toggleMobileMenu} onTouchStart={toggleMobileMenu} />}
-      </div>
+            {mobileMenuOpen && <div className="fixed inset-0 z-40 transparent" onClick={toggleMobileMenu} onTouchStart={toggleMobileMenu} />}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
 
-
 export default memo(Navbar);
+
