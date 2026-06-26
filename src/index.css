@@ -368,7 +368,8 @@ input[type="submit"], input[type="button"] {
 }
 
 .project-card {
-  /* NO will-change here — promoting every card to its own GPU layer crushes scroll */
-  contain: layout style;
+  /* will-change applied only during animation via JS (onAnimationStart/Complete) */
+  /* paint isolation stops card repaints from cascading into siblings during scroll */
+  contain: layout style paint;
 }
 

@@ -8,10 +8,10 @@ import { NeonButton } from '../atoms/NeonButton';
 const CertificationCard = ({ title, issuer, description, link, icon, index }) => {
   return (
     <motion.div 
-      initial={{ opacity: 0, x: index % 2 === 0 ? -80 : 80 }}
+      initial={{ opacity: 0, x: index % 2 === 0 ? -40 : 40 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, amount: 0.3 }}
-      transition={{ type: 'spring', stiffness: 260, damping: 24, delay: index * 0.06 }}
+      transition={{ type: 'spring', stiffness: 80, damping: 20, mass: 1, delay: index * 0.1 }}
       className="cert-card group relative h-full"
     >
       <div className="h-full p-6 md:p-8 rounded-3xl bg-white/5 border border-white/15 shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] flex flex-col">
@@ -74,10 +74,10 @@ const Certifications = () => {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
 
         <motion.div 
-          initial={{ y: 40, opacity: 0 }}
+          initial={{ y: 28, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, amount: 0.8 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 1.1, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="cert-header flex flex-col items-center text-center mb-16"
         >
           <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">

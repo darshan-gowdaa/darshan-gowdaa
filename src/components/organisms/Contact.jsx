@@ -152,10 +152,10 @@ const Contact = () => {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div 
-          initial={{ y: 40, opacity: 0 }}
+          initial={{ y: 28, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, amount: 0.8 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 1.1, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="contact-header text-center mb-16"
         >
           <h2 className="glass-heading text-4xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">
@@ -165,10 +165,10 @@ const Contact = () => {
 
         <div className="contact-content grid md:grid-cols-2 gap-10 md:gap-24 items-start">
           <motion.div 
-            initial={{ x: -80, opacity: 0 }}
+            initial={{ x: -40, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+            transition={{ type: 'spring', stiffness: 80, damping: 20, mass: 1 }}
             className="contact-left"
           >
             <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 font-heading">Let's collaborate</h3>
@@ -214,10 +214,10 @@ const Contact = () => {
           </motion.div>
 
           <motion.div 
-            initial={{ x: 80, opacity: 0 }}
+            initial={{ x: 40, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+            transition={{ type: 'spring', stiffness: 80, damping: 20, mass: 1 }}
             className="contact-right bg-white/5 border border-white/15 rounded-3xl p-6 md:p-10 shadow-[0_0_20px_rgba(255,255,255,0.06)]"
           >
             <form onSubmit={handleSubmit}>

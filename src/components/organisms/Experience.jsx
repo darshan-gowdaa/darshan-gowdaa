@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { timelineItems } from '../../data/experienceData';
 
 // 120fps spring — no scroll listeners
-const SPRING = { type: 'spring', stiffness: 260, damping: 24, mass: 0.8 };
+const SPRING = { type: 'spring', stiffness: 80, damping: 20, mass: 1 };
 
 const TimelineMarker = memo(({ icon: Icon }) => (
   <div className="flex flex-col items-center">
@@ -23,7 +23,7 @@ TimelineMarker.displayName = 'TimelineMarker';
 
 const TimelineContent = memo(({ title, organization, period, description, certificateLink, isEven }) => (
   <motion.div 
-    initial={{ opacity: 0, x: isEven ? -30 : 30 }}
+    initial={{ opacity: 0, x: isEven ? -24 : 24 }}
     whileInView={{ opacity: 1, x: 0 }}
     viewport={{ once: true, amount: 0.5 }}
     transition={SPRING}
@@ -84,10 +84,10 @@ const Experience = () => {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
 
         <motion.div 
-          initial={{ y: 40, opacity: 0 }}
+          initial={{ y: 28, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, amount: 0.8 }}
-          transition={SPRING}
+          transition={{ duration: 1.1, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="text-center mb-16"
         >
           <h2 className="glass-heading text-5xl md:text-7xl font-bold font-heading mb-6 tracking-tight text-white">
@@ -101,7 +101,7 @@ const Experience = () => {
           initial={{ scaleY: 0 }}
           whileInView={{ scaleY: 1 }}
           viewport={{ once: true, amount: 0.05 }}
-          transition={{ duration: 1.4, ease: 'easeOut' }}
+          transition={{ duration: 1.8, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="absolute left-6 md:left-1/2 top-[200px] bottom-24 w-px bg-gradient-to-b from-white via-white/50 to-transparent md:-translate-x-1/2 origin-top" 
         />
 

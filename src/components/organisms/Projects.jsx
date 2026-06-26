@@ -1,11 +1,25 @@
 // src/components/organisms/Projects.jsx
-import React, { memo } from 'react';
+import React, { memo, useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { FaGithub, FaExternalLinkAlt, FaPlay } from 'react-icons/fa';
 import { projects } from '../../data/projectsData';
 
-// Buttery 120fps spring config
-const SPRING = { type: 'spring', stiffness: 280, damping: 24, mass: 0.8 };
+// Spring config
+const SPRING = { type: 'spring', stiffness: 80, damping: 20, mass: 1 };
+
+// Detect mobile once — avoids double-DOM dual render per card
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? !window.matchMedia('(min-width: 768px)').matches : false
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const handler = (e) => setIsMobile(!e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return isMobile;
+}
 
 // Desktop: col-0 → from left, col-1 → from bottom, col-2 → from right (3-col grid)
 // Mobile: even index → from left, odd index → from right
@@ -13,14 +27,14 @@ const getVariants = (index, isMobile) => {
   if (isMobile) {
     const fromLeft = index % 2 === 0;
     return {
-      hidden: { opacity: 0, x: fromLeft ? -60 : 60 },
+      hidden: { opacity: 0, x: fromLeft ? -36 : 36 },
       visible: { opacity: 1, x: 0 },
     };
   }
   const col = index % 3;
-  if (col === 0) return { hidden: { opacity: 0, x: -80 }, visible: { opacity: 1, x: 0 } };
-  if (col === 2) return { hidden: { opacity: 0, x: 80 }, visible: { opacity: 1, x: 0 } };
-  return { hidden: { opacity: 0, y: 80 }, visible: { opacity: 1, y: 0 } };
+  if (col === 0) return { hidden: { opacity: 0, x: -44 }, visible: { opacity: 1, x: 0 } };
+  if (col === 2) return { hidden: { opacity: 0, x: 44 }, visible: { opacity: 1, x: 0 } };
+  return { hidden: { opacity: 0, y: 44 }, visible: { opacity: 1, y: 0 } };
 };
 
 const ActionLink = ({ href, icon: Icon, label, variant, isLiveLink }) => {
@@ -61,73 +75,54 @@ const ActionLink = ({ href, icon: Icon, label, variant, isLiveLink }) => {
   );
 };
 
-const ProjectCard = ({ index, title, description, tags, image, liveLink, demoVideo, githubLink, isVignette }) => {
+const ProjectCard = memo(({ index, isMobile, title, description, tags, image, liveLink, demoVideo, githubLink, isVignette }) => {
   const actionLink = liveLink || demoVideo;
   const isLiveLink = !!liveLink;
   const actionLabel = isLiveLink ? 'Live Demo' : 'Demo Video';
   const ActionIcon = isLiveLink ? FaExternalLinkAlt : FaPlay;
 
-  // Pick variants for desktop (uses CSS media query logic via JS)
-  const desktopVariants = getVariants(index, false);
-  const mobileVariants = getVariants(index, true);
+  // Single variant set — no double DOM
+  const variants = getVariants(index, isMobile);
+  const delay = isMobile ? index * 0.1 : Math.floor(index / 3) * 0.12;
+  const amount = isMobile ? 0.1 : 0.15;
+
+  // will-change only while animating — avoids permanent GPU layer during scroll
+  const ref = useRef(null);
+  const onStart = () => { if (ref.current) ref.current.style.willChange = 'transform, opacity'; };
+  const onComplete = () => { if (ref.current) ref.current.style.willChange = 'auto'; };
 
   return (
-    <>
-      {/* Desktop card (md+) */}
-      <motion.div
-        variants={desktopVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ ...SPRING, delay: Math.floor(index / 3) * 0.08 }}
-        className="group relative h-full flex flex-col project-card hidden md:flex"
-      >
-        <CardInner
-          title={title}
-          description={description}
-          tags={tags}
-          image={image}
-          liveLink={liveLink}
-          demoVideo={demoVideo}
-          githubLink={githubLink}
-          isVignette={isVignette}
-          actionLink={actionLink}
-          isLiveLink={isLiveLink}
-          actionLabel={actionLabel}
-          ActionIcon={ActionIcon}
-        />
-      </motion.div>
-
-      {/* Mobile card (< md) */}
-      <motion.div
-        variants={mobileVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
-        transition={{ ...SPRING, delay: index * 0.06 }}
-        className="group relative h-full flex flex-col project-card md:hidden"
-      >
-        <CardInner
-          title={title}
-          description={description}
-          tags={tags}
-          image={image}
-          liveLink={liveLink}
-          demoVideo={demoVideo}
-          githubLink={githubLink}
-          isVignette={isVignette}
-          actionLink={actionLink}
-          isLiveLink={isLiveLink}
-          actionLabel={actionLabel}
-          ActionIcon={ActionIcon}
-        />
-      </motion.div>
-    </>
+    <motion.div
+      ref={ref}
+      variants={variants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount }}
+      transition={{ ...SPRING, delay }}
+      onAnimationStart={onStart}
+      onAnimationComplete={onComplete}
+      className="group relative h-full flex flex-col project-card"
+    >
+      <CardInner
+        title={title}
+        description={description}
+        tags={tags}
+        image={image}
+        liveLink={liveLink}
+        demoVideo={demoVideo}
+        githubLink={githubLink}
+        isVignette={isVignette}
+        actionLink={actionLink}
+        isLiveLink={isLiveLink}
+        actionLabel={actionLabel}
+        ActionIcon={ActionIcon}
+      />
+    </motion.div>
   );
-};
+});
 
 const CardInner = ({ title, description, tags, image, githubLink, isVignette, actionLink, isLiveLink, actionLabel, ActionIcon }) => (
-  <div className="relative h-full bg-white/5 backdrop-blur-sm border border-white/15 rounded-3xl overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:border-white/30">
+  <div className="relative h-full bg-white/5 border border-white/15 rounded-3xl overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-[box-shadow,border-color] duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:border-white/30">
     <div className="relative aspect-video overflow-hidden">
       {/* image overlays */}
       <div className={`absolute inset-0 z-10 pointer-events-none transition-all duration-500 ${isVignette ? 'shadow-[inset_0_0_60px_rgba(0,0,0,0.9)]' : ''}`} />
@@ -180,6 +175,8 @@ const CardInner = ({ title, description, tags, image, githubLink, isVignette, ac
 );
 
 const Projects = () => {
+  const isMobile = useIsMobile();
+
   return (
     <section id="projects" className="py-24 relative overflow-hidden section-lazy">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -200,6 +197,7 @@ const Projects = () => {
             <ProjectCard
               key={index}
               index={index}
+              isMobile={isMobile}
               {...project}
             />
           ))}

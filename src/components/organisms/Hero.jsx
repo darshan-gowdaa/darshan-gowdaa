@@ -58,16 +58,17 @@ const Hero = ({ onComplete }) => {
           <LightRays
             raysOrigin="top-center"
             raysColor="#ffffff"
-            raysSpeed={1}
-            lightSpread={0.5}
+            raysSpeed={1.5}
+            lightSpread={0.9}
             rayLength={3}
             followMouse={true}
-            mouseInfluence={0.1}
+            mouseInfluence={0.3}
             noiseAmount={0}
             distortion={0}
-            fadeDistance={1}
-            saturation={1}
+            className="custom-rays"
             pulsating={false}
+            fadeDistance={1}
+            saturation={1.9}
           />
         </div>
 

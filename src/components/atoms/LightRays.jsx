@@ -1,4 +1,3 @@
-// src/components/atoms/LightRays.jsx
 import { useRef, useEffect, useState } from 'react';
 import { Renderer, Program, Triangle, Mesh } from 'ogl';
 
@@ -34,16 +33,16 @@ const getAnchorAndDir = (origin, w, h) => {
 const LightRays = ({
   raysOrigin = 'top-center',
   raysColor = DEFAULT_COLOR,
-  raysSpeed = 2,
-  lightSpread = 2,
+  raysSpeed = 1,
+  lightSpread = 1,
   rayLength = 2,
   pulsating = false,
-  fadeDistance = 0.1,
-  saturation = 1.5,
+  fadeDistance = 1.0,
+  saturation = 1.0,
   followMouse = true,
-  mouseInfluence = 0.9,
-  noiseAmount = 0.9,
-  distortion = 0.9,
+  mouseInfluence = 0.1,
+  noiseAmount = 0.0,
+  distortion = 0.0,
   className = ''
 }) => {
   const containerRef = useRef(null);
@@ -94,7 +93,7 @@ const LightRays = ({
       if (!containerRef.current) return;
 
       const renderer = new Renderer({
-        dpr: Math.min(window.devicePixelRatio, 1.5), // cap at 1.5 — 2x DPR doubles GPU fill rate
+        dpr: Math.min(window.devicePixelRatio, 2),
         alpha: true
       });
       rendererRef.current = renderer;
@@ -184,7 +183,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
                rayStrength(rayPos, finalRayDir, coord, 22.3991, 18.0234,
                            1.1 * raysSpeed);
 
-  fragColor = rays1 * 0.8 + rays2 * 0.7;
+  fragColor = rays1 * 0.5 + rays2 * 0.4;
 
   if (noiseAmount > 0.0) {
     float n = noise(coord * 0.01 + iTime * 0.1);
@@ -192,8 +191,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   }
 
   float brightness = 1.0 - (coord.y / iResolution.y);
-  fragColor.x *= 0.1 + brightness * 0.9;
-  fragColor.y *= 0.3 + brightness * 0.7;
+  fragColor.x *= 0.1 + brightness * 0.8;
+  fragColor.y *= 0.3 + brightness * 0.6;
   fragColor.z *= 0.5 + brightness * 0.5;
 
   if (saturation != 1.0) {
@@ -213,8 +212,10 @@ void main() {
       const uniforms = {
         iTime: { value: 0 },
         iResolution: { value: [1, 1] },
+
         rayPos: { value: [0, 0] },
         rayDir: { value: [0, 1] },
+
         raysColor: { value: hexToRgb(raysColor) },
         raysSpeed: { value: raysSpeed },
         lightSpread: { value: lightSpread },
@@ -254,10 +255,7 @@ void main() {
       };
 
       const loop = t => {
-        if (!rendererRef.current || !uniformsRef.current || !meshRef.current) return;
-        // Pause rendering when section is not visible — zero GPU cost while scrolled away
-        if (!containerRef.current || !isVisible) {
-          animationIdRef.current = requestAnimationFrame(loop);
+        if (!rendererRef.current || !uniformsRef.current || !meshRef.current) {
           return;
         }
 
@@ -265,8 +263,10 @@ void main() {
 
         if (followMouse && mouseInfluence > 0.0) {
           const smoothing = 0.92;
+
           smoothMouseRef.current.x = smoothMouseRef.current.x * smoothing + mouseRef.current.x * (1 - smoothing);
           smoothMouseRef.current.y = smoothMouseRef.current.y * smoothing + mouseRef.current.y * (1 - smoothing);
+
           uniforms.mousePos.value = [smoothMouseRef.current.x, smoothMouseRef.current.y];
         }
 
@@ -275,6 +275,7 @@ void main() {
           animationIdRef.current = requestAnimationFrame(loop);
         } catch (error) {
           console.warn('WebGL rendering error:', error);
+          return;
         }
       };
 
@@ -294,8 +295,13 @@ void main() {
           try {
             const canvas = renderer.gl.canvas;
             const loseContextExt = renderer.gl.getExtension('WEBGL_lose_context');
-            if (loseContextExt) loseContextExt.loseContext();
-            if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);
+            if (loseContextExt) {
+              loseContextExt.loseContext();
+            }
+
+            if (canvas && canvas.parentNode) {
+              canvas.parentNode.removeChild(canvas);
+            }
           } catch (error) {
             console.warn('Error during WebGL cleanup:', error);
           }
@@ -377,16 +383,8 @@ void main() {
     };
 
     if (followMouse) {
-      // Throttle to ~60fps — reading getBoundingClientRect on every mousemove forces layout
-      let lastMove = 0;
-      const throttled = (e) => {
-        const now = performance.now();
-        if (now - lastMove < 16) return;
-        lastMove = now;
-        handleMouseMove(e);
-      };
-      window.addEventListener('mousemove', throttled, { passive: true });
-      return () => window.removeEventListener('mousemove', throttled);
+      window.addEventListener('mousemove', handleMouseMove);
+      return () => window.removeEventListener('mousemove', handleMouseMove);
     }
   }, [followMouse]);
 

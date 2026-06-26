@@ -10,18 +10,18 @@ const About = () => {
   const isMobile = useIsMobile();
 
   const fadeInUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 24 } }
+    hidden: { opacity: 0, y: 24 },
+    visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 80, damping: 20, mass: 1 } }
   };
 
   const fadeInLeft = {
-    hidden: { opacity: 0, x: -50 },
-    visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 260, damping: 24 } }
+    hidden: { opacity: 0, x: -40 },
+    visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 80, damping: 20, mass: 1 } }
   };
 
   const fadeInRight = {
-    hidden: { opacity: 0, x: 50 },
-    visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 260, damping: 24 } }
+    hidden: { opacity: 0, x: 40 },
+    visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 80, damping: 20, mass: 1 } }
   };
 
   return (
