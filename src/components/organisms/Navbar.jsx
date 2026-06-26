@@ -49,15 +49,33 @@ const Navbar = ({ show }) => {
       { rootMargin: '-35% 0px -65% 0px', threshold: 0 }
     );
 
-    const t = setTimeout(() => {
+    const observedIds = new Set();
+    let retryInterval;
+
+    const observeSections = () => {
+      let allObserved = true;
       links.forEach(link => {
-        const el = document.getElementById(link.toLowerCase());
-        if (el) observers.observe(el);
+        const id = link.toLowerCase();
+        if (!observedIds.has(id)) {
+          const el = document.getElementById(id);
+          if (el) {
+            observers.observe(el);
+            observedIds.add(id);
+          } else {
+            allObserved = false;
+          }
+        }
       });
-    }, 100);
+      if (allObserved && retryInterval) {
+        clearInterval(retryInterval);
+      }
+    };
+
+    observeSections();
+    retryInterval = setInterval(observeSections, 500);
 
     return () => {
-      clearTimeout(t);
+      clearInterval(retryInterval);
       observers.disconnect();
     };
   }, []);
@@ -77,15 +95,25 @@ const Navbar = ({ show }) => {
       setIsHeadingVisible(isAnyVisible);
     }, { threshold: 0.5, rootMargin: '0px 0px -20% 0px' });
 
-    // Delay to ensure DOM and lazy-loaded headings are ready
-    const t = setTimeout(() => {
+    const observedHeadings = new Set();
+    let retryInterval;
+
+    const observeHeadings = () => {
       const headings = document.querySelectorAll('h2.glass-heading');
-      headings.forEach(h => observer.observe(h));
-    }, 300);
+      headings.forEach(h => {
+        if (!observedHeadings.has(h)) {
+          observer.observe(h);
+          observedHeadings.add(h);
+        }
+      });
+    };
+
+    observeHeadings();
+    retryInterval = setInterval(observeHeadings, 1000);
 
     return () => {
+      clearInterval(retryInterval);
       observer.disconnect();
-      clearTimeout(t);
     };
   }, []);
 
