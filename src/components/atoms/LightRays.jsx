@@ -381,17 +381,42 @@ void main() {
   ]);
 
   useEffect(() => {
+    let cachedRect = null;
+    let resizeTimer = null;
+
+    const updateRect = () => {
+      if (containerRef.current) {
+        cachedRect = containerRef.current.getBoundingClientRect();
+      }
+    };
+
     const handleMouseMove = e => {
       if (!containerRef.current || !rendererRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
+      
+      if (!cachedRect) {
+        updateRect();
+      }
+      
+      const x = (e.clientX - cachedRect.left) / cachedRect.width;
+      const y = (e.clientY - cachedRect.top) / cachedRect.height;
       mouseRef.current = { x, y };
+    };
+
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        cachedRect = null;
+      }, 100);
     };
 
     if (followMouse) {
       window.addEventListener('mousemove', handleMouseMove);
-      return () => window.removeEventListener('mousemove', handleMouseMove);
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('resize', handleResize);
+        clearTimeout(resizeTimer);
+      };
     }
   }, [followMouse]);
 

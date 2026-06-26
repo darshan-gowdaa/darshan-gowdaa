@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import Navbar from './components/organisms/Navbar';
 import Hero from './components/organisms/Hero';
-import About from './components/organisms/About';
-import Skills from './components/organisms/Skills';
-import Experience from './components/organisms/Experience';
-import Projects from './components/organisms/Projects';
-import Certifications from './components/organisms/Certifications';
-import Contact from './components/organisms/Contact';
 import Lenis from 'lenis';
+
+// Lazy load below-the-fold components
+const About = lazy(() => import('./components/organisms/About'));
+const Skills = lazy(() => import('./components/organisms/Skills'));
+const Experience = lazy(() => import('./components/organisms/Experience'));
+const Projects = lazy(() => import('./components/organisms/Projects'));
+const Certifications = lazy(() => import('./components/organisms/Certifications'));
+const Contact = lazy(() => import('./components/organisms/Contact'));
 
 function App() {
   const [isHeroComplete, setIsHeroComplete] = useState(false);
@@ -45,12 +47,14 @@ function App() {
       {/* main content */}
       <main id="main-content" className="relative">
         <Hero onComplete={handleHeroComplete} />
-        <About />
-        <Skills />
-        <Experience />
-        <Projects />
-        <Certifications />
-        <Contact />
+        <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+          <About />
+          <Skills />
+          <Experience />
+          <Projects />
+          <Certifications />
+          <Contact />
+        </Suspense>
       </main>
 
       {/* analytics */}

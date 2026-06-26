@@ -36,12 +36,17 @@ export default function TiltedCard({
   });
 
   const lastYRef = useRef(0);
+  const rectRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
 
   // Core tilt logic — works for both mouse and touch
   const applyTilt = useCallback((clientX, clientY) => {
     if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
+    
+    if (!rectRef.current) {
+      rectRef.current = ref.current.getBoundingClientRect();
+    }
+    const rect = rectRef.current;
     const offsetX = clientX - rect.left - rect.width / 2;
     const offsetY = clientY - rect.top - rect.height / 2;
 
@@ -69,6 +74,7 @@ export default function TiltedCard({
     rotateX.set(0);
     rotateY.set(0);
     rotateFigcaption.set(0);
+    rectRef.current = null;
   }, [scale, opacity, rotateX, rotateY, rotateFigcaption]);
 
   // Mouse handlers
