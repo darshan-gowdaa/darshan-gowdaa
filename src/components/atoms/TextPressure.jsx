@@ -52,6 +52,8 @@ const TextPressure = ({
   const mouseRef = useRef({ x: 0, y: 0 });
   const cursorRef = useRef({ x: 0, y: 0 });
   const isTouchRef = useRef(false);
+  // Cache titleRect — avoids getBoundingClientRect on every RAF frame
+  const titleRectRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
 
   const [fontSize, setFontSize] = useState(minFontSize);
   const [scaleY, setScaleY] = useState(1);
@@ -110,6 +112,8 @@ const TextPressure = ({
     requestAnimationFrame(() => {
       if (!titleRef.current) return;
       const textRect = titleRef.current.getBoundingClientRect();
+      // Update cached rect
+      titleRectRef.current = textRect;
 
       if (scale && textRect.height > 0) {
         const yRatio = containerH / textRect.height;
@@ -177,7 +181,7 @@ const TextPressure = ({
       mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / 9;
 
       if (titleRef.current) {
-        const titleRect = titleRef.current.getBoundingClientRect();
+        const titleRect = titleRectRef.current;
         const maxDist = titleRect.width / 2;
 
         if (isTouchRef.current) {

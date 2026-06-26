@@ -9,6 +9,16 @@ import LightRays from '../atoms/LightRays';
 const Hero = ({ onComplete }) => {
   const containerRef = useRef(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? !window.matchMedia('(min-width: 768px)').matches : false
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const handler = (e) => setIsMobile(!e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setShowScrollButton(window.scrollY > 300);
@@ -69,6 +79,7 @@ const Hero = ({ onComplete }) => {
             pulsating={false}
             fadeDistance={1}
             saturation={1.9}
+            intensity={isMobile ? 2.5 : 1.0}
           />
         </div>
 

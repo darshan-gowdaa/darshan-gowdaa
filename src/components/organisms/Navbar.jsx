@@ -29,71 +29,36 @@ const Navbar = ({ show }) => {
 
   const mobileNavRef = useRef(null);
   const isScrolling = useRef(false);
-  const pendingSectionRef = useRef(null);
   const forceShowTimeoutRef = useRef(null);
 
   // update page title
   useEffect(() => { document.title = `${activeSection} | Darshan Gowda G S`; }, [activeSection]);
 
-  // track active section
+  // track active section via IntersectionObserver — zero per-frame layout reads
   useEffect(() => {
-    const getSections = () => links
-      .map((link) => ({
-        name: link,
-        el: document.getElementById(link.toLowerCase())
-      }))
-      .filter((item) => item.el);
-
-    const updateActiveFromScroll = () => {
-      if (isScrolling.current) {
-        if (pendingSectionRef.current) {
-          setActiveSection((prev) => (prev === pendingSectionRef.current ? prev : pendingSectionRef.current));
-        }
-        return;
-      }
-
-      const sections = getSections();
-      if (!sections.length) return;
-
-      const anchorY = window.innerHeight * 0.35;
-      let best = null;
-
-      sections.forEach(({ name, el }) => {
-        const rect = el.getBoundingClientRect();
-        const containsAnchor = rect.top <= anchorY && rect.bottom >= anchorY;
-        const distance = Math.abs(rect.top - anchorY);
-
-        if (containsAnchor) {
-          if (!best || !best.containsAnchor || distance < best.distance) {
-            best = { name, distance, containsAnchor: true };
+    const observers = new IntersectionObserver(
+      (entries) => {
+        if (isScrolling.current) return;
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const name = links.find(l => l.toLowerCase() === entry.target.id);
+            if (name) setActiveSection(name);
           }
-        } else if (!best || (!best.containsAnchor && distance < best.distance)) {
-          best = { name, distance, containsAnchor: false };
-        }
-      });
-
-      if (best) {
-        setActiveSection((prev) => (prev === best.name ? prev : best.name));
-      }
-    };
-
-    let rafId = null;
-    const onScroll = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(updateActiveFromScroll);
-    };
+        });
+      },
+      { rootMargin: '-35% 0px -65% 0px', threshold: 0 }
+    );
 
     const t = setTimeout(() => {
-      updateActiveFromScroll();
-      window.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', onScroll);
+      links.forEach(link => {
+        const el = document.getElementById(link.toLowerCase());
+        if (el) observers.observe(el);
+      });
     }, 100);
 
     return () => {
       clearTimeout(t);
-      if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      observers.disconnect();
     };
   }, []);
 
@@ -145,7 +110,6 @@ const Navbar = ({ show }) => {
   // scroll to section
   const scrollToSection = (sectionId) => {
     isScrolling.current = true;
-    pendingSectionRef.current = sectionId;
 
     if (document.body.style.overflow === 'hidden') {
       document.body.style.overflow = '';
@@ -162,52 +126,16 @@ const Navbar = ({ show }) => {
       const element = document.getElementById(sectionId.toLowerCase());
       if (!element) {
         isScrolling.current = false;
-        pendingSectionRef.current = null;
         return;
       }
 
       const targetTop = element.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: targetTop, behavior: 'smooth' });
 
-      window.scrollTo({
-        top: targetTop,
-        behavior: 'smooth'
-      });
-
-      const anchorY = window.innerHeight * 0.35;
-      const lockStart = performance.now();
-      const maxLockMs = 2200;
-      let rafId = null;
-
-      const finishScrollLock = () => {
-        if (rafId) cancelAnimationFrame(rafId);
+      // Release lock after scroll settles
+      setTimeout(() => {
         isScrolling.current = false;
-        pendingSectionRef.current = null;
-      };
-
-      const ensureTargetVisible = () => {
-        const target = document.getElementById(sectionId.toLowerCase());
-        if (!target) {
-          finishScrollLock();
-          return;
-        }
-
-        const rect = target.getBoundingClientRect();
-        const isVisibleAtAnchor = rect.top <= anchorY && rect.bottom >= anchorY;
-
-        if (isVisibleAtAnchor) {
-          finishScrollLock();
-          return;
-        }
-
-        if (performance.now() - lockStart > maxLockMs) {
-          finishScrollLock();
-          return;
-        }
-
-        rafId = requestAnimationFrame(ensureTargetVisible);
-      };
-
-      rafId = requestAnimationFrame(ensureTargetVisible);
+      }, 800);
     });
   };
 

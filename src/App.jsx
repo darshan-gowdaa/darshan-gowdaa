@@ -15,27 +15,17 @@ function App() {
   const [isHeroComplete, setIsHeroComplete] = useState(false);
   const handleHeroComplete = useCallback(() => setIsHeroComplete(true), []);
 
-  // Initialize Lenis smooth scrolling — single RAF loop shared with the browser
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.1,          // slightly shorter = snappier feel
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // expo easing
+      lerp: 0.1,            // simple lerp: much cheaper to compute than expo easing
       smoothWheel: true,
-      wheelMultiplier: 1.0,
-      touchMultiplier: 1.5,   // native-feeling on touch
+      wheelMultiplier: 0.9,
+      touchMultiplier: 1.5,
       infinite: false,
+      autoRaf: true,        // Lenis manages its own RAF internally
     });
 
-    // Single RAF loop — Lenis ticks first, everything else follows
-    let rafId;
-    function raf(time) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-    rafId = requestAnimationFrame(raf);
-
     return () => {
-      cancelAnimationFrame(rafId);
       lenis.destroy();
     };
   }, []);
