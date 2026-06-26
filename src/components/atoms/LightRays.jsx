@@ -94,7 +94,7 @@ const LightRays = ({
       if (!containerRef.current) return;
 
       const renderer = new Renderer({
-        dpr: Math.min(window.devicePixelRatio, 2),
+        dpr: Math.min(window.devicePixelRatio, 1.5), // cap at 1.5 — 2x DPR doubles GPU fill rate
         alpha: true
       });
       rendererRef.current = renderer;
@@ -255,6 +255,11 @@ void main() {
 
       const loop = t => {
         if (!rendererRef.current || !uniformsRef.current || !meshRef.current) return;
+        // Pause rendering when section is not visible — zero GPU cost while scrolled away
+        if (!containerRef.current || !isVisible) {
+          animationIdRef.current = requestAnimationFrame(loop);
+          return;
+        }
 
         uniforms.iTime.value = t * 0.001;
 
@@ -372,8 +377,16 @@ void main() {
     };
 
     if (followMouse) {
-      window.addEventListener('mousemove', handleMouseMove);
-      return () => window.removeEventListener('mousemove', handleMouseMove);
+      // Throttle to ~60fps — reading getBoundingClientRect on every mousemove forces layout
+      let lastMove = 0;
+      const throttled = (e) => {
+        const now = performance.now();
+        if (now - lastMove < 16) return;
+        lastMove = now;
+        handleMouseMove(e);
+      };
+      window.addEventListener('mousemove', throttled, { passive: true });
+      return () => window.removeEventListener('mousemove', throttled);
     }
   }, [followMouse]);
 

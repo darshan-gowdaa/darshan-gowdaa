@@ -15,17 +15,27 @@ function App() {
   const [isHeroComplete, setIsHeroComplete] = useState(false);
   const handleHeroComplete = useCallback(() => setIsHeroComplete(true), []);
 
-  // initialize smooth scrolling with lenis
+  // Initialize Lenis smooth scrolling — single RAF loop shared with the browser
   useEffect(() => {
-    const lenis = new Lenis();
+    const lenis = new Lenis({
+      duration: 1.1,          // slightly shorter = snappier feel
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // expo easing
+      smoothWheel: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.5,   // native-feeling on touch
+      infinite: false,
+    });
 
+    // Single RAF loop — Lenis ticks first, everything else follows
+    let rafId;
     function raf(time) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     }
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
 
     return () => {
+      cancelAnimationFrame(rafId);
       lenis.destroy();
     };
   }, []);
@@ -36,7 +46,7 @@ function App() {
         Skip to content
       </a>
 
-      {/* top edge shadow — gives a clean fade when scrolling */}
+      {/* top edge shadow */}
       <div className="fixed top-0 inset-x-0 h-50 z-30 pointer-events-none top-shadow-fade" />
 
       {/* navbar */}

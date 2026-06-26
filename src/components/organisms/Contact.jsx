@@ -168,7 +168,7 @@ const Contact = () => {
             initial={{ x: -80, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
+            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
             className="contact-left"
           >
             <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 font-heading">Let's collaborate</h3>
@@ -217,8 +217,8 @@ const Contact = () => {
             initial={{ x: 80, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="contact-right bg-white/5 border border-white/15 rounded-3xl p-6 md:p-10 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.06)]"
+            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+            className="contact-right bg-white/5 border border-white/15 rounded-3xl p-6 md:p-10 shadow-[0_0_20px_rgba(255,255,255,0.06)]"
           >
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -11,10 +11,10 @@ const CertificationCard = ({ title, issuer, description, link, icon, index }) =>
       initial={{ opacity: 0, x: index % 2 === 0 ? -80 : 80 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.7, ease: "easeOut", delay: index * 0.1 }}
+      transition={{ type: 'spring', stiffness: 260, damping: 24, delay: index * 0.06 }}
       className="cert-card group relative h-full"
     >
-      <div className="h-full p-6 md:p-8 rounded-3xl bg-white/5 border border-white/15 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] flex flex-col">
+      <div className="h-full p-6 md:p-8 rounded-3xl bg-white/5 border border-white/15 shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] flex flex-col">
 
         <div className="flex items-start justify-between gap-4 mb-6">
           <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 text-2xl text-gray-300 group-hover:text-white group-hover:bg-white/10 transition-colors">

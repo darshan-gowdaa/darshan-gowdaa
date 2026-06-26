@@ -1,7 +1,9 @@
 import { useRef, memo } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion } from 'motion/react';
 import { timelineItems } from '../../data/experienceData';
 
+// 120fps spring — no scroll listeners
+const SPRING = { type: 'spring', stiffness: 260, damping: 24, mass: 0.8 };
 
 const TimelineMarker = memo(({ icon: Icon }) => (
   <div className="flex flex-col items-center">
@@ -9,7 +11,7 @@ const TimelineMarker = memo(({ icon: Icon }) => (
       initial={{ scale: 0, opacity: 0 }}
       whileInView={{ scale: 1, opacity: 1 }}
       viewport={{ once: true, amount: 0.8 }}
-      transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
+      transition={{ ...SPRING, bounce: 0.4 }}
       className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-black border border-white/20 flex items-center justify-center z-20 relative shadow-[0_0_20px_rgba(255,255,255,0.15)]"
     >
       <span className="text-white text-lg md:text-2xl"><Icon /></span>
@@ -24,7 +26,7 @@ const TimelineContent = memo(({ title, organization, period, description, certif
     initial={{ opacity: 0, x: isEven ? -30 : 30 }}
     whileInView={{ opacity: 1, x: 0 }}
     viewport={{ once: true, amount: 0.5 }}
-    transition={{ duration: 0.7, ease: "easeOut" }}
+    transition={SPRING}
     className="glass-panel relative p-6 md:p-8 rounded-3xl overflow-hidden group border border-white/10 hover:border-white/20 transition-colors duration-300"
   >
     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
@@ -76,14 +78,7 @@ const TimelineItem = ({ item, index }) => {
 
 const Experience = () => {
   const sectionRef = useRef(null);
-  
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start center", "end center"]
-  });
-
-  const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
-
+  // Spine line grows via CSS animation triggered by whileInView — no per-scroll JS
   return (
     <section id="experience" className="py-24 relative overflow-hidden section-lazy" ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -92,7 +87,7 @@ const Experience = () => {
           initial={{ y: 40, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, amount: 0.8 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={SPRING}
           className="text-center mb-16"
         >
           <h2 className="glass-heading text-5xl md:text-7xl font-bold font-heading mb-6 tracking-tight text-white">
@@ -100,10 +95,13 @@ const Experience = () => {
           </h2>
         </motion.div>
 
-        {/* Vertical spine line */}
+        {/* Static spine line + CSS-animated overlay — zero scroll listeners */}
         <div className="absolute left-6 md:left-1/2 top-[200px] bottom-24 w-px bg-white/5 md:-translate-x-1/2" />
         <motion.div 
-          style={{ scaleY }}
+          initial={{ scaleY: 0 }}
+          whileInView={{ scaleY: 1 }}
+          viewport={{ once: true, amount: 0.05 }}
+          transition={{ duration: 1.4, ease: 'easeOut' }}
           className="absolute left-6 md:left-1/2 top-[200px] bottom-24 w-px bg-gradient-to-b from-white via-white/50 to-transparent md:-translate-x-1/2 origin-top" 
         />
 
