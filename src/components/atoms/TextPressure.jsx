@@ -174,7 +174,7 @@ const TextPressure = ({
       if (!isVisible) return;
 
       mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) / 12;
-      mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / 12;
+      mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / 9;
 
       if (titleRef.current) {
         const titleRect = titleRef.current.getBoundingClientRect();

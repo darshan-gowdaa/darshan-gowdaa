@@ -9,17 +9,22 @@ export const useAnimations = () => {
     if (!containerRef?.current) return () => {};
 
     const ctx = gsap.context(() => {
+      // Pre-set initial states immediately to prevent flash before timeline starts
+      gsap.set('.hero-text-pressure', { scale: 0.98 });
+      gsap.set('.hero-description', { y: 30, opacity: 0 });
+      gsap.set('.hero-buttons', { y: 30, opacity: 0 });
+      gsap.set('.hero-socials a', { y: 30, opacity: 0 });
+
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
       tl.call(() => {
           if (onComplete) onComplete();
         })
-        .fromTo('.hero-text-pressure', { scale: 0.98 }, { scale: 1, duration: 1.2, force3D: true })
-        .fromTo('.hero-description', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, force3D: true }, '-=0.8')
-        .fromTo('.hero-buttons', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, force3D: true }, '-=0.8')
-        .fromTo(
+        .to('.hero-text-pressure', { scale: 1, duration: 1.2, force3D: true })
+        .to('.hero-description', { y: 0, opacity: 1, duration: 1, force3D: true }, '-=0.8')
+        .to('.hero-buttons', { y: 0, opacity: 1, duration: 1, force3D: true }, '-=0.8')
+        .to(
           '.hero-socials a',
-          { y: 30, opacity: 0 },
           {
             y: 0,
             opacity: 1,

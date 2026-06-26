@@ -3,86 +3,13 @@ import React, { memo, useRef, useState, useEffect, useCallback, useMemo } from '
 import { FaGithub, FaLinkedin, FaEnvelope, FaArrowUp, FaArrowRight } from 'react-icons/fa';
 import { useAnimations } from '../../hooks/useAnimations';
 import { NeonButton } from '../atoms/NeonButton';
-
 import TextPressure from '../atoms/TextPressure';
-
-// lazy load heavy 3D background
-const LiquidEther = React.lazy(() => import('../atoms/LiquidEther'));
-
-
-// Performance configuration for LiquidEther
-const LIQUID_CONFIG = {
-  high: {
-    resolution: 0.6, // good quality
-    iterationsViscous: 32,
-    iterationsPoisson: 32,
-    viscous: 30,
-    mouseForce: 25,
-    cursorSize: 100,
-    dt: 1 / 60
-  },
-  medium: {
-    resolution: 0.4, // medium quality
-    iterationsViscous: 22,
-    iterationsPoisson: 22,
-    viscous: 25,
-    mouseForce: 20,
-    cursorSize: 80,
-    dt: 1 / 60
-  },
-  low: {
-    resolution: 0.2, // lower quality but runs fine on weak hardware
-    iterationsViscous: 14,
-    iterationsPoisson: 14,
-    viscous: 20,
-    mouseForce: 15,
-    cursorSize: 60,
-    dt: 1 / 50 // slower tick for stability
-  },
-  mobile: {
-    resolution: 0.15, // minimal quality for mobile GPU budget
-    iterationsViscous: 8,
-    iterationsPoisson: 8,
-    viscous: 15,
-    mouseForce: 10,
-    cursorSize: 50,
-    dt: 1 / 40 // lower tick rate to save battery
-  }
-};
-
-const getInitialTier = () => {
-  if (typeof window === 'undefined') return 'medium';
-
-  const isMobile = window.matchMedia('(max-width: 768px)').matches;
-  if (isMobile) return 'mobile'; // always use lightest tier on mobile
-
-  const cores = navigator.hardwareConcurrency || 4;
-  const ram = navigator.deviceMemory || 4;
-  const isLowPower = cores <= 4 || ram <= 4;
-  return isLowPower ? 'medium' : 'high';
-};
+import LightRays from '../atoms/LightRays';
 
 const Hero = ({ onComplete }) => {
   const containerRef = useRef(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [tier, setTier] = useState('medium');
-  const [loadLiquid, setLoadLiquid] = useState(false);
 
-  // Defer heavy background load
-  useEffect(() => {
-    const timer = setTimeout(() => setLoadLiquid(true), 250);
-    return () => clearTimeout(timer);
-  }, []);
-  // Detect Performance Tier
-  useEffect(() => {
-    const detectTier = () => {
-      setTier(getInitialTier());
-    };
-    detectTier();
-    // only runs once on mount, hardware doesn't really change
-  }, []);
-
-  // Show scroll button logic
   useEffect(() => {
     const handleScroll = () => setShowScrollButton(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -105,8 +32,6 @@ const Hero = ({ onComplete }) => {
     return cleanup;
   }, [animateHero, onComplete]);
 
-  const config = LIQUID_CONFIG[tier];
-
   return (
     <>
       {/* Scroll to Top Button */}
@@ -124,31 +49,23 @@ const Hero = ({ onComplete }) => {
         id="home"
         ref={containerRef}
         className="relative h-[100svh] w-full overflow-hidden flex flex-col items-center justify-start bg-black"
+        style={{ contain: 'layout paint' }}
       >
-        {/* Liquid Background */}
-        <div className="absolute inset-0 z-0">
-          {loadLiquid && (
-            <React.Suspense fallback={<div className="absolute inset-0 bg-black" />}>
-              <LiquidEther
-                colors={['#5227FF', '#FF9FFC', '#B19EEF']}
-                mouseForce={config.mouseForce}
-                cursorSize={config.cursorSize}
-                isViscous={false}
-                viscous={config.viscous}
-                iterationsViscous={config.iterationsViscous}
-                iterationsPoisson={config.iterationsPoisson}
-                resolution={config.resolution}
-                dt={config.dt}
-                isBounce={false}
-                autoDemo={true}
-                autoSpeed={tier === 'mobile' ? 0.3 : tier === 'low' ? 0.3 : 0.4}
-                autoIntensity={tier === 'mobile' ? 1.5 : tier === 'low' ? 1.5 : 2.0}
-                takeoverDuration={0.25}
-                autoResumeDelay={2500}
-                autoRampDuration={0.6}
-              />
-            </React.Suspense>
-          )}
+        {/* LightRays Background */}
+        <div className="absolute inset-0 z-0" style={{ contain: 'strict' }}>
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#ffffff"
+            raysSpeed={3}
+            lightSpread={1.5}
+            rayLength={2.8}
+            followMouse={true}
+            mouseInfluence={0.3}
+            noiseAmount={0.2}
+            distortion={0.1}
+            fadeDistance={1.5}
+            saturation={1.6}
+          />
         </div>
 
         {/* Content Container */}
@@ -174,7 +91,7 @@ const Hero = ({ onComplete }) => {
 
           {/* Description */}
           <p className="hero-description text-center text-gray-300 text-base sm:text-lg md:text-xl max-w-2xl leading-relaxed font-light opacity-0 px-4">
-            Software developer & data analytics student crafting responsive web, mobile, and desktop apps.
+            Software developer &amp; data analytics student crafting responsive web, mobile, and desktop apps.
             Detailed-oriented team player who lives for clean code and next-gen tech.
           </p>
 

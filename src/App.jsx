@@ -6,6 +6,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import Navbar from './components/organisms/Navbar';
 import Hero from './components/organisms/Hero';
 import SectionSkeleton from './components/skeletons/SectionSkeleton';
+import Lenis from 'lenis';
 
 // lazy load components
 const About = React.lazy(() => import('./components/organisms/About'));
@@ -34,6 +35,23 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => ScrollTrigger.refresh(), SCROLL_REFRESH_DELAY);
     return () => clearTimeout(timer);
+  }, []);
+
+  // initialize smooth scrolling with lenis
+  useEffect(() => {
+    const lenis = new Lenis();
+
+    lenis.on('scroll', ScrollTrigger.update);
+
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      lenis.destroy();
+    };
   }, []);
 
   return (
