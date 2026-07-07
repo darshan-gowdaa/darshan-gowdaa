@@ -5,16 +5,20 @@ import { SiInfosys } from 'react-icons/si';
 import { FaAws } from 'react-icons/fa';
 import { NeonButton } from '../atoms/NeonButton';
 
+// Snappy spring
+const SPRING = { type: 'spring', stiffness: 260, damping: 24, mass: 0.6 };
+
 const CertificationCard = ({ title, issuer, description, link, icon, index }) => {
   return (
-    <motion.div 
-      initial={{ opacity: 0, x: index % 2 === 0 ? -40 : 40 }}
+    <motion.div
+      initial={{ opacity: 0, x: index % 2 === 0 ? -28 : 28 }}
       whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ type: 'spring', stiffness: 80, damping: 20, mass: 1, delay: index * 0.1 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ ...SPRING, delay: index * 0.06 }}
+      style={{ willChange: 'transform, opacity' }}
       className="cert-card group relative h-full"
     >
-      <div className="h-full p-6 md:p-8 rounded-3xl bg-white/5 border border-white/15 shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] flex flex-col">
+      <div className="h-full p-6 md:p-8 rounded-3xl bg-white/5 border border-white/15 shadow-lg transition-all duration-300 hover:border-white/30 hover:shadow-xl flex flex-col">
 
         <div className="flex items-start justify-between gap-4 mb-6">
           <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 text-2xl text-gray-300 group-hover:text-white group-hover:bg-white/10 transition-colors">
@@ -73,11 +77,12 @@ const Certifications = () => {
     <section id="certifications" className="py-24 relative overflow-hidden section-lazy">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
 
-        <motion.div 
-          initial={{ y: 28, opacity: 0 }}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true, amount: 0.8 }}
-          transition={{ duration: 1.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+          style={{ willChange: 'transform, opacity' }}
           className="cert-header flex flex-col items-center text-center mb-16"
         >
           <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">

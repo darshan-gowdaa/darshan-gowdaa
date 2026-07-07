@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import React, { useState, useCallback, Suspense, lazy } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import Navbar from './components/organisms/Navbar';
 import Hero from './components/organisms/Hero';
-import Lenis from 'lenis';
 
 // Lazy load below-the-fold components
 const About = lazy(() => import('./components/organisms/About'));
@@ -16,21 +15,6 @@ const Contact = lazy(() => import('./components/organisms/Contact'));
 function App() {
   const [isHeroComplete, setIsHeroComplete] = useState(false);
   const handleHeroComplete = useCallback(() => setIsHeroComplete(true), []);
-
-  useEffect(() => {
-    const lenis = new Lenis({
-      lerp: 0.1,            // simple lerp: much cheaper to compute than expo easing
-      smoothWheel: true,
-      wheelMultiplier: 0.9,
-      touchMultiplier: 1.5,
-      infinite: false,
-      autoRaf: true,        // Lenis manages its own RAF internally
-    });
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
 
   return (
     <div className="bg-gradient-to-br from-[#050505] via-[#050505] to-[#050505] text-white min-h-screen overflow-x-hidden relative">

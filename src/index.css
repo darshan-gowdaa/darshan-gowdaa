@@ -11,6 +11,11 @@
   --color-background: #000000;
 }
 
+/* Force native scroll-behavior off — Lenis handles all smoothing */
+html {
+  scroll-behavior: auto !important;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -19,6 +24,13 @@ body {
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Disable Lenis smoothing for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html.lenis {
+    scroll-behavior: auto !important;
+  }
 }
 
 /* reset tap highlight and selection for everything */
@@ -103,8 +115,8 @@ input[type="submit"], input[type="button"] {
 
 /* glass effect base class */
 .glass-base {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 /* reduce blur a bit on mobile, seemed laggy — kill ALL backdrop filters */
@@ -119,7 +131,9 @@ input[type="submit"], input[type="button"] {
   }
 
   .nav-mobile-closed {
-    background: rgba(10, 10, 10, 0.85) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
   }
 
   .nav-mobile-open {
@@ -139,7 +153,7 @@ input[type="submit"], input[type="button"] {
   border-radius: 2rem;
   position: relative;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
   /* glow */
   box-shadow:
@@ -177,19 +191,15 @@ input[type="submit"], input[type="button"] {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.15);
 
-  /* shadows */
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.37),
-    inset 0 0 20px rgba(255, 255, 255, 0.02);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .glass-panel:hover {
   border-color: rgba(255, 255, 255, 0.35);
   box-shadow:
-    0 15px 20px -5px rgba(0, 0, 0, 0.6),
-    0 0 12px rgba(255, 255, 255, 0.25),
-    inset 0 0 18px rgba(255, 255, 255, 0.08);
+    0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
 /* button variants */
@@ -197,7 +207,7 @@ input[type="submit"], input[type="button"] {
   background: #ffffff;
   color: #000000;
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 .liquid-glass-primary:hover {
@@ -208,7 +218,7 @@ input[type="submit"], input[type="button"] {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #ffffff;
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
   cursor: pointer;
 }
 
@@ -340,9 +350,6 @@ input[type="submit"], input[type="button"] {
   position: relative;
 }
 
-/* was using content-visibility: auto here but it breaks gsap scrolltrigger
-   because the browser skips layout for off-screen elements and returns wrong positions */
-.section-lazy { contain: layout style paint; }
 
 .text-pressure-title.stroke span::after {
   content: attr(data-char);
@@ -367,9 +374,4 @@ input[type="submit"], input[type="button"] {
   -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
 }
 
-.project-card {
-  /* will-change applied only during animation via JS (onAnimationStart/Complete) */
-  /* paint isolation stops card repaints from cascading into siblings during scroll */
-  contain: layout style paint;
-}
 

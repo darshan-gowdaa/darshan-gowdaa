@@ -5,9 +5,11 @@ import { motion } from 'motion/react';
 import { NeonButton } from '../atoms/NeonButton';
 import TextPressure from '../atoms/TextPressure';
 import LightRays from '../atoms/LightRays';
+import { useLenis } from '../../lib/SmoothScrollProvider';
 
 const Hero = ({ onComplete }) => {
   const containerRef = useRef(null);
+  const lenis = useLenis();
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? !window.matchMedia('(min-width: 768px)').matches : false
@@ -33,8 +35,21 @@ const Hero = ({ onComplete }) => {
   ], []);
 
   const scrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+    if (lenis) {
+      lenis.scrollTo(0, { duration: 1.2 });
+    } else {
+      window.scrollTo({ top: 0 });
+    }
+  }, [lenis]);
+
+  const scrollToSection = useCallback((hash) => {
+    if (lenis) {
+      lenis.scrollTo(hash, { duration: 1.2 });
+    } else {
+      const el = document.querySelector(hash);
+      if (el) el.scrollIntoView({ block: 'start' });
+    }
+  }, [lenis]);
 
   useEffect(() => {
     // Notify app that hero is complete — fires right as social icons land
@@ -87,10 +102,10 @@ const Hero = ({ onComplete }) => {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center h-full gap-4 sm:gap-6 md:gap-8 pt-20 sm:pt-24">
 
           {/* Main Title - Text Pressure */}
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.98, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="w-full max-w-5xl"
           >
             <div className="relative w-full h-[80px] sm:h-[120px] md:h-[140px] flex items-center justify-center">
@@ -110,10 +125,10 @@ const Hero = ({ onComplete }) => {
           </motion.div>
 
           {/* Description */}
-          <motion.p 
-            initial={{ y: 30, opacity: 0 }}
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+            transition={{ duration: 0.45, delay: 0.15, ease: "easeOut" }}
             className="text-center text-gray-300 text-base sm:text-lg md:text-xl max-w-2xl leading-relaxed font-light px-4"
           >
             Software developer &amp; data analytics student crafting responsive web, mobile, and desktop apps.
@@ -121,14 +136,14 @@ const Hero = ({ onComplete }) => {
           </motion.p>
 
           {/* Buttons */}
-          <motion.div 
-            initial={{ y: 30, opacity: 0 }}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+            transition={{ duration: 0.45, delay: 0.25, ease: "easeOut" }}
             className="flex flex-col sm:flex-row items-center gap-4 w-auto"
           >
             <NeonButton
-              href="#projects"
+              onClick={() => scrollToSection('#projects')}
               variant="solid"
               size="lg"
               className="w-56 sm:w-auto"
@@ -141,7 +156,7 @@ const Hero = ({ onComplete }) => {
             </NeonButton>
 
             <NeonButton
-              href="#contact"
+              onClick={() => scrollToSection('#contact')}
               variant="default"
               size="lg"
               className="w-56 sm:w-auto"

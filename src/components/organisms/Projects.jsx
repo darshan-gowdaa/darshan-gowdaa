@@ -4,8 +4,8 @@ import { motion } from 'motion/react';
 import { FaGithub, FaExternalLinkAlt, FaPlay } from 'react-icons/fa';
 import { projects } from '../../data/projectsData';
 
-// Spring config
-const SPRING = { type: 'spring', stiffness: 80, damping: 20, mass: 1 };
+// Snappy spring — stiffness 260, mass 0.6 feels immediate
+const SPRING = { type: 'spring', stiffness: 260, damping: 24, mass: 0.6 };
 
 // Detect mobile once — avoids double-DOM dual render per card
 function useIsMobile() {
@@ -21,20 +21,19 @@ function useIsMobile() {
   return isMobile;
 }
 
-// Desktop: col-0 → from left, col-1 → from bottom, col-2 → from right (3-col grid)
-// Mobile: even index → from left, odd index → from right
+// Smaller travel distances — large offsets with slow springs feel heavy
 const getVariants = (index, isMobile) => {
   if (isMobile) {
     const fromLeft = index % 2 === 0;
     return {
-      hidden: { opacity: 0, x: fromLeft ? -36 : 36 },
+      hidden: { opacity: 0, x: fromLeft ? -24 : 24 },
       visible: { opacity: 1, x: 0 },
     };
   }
   const col = index % 3;
-  if (col === 0) return { hidden: { opacity: 0, x: -44 }, visible: { opacity: 1, x: 0 } };
-  if (col === 2) return { hidden: { opacity: 0, x: 44 }, visible: { opacity: 1, x: 0 } };
-  return { hidden: { opacity: 0, y: 44 }, visible: { opacity: 1, y: 0 } };
+  if (col === 0) return { hidden: { opacity: 0, x: -28 }, visible: { opacity: 1, x: 0 } };
+  if (col === 2) return { hidden: { opacity: 0, x:  28 }, visible: { opacity: 1, x: 0 } };
+  return { hidden: { opacity: 0, y: 28 }, visible: { opacity: 1, y: 0 } };
 };
 
 const ActionLink = ({ href, icon: Icon, label, variant, isLiveLink }) => {
@@ -81,27 +80,20 @@ const ProjectCard = memo(({ index, isMobile, title, description, tags, image, li
   const actionLabel = isLiveLink ? 'Live Demo' : 'Demo Video';
   const ActionIcon = isLiveLink ? FaExternalLinkAlt : FaPlay;
 
-  // Single variant set — no double DOM
   const variants = getVariants(index, isMobile);
-  const delay = isMobile ? index * 0.1 : Math.floor(index / 3) * 0.12;
-  const amount = isMobile ? 0.1 : 0.15;
-
-  // will-change only while animating — avoids permanent GPU layer during scroll
-  const ref = useRef(null);
-  const onStart = () => { if (ref.current) ref.current.style.willChange = 'transform, opacity'; };
-  const onComplete = () => { if (ref.current) ref.current.style.willChange = 'auto'; };
+  // Tighter stagger — was 0.12 per row (10 cards = 1.2s for last). Now 0.06 per row.
+  const delay = isMobile ? index * 0.06 : Math.floor(index / 3) * 0.08;
+  const amount = isMobile ? 0.05 : 0.1;
 
   return (
     <motion.div
-      ref={ref}
       variants={variants}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount }}
-      transition={{ ...SPRING, delay }}
-      onAnimationStart={onStart}
-      onAnimationComplete={onComplete}
-      className="group relative h-full flex flex-col project-card"
+      transition={{ duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+      style={{ willChange: 'transform, opacity' }}
+      className="group relative h-full flex flex-col"
     >
       <CardInner
         title={title}
@@ -122,17 +114,17 @@ const ProjectCard = memo(({ index, isMobile, title, description, tags, image, li
 });
 
 const CardInner = ({ title, description, tags, image, githubLink, isVignette, actionLink, isLiveLink, actionLabel, ActionIcon }) => (
-  <div className="relative h-full bg-white/5 border border-white/15 rounded-3xl overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-[box-shadow,border-color] duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:border-white/30">
+  <div className="relative h-full bg-white/5 border border-white/15 rounded-3xl overflow-hidden shadow-lg transition-[box-shadow,border-color] duration-500 hover:shadow-xl hover:border-white/30">
     <div className="relative aspect-video overflow-hidden">
       {/* image overlays */}
-      <div className={`absolute inset-0 z-10 pointer-events-none transition-all duration-500 ${isVignette ? 'shadow-[inset_0_0_60px_rgba(0,0,0,0.9)]' : ''}`} />
+      <div className={`absolute inset-0 z-10 pointer-events-none transition-all duration-500 ${isVignette ? 'shadow-[inset_0_0_30px_rgba(0,0,0,0.8)]' : ''}`} />
       <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
 
       {/* Plain img — no lazy loading interference */}
       <img
         src={image}
         alt={title}
-        loading="eager"
+        loading="lazy"
         decoding="async"
         fetchPriority="auto"
         className="w-full h-full object-cover transition-transform duration-700"
@@ -181,10 +173,10 @@ const Projects = () => {
     <section id="projects" className="py-24 relative overflow-hidden section-lazy">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div
-          initial={{ y: 40, opacity: 0 }}
+          initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true, amount: 0.8 }}
-          transition={{ ...SPRING }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="text-center mb-16"
         >
           <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">

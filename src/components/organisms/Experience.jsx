@@ -2,16 +2,18 @@ import { useRef, memo } from 'react';
 import { motion } from 'motion/react';
 import { timelineItems } from '../../data/experienceData';
 
-// 120fps spring — no scroll listeners
-const SPRING = { type: 'spring', stiffness: 80, damping: 20, mass: 1 };
+// Snappy spring — fires fast, no slug
+const SPRING = { type: 'spring', stiffness: 260, damping: 24, mass: 0.6 };
+const TWEEN  = { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] };
 
 const TimelineMarker = memo(({ icon: Icon }) => (
   <div className="flex flex-col items-center">
-    <motion.div 
+    <motion.div
       initial={{ scale: 0, opacity: 0 }}
       whileInView={{ scale: 1, opacity: 1 }}
-      viewport={{ once: true, amount: 0.8 }}
+      viewport={{ once: true, amount: 0.3 }}
       transition={{ ...SPRING, bounce: 0.4 }}
+      style={{ willChange: 'transform, opacity' }}
       className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-black border border-white/20 flex items-center justify-center z-20 relative shadow-[0_0_20px_rgba(255,255,255,0.15)]"
     >
       <span className="text-white text-lg md:text-2xl"><Icon /></span>
@@ -22,11 +24,12 @@ TimelineMarker.displayName = 'TimelineMarker';
 
 
 const TimelineContent = memo(({ title, organization, period, description, certificateLink, isEven }) => (
-  <motion.div 
-    initial={{ opacity: 0, x: isEven ? -24 : 24 }}
+  <motion.div
+    initial={{ opacity: 0, x: isEven ? -20 : 20 }}
     whileInView={{ opacity: 1, x: 0 }}
-    viewport={{ once: true, amount: 0.5 }}
+    viewport={{ once: true, amount: 0.2 }}
     transition={SPRING}
+    style={{ willChange: 'transform, opacity' }}
     className="glass-panel relative p-6 md:p-8 rounded-3xl overflow-hidden group border border-white/10 hover:border-white/20 transition-colors duration-300"
   >
     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
@@ -36,10 +39,10 @@ const TimelineContent = memo(({ title, organization, period, description, certif
           {period}
         </span>
         {certificateLink && (
-          <a 
-            href={certificateLink} 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            href={certificateLink}
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-xs text-gray-400 hover:text-white transition-colors underline underline-offset-4"
             aria-label={`View certificate for ${title} at ${organization}`}
           >
@@ -78,16 +81,16 @@ const TimelineItem = ({ item, index }) => {
 
 const Experience = () => {
   const sectionRef = useRef(null);
-  // Spine line grows via CSS animation triggered by whileInView — no per-scroll JS
   return (
     <section id="experience" className="py-24 relative overflow-hidden section-lazy" ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-6 relative z-10">
 
-        <motion.div 
-          initial={{ y: 28, opacity: 0 }}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true, amount: 0.8 }}
-          transition={{ duration: 1.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={TWEEN}
+          style={{ willChange: 'transform, opacity' }}
           className="text-center mb-16"
         >
           <h2 className="glass-heading text-5xl md:text-7xl font-bold font-heading mb-6 tracking-tight text-white">
@@ -97,20 +100,20 @@ const Experience = () => {
 
         {/* Static spine line + CSS-animated overlay — zero scroll listeners */}
         <div className="absolute left-6 md:left-1/2 top-[200px] bottom-24 w-px bg-white/5 md:-translate-x-1/2" />
-        <motion.div 
+        <motion.div
           initial={{ scaleY: 0 }}
           whileInView={{ scaleY: 1 }}
           viewport={{ once: true, amount: 0.05 }}
-          transition={{ duration: 1.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="absolute left-6 md:left-1/2 top-[200px] bottom-24 w-px bg-gradient-to-b from-white via-white/50 to-transparent md:-translate-x-1/2 origin-top" 
+          transition={{ duration: 1.0, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="absolute left-6 md:left-1/2 top-[200px] bottom-24 w-px bg-gradient-to-b from-white via-white/50 to-transparent md:-translate-x-1/2 origin-top"
         />
 
         <div className="space-y-12">
           {timelineItems.map((item, index) => (
-            <TimelineItem 
-              key={index} 
-              item={item} 
-              index={index} 
+            <TimelineItem
+              key={index}
+              item={item}
+              index={index}
             />
           ))}
         </div>

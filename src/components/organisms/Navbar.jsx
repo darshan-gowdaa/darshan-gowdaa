@@ -1,6 +1,7 @@
 // src/components/organisms/Navbar.jsx
 import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useLenis } from '../../lib/SmoothScrollProvider';
 
 // site sections
 const links = ['Home', 'About', 'Skills', 'Experience', 'Projects', 'Certifications', 'Contact'];
@@ -21,6 +22,8 @@ const GlassOverlay = () => (
 );
 
 const Navbar = ({ show }) => {
+  const lenis = useLenis();
+
   // menu state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('Home');
@@ -80,11 +83,16 @@ const Navbar = ({ show }) => {
     };
   }, []);
 
-  // prevent scroll when menu open
+  // prevent scroll when menu open — use Lenis stop/start instead of body overflow
   useEffect(() => {
-    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [mobileMenuOpen]);
+    if (!lenis) return;
+    if (mobileMenuOpen) {
+      lenis.stop();
+    } else {
+      lenis.start();
+    }
+    return () => { lenis.start(); };
+  }, [mobileMenuOpen, lenis]);
 
   // auto hide mobile nav
   useEffect(() => {
@@ -139,9 +147,8 @@ const Navbar = ({ show }) => {
   const scrollToSection = (sectionId) => {
     isScrolling.current = true;
 
-    if (document.body.style.overflow === 'hidden') {
-      document.body.style.overflow = '';
-    }
+    // Ensure lenis is running before scrolling
+    if (lenis) lenis.start();
 
     setMobileMenuOpen(false);
     setActiveSection(sectionId);
@@ -151,19 +158,20 @@ const Navbar = ({ show }) => {
     forceShowTimeoutRef.current = setTimeout(() => setForceShowNavbar(false), 2500);
 
     requestAnimationFrame(() => {
-      const element = document.getElementById(sectionId.toLowerCase());
-      if (!element) {
+      const target = `#${sectionId.toLowerCase()}`;
+
+      if (lenis) {
+        // Use Lenis scrollTo — synced with its RAF loop, buttery smooth
+        lenis.scrollTo(target, {
+          duration: 1.2,
+          onComplete: () => { isScrolling.current = false; },
+        });
+      } else {
+        // Fallback: reduced-motion or pre-mount
+        const element = document.getElementById(sectionId.toLowerCase());
+        if (element) element.scrollIntoView({ block: 'start' });
         isScrolling.current = false;
-        return;
       }
-
-      const targetTop = element.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: targetTop, behavior: 'smooth' });
-
-      // Release lock after scroll settles
-      setTimeout(() => {
-        isScrolling.current = false;
-      }, 800);
     });
   };
 
