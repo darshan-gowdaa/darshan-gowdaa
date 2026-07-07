@@ -124,8 +124,7 @@ const CardInner = ({ title, description, tags, image, githubLink, isVignette, ac
       <img
         src={image}
         alt={title}
-        loading="lazy"
-        decoding="async"
+        loading="eager"
         fetchPriority="auto"
         className="w-full h-full object-cover transition-transform duration-700"
       />
@@ -170,13 +169,14 @@ const Projects = () => {
   const isMobile = useIsMobile();
 
   return (
-    <section id="projects" className="py-24 relative overflow-hidden section-lazy">
+    <section id="projects" className="py-24 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+          style={{ willChange: 'transform, opacity' }}
           className="text-center mb-16"
         >
           <h2 className="glass-heading text-5xl md:text-7xl font-bold text-white mb-6 font-heading tracking-tight">

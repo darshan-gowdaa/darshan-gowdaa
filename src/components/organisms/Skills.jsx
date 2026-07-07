@@ -33,12 +33,12 @@ const Skills = () => {
     >
       <div className={`w-24 h-24 md:w-32 md:h-32 rounded-3xl flex items-center justify-center transition-all duration-300
         ${isMobile
-          ? 'bg-transparent border-none shadow-none'
-          : 'backdrop-blur-md bg-white/5 border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)] group-hover/skill:shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover/skill:border-white/40 group-hover/skill:bg-white/10'
+          ? 'bg-transparent border-none'
+          : 'bg-white/5 border border-white/10 group-hover/skill:border-white/40 group-hover/skill:bg-white/10'
         }`}>
         <div className={`text-5xl md:text-6xl transition-colors duration-300
           ${isMobile
-            ? 'text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]'
+            ? 'text-white'
             : 'text-gray-400 group-hover/skill:text-white'
           }`}>
           <item.node />
@@ -75,6 +75,7 @@ const Skills = () => {
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
         variants={fadeInRight}
+        style={{ willChange: 'transform, opacity' }}
         className="w-full relative"
       >
         <div className="absolute left-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
