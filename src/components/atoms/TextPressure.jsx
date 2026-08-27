@@ -231,6 +231,7 @@ const TextPressure = ({
   const styleElement = useMemo(() => {
     return (
       <style>{`
+        @import url('${fontUrl}');
         .stroke span {
           position: relative;
           color: ${textColor};
@@ -247,7 +248,7 @@ const TextPressure = ({
         }
       `}</style>
     );
-  }, [textColor, strokeColor, strokeWidth]);
+  }, [fontUrl, textColor, strokeColor, strokeWidth]);
 
   return (
     <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-transparent">

@@ -123,7 +123,7 @@ const CardInner = ({ title, description, tags, image, githubLink, isVignette, ac
 
       {/* Plain img — no lazy loading interference */}
       <img
-        src={image}
+        src={image?.src || image}
         alt={title}
         loading="eager"
         fetchPriority="auto"
