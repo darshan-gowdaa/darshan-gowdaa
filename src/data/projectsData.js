@@ -1,4 +1,6 @@
 import axiomPulseCloneThumbnail from '../assets/axiom-pulse-clone-thumbnail.avif';
+import meetMaxxingThumbnail from '../assets/MeetMaxxing-thumbnail.avif';
+import speechifierThumbnail from '../assets/speechifier-thumbnail.avif';
 import petrolBunkThumbnail from '../assets/petrol-bunk-management-thumbnail.avif';
 import eduWorldThumbnail from '../assets/eduworld-thumbnail.avif';
 import headlinesHubThumbnail from '../assets/headlines-hub-thumbnail.avif';
@@ -9,6 +11,29 @@ import adminPortalBackendThumbnail from '../assets/admin-portal-backend-thumbnai
 import wslHadoopThumbnail from '../assets/wsl-hadoop-installer-thumbnail.avif';
 
 export const projects = [
+  {
+    title: "MeetMaxxing",
+    description: "A Multi-Agent AI Meeting Copilot transforming online meetings into intelligent, collaborative experiences through modular AI agents, semantic memory, and real-time assistance.",
+    tags: ["React", "Next.js", "Python", "FastAPI", "AI Agents"],
+    image: meetMaxxingThumbnail,
+    githubLink: "https://github.com/darshan-gowdaa/MeetMaxxing",
+    liveLink: "https://meetmaxxing.vercel.app/about",
+  },
+  {
+    title: "Speechifier",
+    description: "A privacy-first, browser-based text-to-speech app that reads PDF, DOCX, and text files locally using Web Speech API and Web Workers.",
+    tags: ["Web Speech API", "Text-to-Speech", "Privacy"],
+    image: speechifierThumbnail,
+    githubLink: "https://github.com/darshan-gowdaa/Speechifier",
+    liveLink: "https://speech-to-text-next.vercel.app/",
+  },
+  {
+    title: "Stress-Lens",
+    description: "Anonymous Student Stress Intelligence and Workload Feedback System. A privacy-first ML platform for early detection of student overload and campus stress trends.",
+    tags: ["Python", "FastAPI", "Next.js", "Machine Learning"],
+    image: loginDashboardThumbnail,
+    githubLink: "https://github.com/darshan-gowdaa/Stress-Lens",
+  },
   {
     title: "Petrol Bunk Management System",
     description: "A comprehensive MERN-Stack solution for managing petrol bunk operations. Streamlines inventory tracking, sales reporting, and employee management with real-time data visualization.",

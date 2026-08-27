@@ -39,6 +39,8 @@ export const metadata = {
     'Node.js',
     'MongoDB',
     'Python',
+    'AI Agents',
+    'Machine Learning',
   ],
   authors: [{ name: 'Darshan Gowda G S' }],
   creator: 'Darshan Gowda G S',

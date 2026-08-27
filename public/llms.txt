@@ -38,6 +38,9 @@
 
 ## Projects
 
+- [MeetMaxxing](https://meetmaxxing.vercel.app/about): A Multi-Agent AI Meeting Copilot transforming online meetings into intelligent, collaborative experiences through modular AI agents, semantic memory, and real-time assistance. [Source code](https://github.com/darshan-gowdaa/MeetMaxxing)
+- [Speechifier](https://speech-to-text-next.vercel.app/): A privacy-first, browser-based text-to-speech app that reads PDF, DOCX, and text files locally using Web Speech API and Web Workers. [Source code](https://github.com/darshan-gowdaa/Speechifier)
+- [Stress-Lens](https://github.com/darshan-gowdaa/Stress-Lens): Anonymous Student Stress Intelligence and Workload Feedback System. A privacy-first ML platform for early detection of student overload and campus stress trends. [Source code](https://github.com/darshan-gowdaa/Stress-Lens)
 - [Axiom Pulse Clone](https://axiom-pulse-clone-gamma.vercel.app): Pixel-perfect, high-performance clone of the Axiom Trade Pulse token discovery interface. Built with Next.js 16, TypeScript, Redux Toolkit, and Tailwind CSS. Features real-time price simulations, atomic architecture, and fully responsive design. [Source code](https://github.com/darshan-gowdaa/axiom-trade-pulse-clone)
 - [Petrol Bunk Management System](https://petrol-bunk-management-system-alpha.vercel.app/): Comprehensive MERN-Stack solution for managing petrol bunk operations. Streamlines inventory tracking, sales reporting, and employee management with real-time data visualization. [Source code](https://github.com/darshan-gowdaa/petrol-bunk-management-system)
 - [Headlines Hub](https://headlineshub-react.vercel.app/): Modern news aggregator leveraging NewsAPI. Features infinite scrolling, category filtering, and responsive reading experience. Built with React and Vite. [Source code](https://github.com/darshan-gowdaa/headlinesHub-React)
