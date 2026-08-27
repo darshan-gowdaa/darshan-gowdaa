@@ -90,6 +90,16 @@ export const metadata = {
     icon: [{ url: '/favicon.avif', type: 'image/avif' }],
     apple: [{ url: '/favicon.avif' }],
   },
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
+  appleWebApp: {
+    title: 'Darshan Gowda',
+    statusBarStyle: 'black-translucent',
+  },
+  category: 'portfolio',
 };
 
 const personSchema = {
@@ -154,6 +164,14 @@ const websiteSchema = {
 };
 
 
+const profileSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  dateCreated: '2023-01-01T00:00:00+00:00',
+  dateModified: new Date().toISOString(),
+  mainEntity: personSchema
+};
+
 export const viewport = {
   themeColor: '#050505',
   width: 'device-width',
@@ -172,6 +190,10 @@ export default function RootLayout({ children }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(profileSchema) }}
         />
         <link rel="dns-prefetch" href="https://github.com" />
         <link rel="dns-prefetch" href="https://www.linkedin.com" />
