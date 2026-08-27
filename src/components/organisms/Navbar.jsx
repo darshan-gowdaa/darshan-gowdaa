@@ -1,3 +1,4 @@
+'use client';
 // src/components/organisms/Navbar.jsx
 import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';

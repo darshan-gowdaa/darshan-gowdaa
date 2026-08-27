@@ -1,3 +1,4 @@
+'use client';
 // src/components/organisms/Certifications.jsx
 import { memo } from 'react';
 import { motion } from 'motion/react';

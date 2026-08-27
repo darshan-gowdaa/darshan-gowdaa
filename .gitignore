@@ -47,3 +47,7 @@ build/
 
 .agents
 skills-lock.json
+# Next.js build output
+.next/
+.next
+

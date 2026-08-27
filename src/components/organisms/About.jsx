@@ -1,3 +1,4 @@
+'use client';
 // src/components/organisms/About.jsx
 import { useRef, memo } from 'react';
 import { motion } from 'motion/react';

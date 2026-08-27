@@ -1,3 +1,4 @@
+'use client';
 // src/components/atoms/NeonButton.jsx
 import React from 'react';
 

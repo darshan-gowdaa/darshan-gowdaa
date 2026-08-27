@@ -1,3 +1,4 @@
+'use client';
 // src/lib/SmoothScrollProvider.jsx
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import Lenis from 'lenis';

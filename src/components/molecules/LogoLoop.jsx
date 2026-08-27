@@ -1,3 +1,4 @@
+'use client';
 // src/components/molecules/LogoLoop.jsx
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';

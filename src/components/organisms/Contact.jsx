@@ -1,3 +1,4 @@
+'use client';
 // src/components/organisms/Contact.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -37,7 +38,10 @@ const InputField = ({ label, name, type = "text", placeholder, value, onChange, 
   );
 };
 
-const ToastMessage = React.forwardRef(({ toast }, ref) => {
+const ToastMessage = React.forwardRef(function ToastMessage({ toast }, ref) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
   return createPortal(
     <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4 pointer-events-none">
       <AnimatePresence>
@@ -49,8 +53,8 @@ const ToastMessage = React.forwardRef(({ toast }, ref) => {
             transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
             ref={ref}
             className={`pointer-events-auto flex items-center gap-3 p-4 rounded-xl border backdrop-blur-xl shadow-2xl ${
-              toast.type === 'success' 
-                ? 'bg-green-500/10 border-green-500/20 text-green-400' 
+              toast.type === 'success'
+                ? 'bg-green-500/10 border-green-500/20 text-green-400'
                 : 'bg-red-500/10 border-red-500/20 text-red-400'
             }`}
           >
@@ -85,17 +89,17 @@ const Contact = () => {
   const validateForm = () => {
     if (!formData.name.trim()) return "Name is required";
     if (formData.name.length < 2) return "Name must be at least 2 characters";
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim()) return "Email is required";
     if (!emailRegex.test(formData.email)) return "Please enter a valid email address";
-    
+
     if (!formData.subject.trim()) return "Subject is required";
     if (formData.subject.length < 5) return "Subject must be at least 5 characters";
-    
+
     if (!formData.message.trim()) return "Message is required";
     if (formData.message.length < 10) return "Message must be at least 10 characters";
-    
+
     return null;
   };
 
@@ -111,9 +115,9 @@ const Contact = () => {
 
     setIsSubmitting(true);
 
-    const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-    const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-    const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+    const SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+    const TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+    const PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
 
     const templateParams = {
       name: formData.name,
@@ -128,7 +132,7 @@ const Contact = () => {
         showToast('success', 'Message sent successfully!');
         setFormData({ name: '', email: '', subject: '', message: '' });
       }, (error) => {
-        if (import.meta.env.DEV) console.error(error.text);
+        if (process.env.NODE_ENV === 'development') console.error(error.text);
         showToast('error', 'Failed to send message. Please try again later.');
       })
       .finally(() => {
@@ -173,9 +177,9 @@ const Contact = () => {
             style={{ willChange: 'transform, opacity' }}
             className="contact-left"
           >
-            <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 font-heading">Let's collaborate</h3>
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 font-heading">{"Let's collaborate"}</h3>
             <p className="text-gray-400 leading-relaxed mb-12 text-base md:text-lg">
-              I'm currently looking for new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!
+              {"I'm currently looking for new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!"}
             </p>
 
             <div className="space-y-8 mb-12">
@@ -252,4 +256,3 @@ const Contact = () => {
 };
 
 export default React.memo(Contact);
-

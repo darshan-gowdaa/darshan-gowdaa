@@ -1,26 +1,23 @@
 {
   "name": "Darshan-Gowdaa-Portfolio",
-  "homepage": "https://darshan-gowdaa.github.io/darshan-gowdaa/",
+  "homepage": "https://darshan-gowdaa.vercel.app/",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist -m \"Deploy to GitHub pages\"",
-    "deploy:vercel": "vercel --prod"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
-    "@tailwindcss/vite": "^4.1.3",
+    "@tailwindcss/postcss": "^4.0.0",
     "@vercel/analytics": "^1.6.1",
     "@vercel/speed-insights": "^1.3.1",
     "gsap": "^3.15.0",
     "lenis": "^1.3.24",
     "motion": "^12.42.0",
+    "next": "^15.0.0",
     "ogl": "^1.0.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -28,17 +25,10 @@
     "tailwindcss": "^4.1.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
-    "@vitejs/plugin-react-swc": "^4.3.1",
     "eslint": "^9.21.0",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
+    "eslint-config-next": "^15.0.0",
     "gh-pages": "^6.3.0",
-    "globals": "^15.15.0",
     "sharp": "^0.34.5",
-    "svgo": "^4.0.1",
-    "vite": "^8.0.3",
-    "vite-plugin-compression": "^0.5.1"
+    "svgo": "^4.0.1"
   }
 }

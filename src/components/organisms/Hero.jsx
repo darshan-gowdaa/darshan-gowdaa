@@ -1,3 +1,4 @@
+'use client';
 // src/components/organisms/Hero.jsx
 import React, { memo, useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { FaGithub, FaLinkedin, FaEnvelope, FaArrowUp, FaArrowRight } from 'react-icons/fa';

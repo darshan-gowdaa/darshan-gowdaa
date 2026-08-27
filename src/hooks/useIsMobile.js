@@ -1,3 +1,4 @@
+'use client';
 // src/hooks/useIsMobile.js
 import { useState, useEffect } from 'react';
 

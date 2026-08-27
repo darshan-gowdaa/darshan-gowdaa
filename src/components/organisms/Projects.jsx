@@ -1,3 +1,4 @@
+'use client';
 // src/components/organisms/Projects.jsx
 import React, { memo, useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';

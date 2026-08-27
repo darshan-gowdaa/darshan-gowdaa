@@ -1,3 +1,4 @@
+'use client';
 import { useRef, memo } from 'react';
 import { motion } from 'motion/react';
 import { timelineItems } from '../../data/experienceData';
