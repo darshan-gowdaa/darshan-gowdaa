@@ -125,8 +125,8 @@ const CardInner = ({ title, description, tags, image, githubLink, isVignette, ac
       <img
         src={image?.src || image}
         alt={title}
-        loading="eager"
-        fetchPriority="auto"
+        loading="lazy"
+        decoding="async"
         className="w-full h-full object-cover transition-transform duration-700"
       />
 

@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { FaMapMarkerAlt, FaEnvelope, FaGithub, FaLinkedin, FaPaperPlane, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
-import emailjs from '@emailjs/browser';
+// removed emailjs static import
 import { NeonButton } from '../atoms/NeonButton';
 
 const InputField = ({ label, name, type = "text", placeholder, value, onChange, isTextarea, required }) => {
@@ -103,7 +103,7 @@ const Contact = () => {
     return null;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setToast(null);
 
@@ -127,17 +127,17 @@ const Contact = () => {
       time: new Date().toLocaleString(),
     };
 
-    emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
-      .then(() => {
-        showToast('success', 'Message sent successfully!');
-        setFormData({ name: '', email: '', subject: '', message: '' });
-      }, (error) => {
-        if (process.env.NODE_ENV === 'development') console.error(error.text);
-        showToast('error', 'Failed to send message. Please try again later.');
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+    try {
+      const emailjs = (await import('@emailjs/browser')).default;
+      await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY);
+      showToast('success', 'Message sent successfully!');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') console.error(error);
+      showToast('error', 'Failed to send message. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactDetails = [
