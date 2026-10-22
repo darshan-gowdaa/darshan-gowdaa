@@ -1,4 +1,5 @@
 'use client';
+import { sendGTMEvent } from "@next/third-parties/google";
 // src/components/organisms/Contact.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -131,6 +132,7 @@ const Contact = () => {
       const emailjs = (await import('@emailjs/browser')).default;
       await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY);
       showToast('success', 'Message sent successfully!');
+      try { sendGTMEvent({ event: 'form_submission', form_name: 'contact_form' }); } catch (_) {}
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {
       if (process.env.NODE_ENV === 'development') console.error(error);

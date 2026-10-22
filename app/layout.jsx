@@ -1,6 +1,7 @@
 import { Outfit, Raleway } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { GoogleTagManager, GoogleAnalytics } from '@next/third-parties/google';
 import { SmoothScrollProvider } from '../src/lib/SmoothScrollProvider';
 import 'lenis/dist/lenis.css';
 import '../src/index.css';
@@ -19,41 +20,56 @@ const raleway = Raleway({
   weight: ['400', '500', '600', '700'],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://darshan-gowdaa.tech';
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID || 'GTM-W559HPFT';
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || 'G-Z2JKPFTP1J';
+
 export const metadata = {
-  metadataBase: new URL('https://darshan-gowdaa.vercel.app'),
+  metadataBase: new URL(SITE_URL),
   title: 'Darshan Gowda G S | Full-Stack Developer & Data Analytics Portfolio',
   description:
-    'Darshan Gowda G S - Full-Stack Developer & Data Analytics Student at Christ University. MERN stack expert, building scalable web applications. View my projects, skills, and experience.',
+    'Darshan Gowda G S - Full-Stack Developer & Data Analytics Student at Christ University. MERN stack expert building scalable web applications and AI agents. View projects, skills, and experience.',
   keywords: [
-    'Darshan Gowda G S',
     'Darshan Gowda',
+    'Darshan Gowdaa',
+    'Darshan Gowda G S',
+    'Darshan G S',
+    'darshan-gowdaa.tech',
+    'Darshan Gowda Bengaluru',
+    'Darshan Gowda Christ University',
     'Full Stack Developer',
-    'MERN Stack',
+    'MERN Stack Developer',
     'React Developer',
+    'Next.js Developer',
     'Data Analytics',
-    'Portfolio',
-    'Web Developer',
-    'Bengaluru',
-    'Christ University',
-    'JavaScript',
-    'Node.js',
-    'MongoDB',
-    'Python',
     'AI Agents',
     'Machine Learning',
+    'Software Engineer Bengaluru',
+    'Bengaluru Web Developer',
+    'Portfolio',
   ],
   authors: [{ name: 'Darshan Gowda G S' }],
   creator: 'Darshan Gowda G S',
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   alternates: {
-    canonical: '/',
+    canonical: SITE_URL,
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'dIZh1upRiawrg8eZU129528sFKJXoVk-cAotMZGUOeI',
   },
   openGraph: {
     type: 'website',
-    url: 'https://darshan-gowdaa.vercel.app/',
+    url: SITE_URL,
     title: 'Darshan Gowda G S | Full-Stack Developer & Data Analytics Portfolio',
     description:
       'Full-Stack Developer & Data Analytics Student. MERN stack expert building scalable web applications. View my projects and experience.',
@@ -108,10 +124,15 @@ const personSchema = {
   '@context': 'https://schema.org',
   '@type': 'Person',
   name: 'Darshan Gowda G S',
-  alternateName: 'Darshan Gowda',
-  url: 'https://darshan-gowdaa.vercel.app/',
-  image: 'https://darshan-gowdaa.vercel.app/profile-picture.avif',
-  jobTitle: 'Full-Stack Developer',
+  alternateName: [
+    'Darshan Gowda',
+    'Darshan Gowdaa',
+    'Darshan G S',
+    'DarshanGS',
+  ],
+  url: SITE_URL,
+  image: `${SITE_URL}/profile-picture.avif`,
+  jobTitle: ['Full-Stack Developer', 'Data Analytics Specialist', 'Software Engineer'],
   worksFor: {
     '@type': 'Organization',
     name: 'Freelance / Open to Opportunities',
@@ -131,16 +152,19 @@ const personSchema = {
   knowsAbout: [
     'MERN Stack',
     'React',
+    'Next.js',
     'Node.js',
     'MongoDB',
     'Python',
     'Data Analytics',
     'Machine Learning',
     'Web Development',
+    'AI Agents',
   ],
   sameAs: [
     'https://github.com/darshan-gowdaa',
     'https://www.linkedin.com/in/Darshan-Gowda-G-S',
+    'https://x.com/DarshanG_S',
   ],
   email: 'mailto:darshangowdaa223@gmail.com',
   address: {
@@ -155,23 +179,22 @@ const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'Darshan Gowda G S Portfolio',
-  alternateName: 'Darshan Gowda G S - Full Stack Developer',
-  url: 'https://darshan-gowdaa.vercel.app/',
+  alternateName: 'Darshan Gowda - Full Stack Developer',
+  url: SITE_URL,
   description:
-    'Portfolio website of Darshan Gowda G S, a Full-Stack Developer and Data Analytics student',
+    'Portfolio website of Darshan Gowda G S, Full-Stack Developer and Data Analytics student',
   author: {
     '@type': 'Person',
     name: 'Darshan Gowda G S',
   },
 };
 
-
 const profileSchema = {
   '@context': 'https://schema.org',
   '@type': 'ProfilePage',
   dateCreated: '2023-01-01T00:00:00+00:00',
   dateModified: new Date().toISOString(),
-  mainEntity: personSchema
+  mainEntity: personSchema,
 };
 
 export const viewport = {
@@ -184,6 +207,8 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${outfit.variable} ${raleway.variable}`}>
+      <GoogleTagManager gtmId={GTM_ID} />
+      {GA_ID && <GoogleAnalytics gaId={GA_ID} />}
       <head>
         <script
           type="application/ld+json"

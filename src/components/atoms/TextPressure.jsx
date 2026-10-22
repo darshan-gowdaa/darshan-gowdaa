@@ -254,6 +254,7 @@ const TextPressure = ({
     <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-transparent">
       {styleElement}
       <h1
+        aria-label={text}
         ref={titleRef}
         className={`text-pressure-title ${className} ${
           flex ? 'flex justify-between' : ''

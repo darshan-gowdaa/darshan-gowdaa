@@ -35,8 +35,14 @@ const Navbar = ({ show }) => {
   const isScrolling = useRef(false);
   const forceShowTimeoutRef = useRef(null);
 
-  // update page title
-  useEffect(() => { document.title = `${activeSection} | Darshan Gowda G S`; }, [activeSection]);
+  // update page title without overwriting home SEO title
+  useEffect(() => {
+    if (activeSection === "Home") {
+      document.title = "Darshan Gowda G S | Full-Stack Developer & Data Analytics Portfolio";
+    } else {
+      document.title = `${activeSection} | Darshan Gowda G S`;
+    }
+  }, [activeSection]);
 
   // track active section via IntersectionObserver — zero per-frame layout reads
   useEffect(() => {
