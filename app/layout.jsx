@@ -20,7 +20,7 @@ const raleway = Raleway({
   weight: ['400', '500', '600', '700'],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://darshan-gowdaa.tech';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.darshan-gowdaa.tech';
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID || 'GTM-W559HPFT';
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID || 'G-Z2JKPFTP1J';
 

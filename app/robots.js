@@ -4,6 +4,6 @@ export default function robots() {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://darshan-gowdaa.tech/sitemap.xml',
+    sitemap: 'https://www.darshan-gowdaa.tech/sitemap.xml',
   }
 }
